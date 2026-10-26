@@ -376,3 +376,21 @@ def test_repeated_condition_is_not_acknowledged_again(parser_client):
     res = send(client, sid, "무선이고 노캔도").json()
     assert "반영했어요: 노이즈 캔슬링(ANC) 필요." in res["reply"]
     assert "연결 방식" not in res["reply"].split("\n")[0]
+
+
+def test_serves_built_frontend_when_present(tmp_path):
+    dist = tmp_path / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<!doctype html><title>built-ui</title>", encoding="utf-8")
+    (dist / "assets" / "app.js").write_text("console.log(1)", encoding="utf-8")
+    with TestClient(create_app(tmp_path / "t.db", frontend_dist=dist)) as c:
+        assert "built-ui" in c.get("/").text
+        assert c.get("/assets/app.js").status_code == 200
+        assert c.get("/api/health").json() == {"status": "ok"}  # API가 우선
+        assert c.post("/api/sessions").status_code == 201
+
+
+def test_no_frontend_mount_without_build(tmp_path):
+    with TestClient(create_app(tmp_path / "t.db", frontend_dist=tmp_path / "missing")) as c:
+        assert c.get("/").status_code == 404
+        assert c.get("/api/health").status_code == 200

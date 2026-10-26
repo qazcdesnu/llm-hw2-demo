@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     db_path: Path = BACKEND_DIR / "data" / "app.db"
     # 새 세션이 다루는 카테고리 (categories/<id>.yaml, 카탈로그가 DB에 빌드되어 있어야 함)
     default_category: str = "headphones"
+    # 빌드된 프론트엔드(npm run build 결과). index.html이 있으면 FastAPI가 같은 포트에서 함께 서비스한다.
+    frontend_dist: Path = BACKEND_DIR.parent / "frontend" / "dist"
 
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5-mini"

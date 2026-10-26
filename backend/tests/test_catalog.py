@@ -174,3 +174,22 @@ def test_stratified_sample_is_reproducible_and_respects_require_known(headphones
     assert len(first) == 50
     assert [r[0]["parent_asin"] for r in first] == [r[0]["parent_asin"] for r in second]
     assert all("form_factor" in attrs for _, attrs in first)
+
+
+def test_load_committed_catalog_json(tmp_path):
+    """git에 포함된 카탈로그 JSON만으로 DB를 만들 수 있다 (원본 데이터 없이)."""
+    import json as _json
+    import sys as _sys
+    from pathlib import Path as _Path
+
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "scripts"))
+    from load_catalog import CATALOG_DIR, load
+
+    db_path = tmp_path / "loaded.db"
+    expected = _json.loads((CATALOG_DIR / "headphones.json").read_text(encoding="utf-8"))
+    assert load("headphones", db_path) == len(expected["products"]) == 150
+    with closing(connect(db_path)) as conn:
+        products = {p.id: p for p in load_products(conn, "headphones")}
+    sample = expected["products"][0]
+    assert products[sample["id"]].attributes == {k: a["value"] for k, a in sample["attributes"].items()}
+    assert products[sample["id"]].image_url == sample["image_url"]

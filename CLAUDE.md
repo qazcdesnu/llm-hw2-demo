@@ -8,6 +8,7 @@ IG 기반 대화형 상품 추천 챗봇 (HW2). Frontend `frontend/` (Vite), Bac
 
 | 문서 | 내용 |
 |---|---|
+| [README.md](README.md) | 프로젝트 소개, 빠른 시작, 구조 요약, 현재 결과 (사람용 첫 페이지) |
 | [architecture.md](docs/architecture.md) | 시스템 구조, 대화 한 턴의 흐름, 데이터 파이프라인, DB 모델, 설계 원칙 |
 | [ig-engine.md](docs/ig-engine.md) | IG 엔진: 가능도 모델, 대화 상태, 질문 선택, 종료 조건·한계 표시, 예비 결과 |
 | [llm-parser.md](docs/llm-parser.md) | LLM 파서(요청 분류·조건 추출), 멀티턴 추천 조정, Safety, 파서 평가와 모델 선택 |
@@ -31,6 +32,7 @@ IG 기반 대화형 상품 추천 챗봇 (HW2). Frontend `frontend/` (Vite), Bac
 - 코드를 고친 뒤에는 `uv run --project backend python tools/doclinks/doclinks.py sync`로 링크 줄 번호를 갱신한다. 깨진 링크는 `pytest`에서 실패한다.
 
 ## 실행
+- 처음 한 번: `cd backend && uv sync && uv run python scripts/load_catalog.py headphones` (git의 카탈로그 JSON → SQLite)
 - backend: `cd backend && uv run uvicorn app.main:app --reload` (8000), 테스트 `uv run pytest`
 - frontend: `cd frontend && npm run dev` (5173, `/api`는 8000으로 프록시). Vite는 `localhost`(IPv6)에만 listen하므로 `127.0.0.1:5173`으로는 접속되지 않음
 - 자세한 내용: [backend/README.md](backend/README.md)

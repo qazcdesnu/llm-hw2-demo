@@ -19,7 +19,7 @@ categories/<id>.yaml ──▶ app/catalog/spec.py      (Pydantic으로 검증)
 2. 원본 메타 파일을 `backend/data/raw/`에 받음 (HuggingFace `McAuley-Lab/Amazon-Reviews-2023`, `raw/meta_categories/`)
 3. `uv run python scripts/filter_category.py <id>` → `data/interim/<id>.jsonl`
 4. `uv run python scripts/build_catalog.py <id> --dry-run` → 속성별 커버리지 확인, 규칙 조정
-5. `uv run python scripts/build_catalog.py <id>` → SQLite에 저장 + `data/catalog/<id>.json` 내보내기 (git에 포함, 원본 없이 재현용)
+5. `uv run python scripts/build_catalog.py <id>` → SQLite에 저장 + `data/catalog/<id>.json` 내보내기 (git에 포함). 원본 없이 이 JSON으로 DB를 만들 때는 `scripts/load_catalog.py <id>`
 6. `uv run python scripts/export_validation.py <id> --n 40` → `docs/validation/<id>_validation.csv` 수동 검증
 7. `uv run pytest` (모든 yaml이 스키마 검증을 통과하는지 함께 확인됨)
 

@@ -27,7 +27,7 @@ uv run python scripts/eval_parser.py --verbose   # 파서 평가 세트 채점 (
 - `app/catalog/`: 카테고리 정의 스키마, 속성 추출, 카탈로그 DB 저장·조회
 - `categories/`: 카테고리 정의 YAML (작성법: [category-spec.md](../docs/category-spec.md))
 - `app/core/`: IG 엔진 (웹·DB와 무관한 순수 Python, 평가 코드에서도 사용). 진입점 [`IGEngine`](app/core/engine.py#L71 "docid:core.engine"), 설명 [ig-engine.md](../docs/ig-engine.md)
-- `scripts/`: 데이터 스크립트 (`filter_category.py` → `build_catalog.py` → `export_validation.py`, 분석 `analyze_headphones.py`, 엔진 데모 `ig_demo.py`)
+- `scripts/`: 데이터 스크립트 (`filter_category.py` → `build_catalog.py` → `export_validation.py`, 원본 없이 적재 `load_catalog.py`, 분석 `analyze_headphones.py`, 엔진 데모 `ig_demo.py`)
 - `data/catalog/<id>.json`: 빌드된 카탈로그 (git 포함)
 - `data/raw/`: Amazon Reviews 2023 원본 (git 제외)
 
