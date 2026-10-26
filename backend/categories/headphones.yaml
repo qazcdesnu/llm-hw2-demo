@@ -1,0 +1,146 @@
+# 헤드폰·이어폰 카테고리 정의. 작성법은 docs/category-spec.md 참고.
+id: headphones
+name: 헤드폰·이어폰
+description: 유선·무선 헤드폰, 이어폰, 이어버드
+
+source:
+  raw_file: meta_Electronics.jsonl
+  category: Headphones & Earbuds
+
+candidate_filter:
+  require_price: true
+  min_rating_number: 100
+
+# 실제 분포 유지: 연결 방식 × 착용 방식 조합의 후보 비율대로 뽑는다.
+# ANC 등 다른 속성도 무작위로 뽑히므로 실제 비율(약 10%)에 가깝게 유지된다.
+sampling:
+  size: 150
+  seed: 42
+  stratify_by: [connection, form_factor]
+  require_known: [connection, form_factor]
+
+attributes:
+  - key: connection
+    label: 연결 방식
+    question: 무선 제품을 원하시나요, 유선도 괜찮으신가요?
+    values:
+      - {value: wireless, label: 무선}
+      - {value: wired, label: 유선}
+    rules:
+      # "Wireless, Wired"처럼 둘 다 적힌 경우 무선으로 본다 (map은 위에서부터 먼저 맞는 값).
+      - type: details
+        keys: [Connectivity Technology, Connectivity technologies]
+        map:
+          wireless: wireless|bluetooth
+          wired: wired
+      - type: details
+        keys: [Wireless Communication Technology, Wireless communication technologies]
+        map:
+          wireless: bluetooth
+      # 텍스트의 "wired"/"3.5mm"는 무선 제품의 보조 단자 설명에도 나와서 무선만 판단한다.
+      - type: keywords
+        map:
+          wireless: \bwireless\b|bluetooth|\btws\b
+
+  - key: form_factor
+    label: 착용 방식
+    question: 귀를 덮는 헤드폰과 귀에 넣는 이어폰 중 어떤 형태가 편하신가요?
+    values:
+      - {value: in_ear, label: 이어폰(인이어)}
+      - {value: on_ear, label: 온이어 헤드폰}
+      - {value: over_ear, label: 오버이어 헤드폰}
+      - {value: open_ear, label: 오픈형(골전도 등)}
+    rules:
+      - type: details
+        keys: [Form Factor, Ear Placement]
+        map:
+          open_ear: open[- ]?ear|bone
+          in_ear: in[- ]?ear|earbud
+          on_ear: on[- ]?ear
+          over_ear: over[- ]?ear|around[- ]?ear
+      - type: categories
+        map:
+          open_ear: Open-Ear Headphones
+          in_ear: Earbud Headphones
+          on_ear: On-Ear Headphones
+          over_ear: Over-Ear Headphones
+
+  - key: anc
+    label: 노이즈 캔슬링(ANC)
+    question: 주변 소음을 줄여주는 노이즈 캔슬링 기능이 필요하신가요?
+    values:
+      - {value: "yes", label: 필요}
+      - {value: "no", label: 불필요}
+    rules:
+      - type: keywords
+        map:
+          "yes": active noise|\banc\b|hybrid noise
+    # ANC는 제품 설명에서 강조하는 기능이라, 설명이 있는데 언급이 없으면 없는 것으로 본다.
+    default: "no"
+    # 단, "noise cancelling"만 적힌 경우는 실제 ANC와 통화용 소음 제거(CVC/ENC), 마케팅 문구가 섞여 있어
+    # (표본 25개 중 실제 ANC 약 3개) no로 단정하지 않고 unknown으로 둔다. LLM·수동 검증으로 확정.
+    unknown_if: noise[- ]?cancel
+
+  - key: price_band
+    label: 가격대
+    question: 생각하시는 예산이 어느 정도인가요? ($20 미만 / $20~60 / $60 이상)
+    values:
+      - {value: low, label: $20 미만}
+      - {value: mid, label: $20~60}
+      - {value: high, label: $60 이상}
+    rules:
+      - type: band
+        field: price
+        bands:
+          - {value: low, max: 20}
+          - {value: mid, max: 60}
+          - {value: high}
+
+  - key: mic
+    label: 마이크
+    question: 통화나 음성 채팅용 마이크가 필요하신가요?
+    values:
+      - {value: "yes", label: 필요}
+      - {value: "no", label: 불필요}
+    rules:
+      - type: keywords
+        fields: [title, features, description, details]
+        map:
+          "yes": \bmic\b|microphone|hands[- ]?free|calls?\b
+
+  - key: water_resistant
+    label: 방수·방진
+    question: 운동하거나 비 오는 날에도 쓸 수 있는 방수 기능이 필요하신가요?
+    values:
+      - {value: "yes", label: 필요}
+      - {value: "no", label: 불필요}
+    rules:
+      - type: keywords
+        fields: [title, features, description, details]
+        map:
+          "yes": ipx ?\d|\bip\d\d\b|waterproof|water[- ]resistan|sweat[- ]?proof|sweat[- ]resistan
+
+  - key: use_case
+    label: 주 용도
+    question: 주로 어떤 용도로 쓰실 건가요? (운동 / 게임 / 아이용 / 일상)
+    values:
+      - {value: kids, label: 아이용}
+      - {value: gaming, label: 게임}
+      - {value: sports, label: 운동}
+      - {value: general, label: 일상}
+    rules:
+      - type: keywords
+        fields: [title, features]
+        map:
+          kids: \bkids?\b|children|volume[- ]limit
+          gaming: gaming|gamer
+          sports: \bsports?\b|running|workout|\bgym\b
+    default: general
+
+  - key: brand
+    label: 브랜드
+    # 값이 많아 IG가 과대평가될 수 있어 일단 질문 대상에서 뺀다. 사용자가 먼저 말하면 조건으로는 쓴다.
+    askable: false
+    rules:
+      - type: details
+        keys: [Brand, Manufacturer]

@@ -1,0 +1,9 @@
+backend/data/raw/
+*.db
+__pycache__/
+.venv/
+node_modules/
+dist/
+.env
+.DS_Store
+backend/data/interim/
