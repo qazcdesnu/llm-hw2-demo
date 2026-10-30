@@ -65,6 +65,38 @@ CREATE TABLE IF NOT EXISTS product_attributes (
 """
 
 
+EVAL_SCHEMA = """
+-- 평가 (docs/evaluation.md). 결과 본문은 JSON.
+CREATE TABLE IF NOT EXISTS eval_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    status TEXT NOT NULL,            -- running / done / failed
+    config TEXT NOT NULL,            -- {systems, limit, scenario_ids}
+    done INTEGER NOT NULL DEFAULT 0, -- 끝난 에피소드 수
+    total INTEGER NOT NULL DEFAULT 0,
+    summary TEXT,                    -- 시스템별 지표
+    error TEXT
+);
+
+CREATE TABLE IF NOT EXISTS eval_episodes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id INTEGER NOT NULL REFERENCES eval_runs(id) ON DELETE CASCADE,
+    scenario_id TEXT NOT NULL,
+    system TEXT NOT NULL,
+    result TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_eval_episodes_run ON eval_episodes(run_id);
+
+CREATE TABLE IF NOT EXISTS eval_manual (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    session_id TEXT NOT NULL,
+    scenario_id TEXT NOT NULL,
+    result TEXT NOT NULL
+);
+"""
+
+
 def connect(db_path: Path) -> sqlite3.Connection:
     # FastAPI는 sync 의존성과 엔드포인트를 서로 다른 스레드에서 실행할 수 있다.
     conn = sqlite3.connect(db_path, check_same_thread=False)
@@ -77,6 +109,7 @@ def init_db(db_path: Path) -> None:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with closing(connect(db_path)) as conn:
         conn.executescript(SCHEMA)
+        conn.executescript(EVAL_SCHEMA)
 
 
 def get_db(request: Request) -> Iterator[sqlite3.Connection]:

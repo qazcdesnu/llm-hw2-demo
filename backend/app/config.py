@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-5-mini"
     # 추론 모델의 reasoning effort. 빈 값이면 보내지 않는다(비추론 모델용).
     openai_reasoning_effort: str | None = "low"
+    # 질문 작성기(친구 말투 질문)의 모델과 reasoning effort. 모델이 비어 있으면 openai_model을 쓴다.
+    # effort가 빈 값이면 보내지 않는다(비추론 모델용).
+    openai_question_model: str | None = None
+    openai_question_reasoning_effort: str | None = "low"
     openai_timeout: float = 30.0
 
 

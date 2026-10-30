@@ -5,7 +5,9 @@
     uv run python scripts/eval_parser.py --verbose                         # 틀린 케이스 출력
 
 설정 형식: <모델>:<reasoning effort> (비추론 모델은 effort를 비움)
-채점: request_type 일치 + 기대 explicit 조건 모두 포함 + 기대 밖 explicit 없음 + forbid 없음
+파서는 요청 분류와 속성 추출 두 호출을 동시에 보내므로, 비용은 두 호출의 합이다.
+채점: request_type 일치 + expect 조건 모두 포함 + expect·optional·allow 밖의 출력 없음 + forbid 없음
+(추출 결과는 그대로 조건이 되므로 과잉 추출은 오답이다)
 
 @see docs/llm-parser.md#3-평가
 """
@@ -24,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.catalog.spec import load_category_spec  # noqa: E402
 from app.config import settings  # noqa: E402
 from app.llm import LLMError, OpenAIClient  # noqa: E402
-from app.services.parser import parse_message  # noqa: E402
+from app.services.parser import ParseContext, parse_message  # noqa: E402
 
 CASES = Path(__file__).resolve().parent.parent / "evaluation" / "parser_cases.yaml"
 
@@ -56,7 +58,7 @@ class CaseResult:
     case: dict
     passed: bool
     errors: list[str] = field(default_factory=list)
-    inferred_hits: int = 0
+    optional_hits: int = 0
     seconds: float = 0.0
 
 
@@ -64,15 +66,15 @@ def grade(case: dict, result) -> CaseResult:
     errors = []
     if result.request_type != case["request"]:
         errors.append(f"request {result.request_type} != {case['request']}")
-    explicit = {c.attribute: c.value for c in result.constraints if c.kind == "explicit"}
     produced = {c.attribute: c.value for c in result.constraints}
-    want = {k: str(v) for k, v in (case.get("explicit") or {}).items()}
+    want = {k: str(v) for k, v in (case.get("expect") or {}).items()}
+    optional = {k: str(v) for k, v in (case.get("optional") or {}).items()}
     allow = {k: [str(x) for x in v] for k, v in (case.get("allow") or {}).items()}
     for k, v in want.items():
-        if explicit.get(k) != v:
+        if produced.get(k) != v:
             errors.append(f"missing {k}={v} (got {produced.get(k)})")
-    for k, v in explicit.items():
-        if k not in want and v not in allow.get(k, []):
+    for k, v in produced.items():
+        if want.get(k) != v and optional.get(k) != v and v not in allow.get(k, []):
             errors.append(f"extra {k}={v}")
     for k in case.get("forbid") or []:
         if k in produced:
@@ -81,9 +83,16 @@ def grade(case: dict, result) -> CaseResult:
         errors.append(f"price_order {result.price_order} != {case['price_order']}")
     if "exclude" in case and result.exclude_ranks != case["exclude"]:
         errors.append(f"exclude {result.exclude_ranks} != {case['exclude']}")
-    inferred = {k: str(v) for k, v in (case.get("inferred") or {}).items()}
-    hits = sum(1 for k, v in inferred.items() if produced.get(k) == v)
+    hits = sum(1 for k, v in optional.items() if produced.get(k) == v)
     return CaseResult(case, not errors, errors, hits)
+
+
+def case_context(spec, case: dict) -> ParseContext:
+    """케이스의 맥락. 질문 문장이 없으면 카테고리 정의의 고정 질문을 쓴다."""
+    pending = case.get("pending")
+    question = case.get("question") or (spec.attribute(pending).question if pending else None)
+    known = [f"{spec.attribute(k).label}={v} (직접 말함)" for k, v in (case.get("known") or {}).items()]
+    return ParseContext(pending, question, known, case.get("current"))
 
 
 def run_config(model: str, effort: str | None, spec, cases: list[dict], workers: int):
@@ -93,9 +102,7 @@ def run_config(model: str, effort: str | None, spec, cases: list[dict], workers:
     def one(case: dict) -> CaseResult:
         start = time.perf_counter()
         try:
-            known = {k: str(v) for k, v in (case.get("known") or {}).items()}
-            result = parse_message(client, spec, case["message"], case.get("pending"), known,
-                                   case.get("current"))
+            result = parse_message(client, spec, case["message"], case_context(spec, case))
             graded = grade(case, result)
         except LLMError as e:
             graded = CaseResult(case, False, ["request: LLM error", f"{e}"[:200]])
@@ -120,7 +127,7 @@ def main() -> None:
     data = yaml.safe_load(CASES.read_text(encoding="utf-8"))
     spec = load_category_spec(data["category"])
     cases = data["cases"]
-    n_inferred = sum(len(c.get("inferred") or {}) for c in cases)
+    n_optional = sum(len(c.get("optional") or {}) for c in cases)
 
     rows = []
     for config in args.configs:
@@ -130,9 +137,9 @@ def main() -> None:
         request_ok = sum(not any(e.startswith("request") for e in r.errors) for r in results)
         unsafe = [r for r in results if r.case["request"] == "unsafe"]
         unsafe_ok = sum(not any(e.startswith("request") for e in r.errors) for r in unsafe)
-        inferred = sum(r.inferred_hits for r in results)
+        optional = sum(r.optional_hits for r in results)
         latency = sorted(r.seconds for r in results)[len(results) // 2]
-        rows.append((config, passed, request_ok, unsafe_ok, len(unsafe), inferred, latency, cost))
+        rows.append((config, passed, request_ok, unsafe_ok, len(unsafe), optional, latency, cost))
         if args.verbose:
             print(f"\n== {config}")
             for r in results:
@@ -140,10 +147,10 @@ def main() -> None:
                     print(f"  ✗ [{r.case.get('pending') or '-'}] {r.case['message']}: {'; '.join(r.errors)}")
 
     n = len(cases)
-    print(f"\n{'config':24} {'pass':>9} {'request':>9} {'unsafe':>7} {'inferred':>9} {'p50 s':>6} {'$/1k turns':>11}")
-    for config, passed, request_ok, unsafe_ok, n_unsafe, inferred, latency, cost in rows:
+    print(f"\n{'config':24} {'pass':>9} {'request':>9} {'unsafe':>7} {'optional':>9} {'p50 s':>6} {'$/1k turns':>11}")
+    for config, passed, request_ok, unsafe_ok, n_unsafe, optional, latency, cost in rows:
         print(f"{config:24} {passed:>4}/{n:<4} {request_ok:>4}/{n:<4} {unsafe_ok:>3}/{n_unsafe:<3} "
-              f"{inferred:>4}/{n_inferred:<4} {latency:>6.1f} {cost / n * 1000:>11.3f}")
+              f"{optional:>4}/{n_optional:<4} {latency:>6.1f} {cost / n * 1000:>11.3f}")
 
 
 if __name__ == "__main__":

@@ -8,10 +8,11 @@ from app.catalog.repository import replace_products
 from app.catalog.spec import load_category_spec
 from app.core.model import DONT_CARE
 from app.db import connect, init_db
-from app.api.sessions import get_parser
+from app.api.sessions import get_parser, get_question_writer
 from app.main import create_app
 from app.services.chat import match_text
 from app.services.parser import ParsedConstraint, ParseResult
+from app.services.questioner import WrittenQuestion
 
 SPEC = load_category_spec("headphones")
 
@@ -49,15 +50,29 @@ class FakeParser:
         self.table = table or {}
         self.calls = []
 
-    def __call__(self, spec, message, pending, known, current):
-        self.calls.append({"message": message, "pending": pending, "current": current})
+    def __call__(self, spec, message, ctx):
+        self.calls.append({"message": message, "pending": ctx.pending, "current": ctx.current,
+                           "question_text": ctx.question_text, "known": ctx.known})
         return self.table.get(message, ParseResult("shopping"))
 
 
-def make_client(db_path, parser=None):
+class FakeWriter:
+    """질문 요청 → '[속성] 질문'. 요청을 기록한다. fail=True면 실패(None)."""
+
+    def __init__(self, fail=False):
+        self.fail = fail
+        self.requests = []
+
+    def __call__(self, spec, req):
+        self.requests.append(req)
+        return None if self.fail else WrittenQuestion(f"[{req.attribute}] 친구 질문", "장면")
+
+
+def make_client(db_path, parser=None, writer=None):
     app = create_app(db_path)
     # 테스트에서는 실제 LLM을 부르지 않는다 (.env에 키가 있어도).
     app.dependency_overrides[get_parser] = lambda: parser
+    app.dependency_overrides[get_question_writer] = lambda: writer
     return TestClient(app)
 
 
@@ -89,7 +104,7 @@ def test_first_message_asks_highest_ig_question(client):
     res = send(client, sid, "헤드폰 추천해 줘").json()
 
     q = res["question"]
-    assert "추천을 도와드릴게요" in res["reply"]
+    assert "고르는 거 도와줄게" in res["reply"]
     assert q["options"][-1] == {"value": DONT_CARE, "label": "상관없음"}
     debug = res["debug"]
     assert debug["selected_attribute"] == q["attribute"]
@@ -142,12 +157,13 @@ def test_dont_care_text_and_unrecognized_text(client):
     q = send(client, sid, "추천해 줘").json()["question"]
 
     res = send(client, sid, "음 글쎄요").json()
-    assert "잘 이해하지 못했어요" in res["reply"]
+    assert "잘 못 알아들었어" in res["reply"]
     assert res["question"]["attribute"] == q["attribute"]  # 같은 질문을 다시
 
+    # LLM이 없으면 '상관없음' 같은 의미는 판정하지 않는다 (보기 버튼으로 고른다)
     res = send(client, sid, "그건 상관없어요").json()
-    assert res["debug"]["preferences"]["dont_care"] == [q["attribute"]]
-    assert res["question"]["attribute"] != q["attribute"]
+    assert "잘 못 알아들었어" in res["reply"]
+    assert res["debug"]["preferences"]["dont_care"] == []
 
 
 def test_invalid_answer_is_rejected(client):
@@ -188,7 +204,7 @@ def test_unknown_session_and_empty_message(client):
     ("anc", "필요해요", "yes"),
     ("anc", "불필요해요", "no"),  # "필요"를 포함하지만 더 긴 "불필요"만 인정
     ("form_factor", "이어폰이 좋아", "in_ear"),
-    ("form_factor", "아무거나", DONT_CARE),
+    ("form_factor", "아무거나", None),  # 의미 판정(상관없음)은 하지 않는다
     ("connection", "무선이든 유선이든", None),  # 둘 다 → 모호
     ("connection", "잘 모르겠어요", None),
 ])
@@ -198,12 +214,8 @@ def test_match_text(attribute, text, expected):
 
 # ---------------------------------------------------------------- LLM 파서 연결 (가짜 파서)
 
-def explicit(attribute, value):
-    return ParsedConstraint(attribute, value, "explicit", 1.0, "")
-
-
-def inferred(attribute, value, confidence):
-    return ParsedConstraint(attribute, value, "inferred", confidence, "출퇴근")
+def explicit(attribute, value, quote=""):
+    return ParsedConstraint(attribute, value, quote)
 
 
 @pytest.fixture
@@ -224,24 +236,21 @@ def test_multiple_conditions_in_one_message(parser_client):
 
     prefs = res["debug"]["preferences"]
     assert prefs["explicit"] == {"connection": "wireless", "anc": "yes"}
-    assert "반영했어요: 연결 방식 무선, 노이즈 캔슬링(ANC) 필요" in res["reply"]
+    assert "반영했어: 연결 방식: 무선, 노이즈 캔슬링(ANC): 필요" in res["reply"]
     # 이미 답한 속성은 묻지 않는다
     if res["question"]:
         assert res["question"]["attribute"] not in {"connection", "anc"}
 
 
-def test_inferred_preferences_by_confidence(parser_client):
+def test_extracted_values_are_trusted_as_conditions(parser_client):
+    """상황에서 뽑은 값도 확신도 없이 그대로 조건이 된다 (추천에서 조건 위반 상품을 뺀다)."""
     client, parser = parser_client
     parser.table["출퇴근용"] = ParseResult("shopping", [
-        inferred("anc", "yes", 0.7),          # soft evidence
-        inferred("connection", "wireless", 0.9),  # 명시로 승격
-        inferred("mic", "yes", 0.3),          # 버림
-    ])
+        explicit("anc", "yes", "출퇴근"), explicit("connection", "wireless", "출퇴근")])
     sid = new_session(client)
-    prefs = send(client, sid, "출퇴근용").json()["debug"]["preferences"]
-    assert prefs["explicit"] == {"connection": "wireless"}
-    assert list(prefs["inferred"]) == ["anc"]
-    assert prefs["inferred"]["anc"]["confidence"] == 0.7
+    res = send(client, sid, "출퇴근용").json()
+    assert res["debug"]["preferences"]["explicit"] == {"anc": "yes", "connection": "wireless"}
+    assert {r["product_id"] for r in res["debug"]["top_candidates"][:2]} == {"P1", "P3"}
 
 
 def test_non_shopping_requests_keep_the_question(parser_client):
@@ -252,13 +261,13 @@ def test_non_shopping_requests_keep_the_question(parser_client):
     q = send(client, sid, "추천해 줘").json()["question"]
 
     res = send(client, sid, "총 구하는 방법").json()
-    assert "도와드릴 수 없어요" in res["reply"]
+    assert "도와줄 수 없어" in res["reply"]
     assert res["question"]["attribute"] == q["attribute"]
     assert res["debug"]["request_type"] == "unsafe"
     assert res["debug"]["preferences"]["explicit"] == {}
 
     res = send(client, sid, "노트북 추천").json()
-    assert "만 추천할 수 있어요" in res["reply"]
+    assert "만 추천할 수 있어" in res["reply"]
 
 
 def test_unanswered_question_is_released_when_user_gives_other_info(parser_client):
@@ -272,7 +281,9 @@ def test_unanswered_question_is_released_when_user_gives_other_info(parser_clien
     prefs = res["debug"]["preferences"]
     assert other in prefs["explicit"]
     assert q["attribute"] not in prefs["explicit"]
-    # 대기 중이던 질문은 '안 물은 것'으로 돌아가 다시 물을 수 있다
+    # 대기 중이던 질문은 '답 안 함'으로 닫혀 다시 물을 수 있다
+    record = next(x for x in res["debug"]["memory"]["questions"] if x["attribute"] == q["attribute"])
+    assert record["attempts"] == 1 or res["question"]["attribute"] == q["attribute"]
     assert q["attribute"] not in prefs["asked"] or res["question"]["attribute"] == q["attribute"]
 
 
@@ -333,7 +344,7 @@ def test_refine_with_nothing_understood_asks_for_more(parser_client):
     sid = new_session(client)
     _finish(client, sid)
     res = send(client, sid, "음...").json()
-    assert "조금만 더 알려주세요" in res["reply"]
+    assert "조금만 더 말해 줄래" in res["reply"]
     assert res["recommendations"] == []
 
 
@@ -360,7 +371,7 @@ def test_cheaper_sorts_equally_matching_items_by_price(tmp_path):
         res = send(client, sid, "더 싼 걸로").json()
         assert [r["product_id"] for r in res["recommendations"]] == ["B", "C", "A"]
         assert "더 저렴한 순" in res["reply"]
-        assert "가격이 낮은 순으로 골랐어요" in res["reply"]
+        assert "가격이 낮은 순으로 골랐어" in res["reply"]
 
         res = send(client, sid, "더 좋은 걸로").json()
         assert [r["product_id"] for r in res["recommendations"]] == ["D", "A", "C"]
@@ -374,8 +385,124 @@ def test_repeated_condition_is_not_acknowledged_again(parser_client):
     sid = new_session(client)
     send(client, sid, "무선으로")
     res = send(client, sid, "무선이고 노캔도").json()
-    assert "반영했어요: 노이즈 캔슬링(ANC) 필요." in res["reply"]
+    assert "반영했어: 노이즈 캔슬링(ANC): 필요." in res["reply"]
     assert "연결 방식" not in res["reply"].split("\n")[0]
+
+
+# ---------------------------------------------------------------- 메모리·질문 작성기
+
+@pytest.fixture
+def chat(tmp_path):
+    db_path = tmp_path / "test.db"
+    seed_catalog(db_path)
+    parser, writer = FakeParser(), FakeWriter()
+    with make_client(db_path, parser, writer) as c:
+        yield c, parser, writer
+
+
+def test_memory_keeps_facts_with_quotes_and_notes(chat):
+    client, parser, _ = chat
+    parser.table["지하철 출퇴근용, 무선으로"] = ParseResult(
+        "shopping",
+        [explicit("connection", "wireless", "무선으로")], notes=["지하철 출퇴근"])
+    sid = new_session(client)
+    res = send(client, sid, "지하철 출퇴근용, 무선으로").json()
+
+    memory = res["debug"]["memory"]
+    facts = {f["attribute"]: f for f in memory["facts"]}
+    assert facts == {"connection": {"attribute": "connection", "value": "wireless", "quote": "무선으로",
+                                    "turn": 1, "source": "said"}}
+    assert memory["notes"] == ["지하철 출퇴근"]
+    # 엔진 입력은 메모리에서 만든다
+    assert res["debug"]["preferences"]["explicit"] == {"connection": "wireless"}
+
+    # 다음 턴 파서는 메모리 요약과 직전 질문 문장을 맥락으로 받는다
+    send(client, sid, "음")
+    ctx = parser.calls[-1]
+    assert ctx["question_text"] == res["question"]["text"]
+    assert '연결 방식: 무선 (근거: "무선으로")' in ctx["known"]
+    assert "맥락: 지하철 출퇴근" in ctx["known"]
+
+
+def test_button_answer_is_remembered(chat):
+    client, _, _ = chat
+    sid = new_session(client)
+    q = send(client, sid, "추천해 줘").json()["question"]
+    option = q["options"][0]
+    res = send(client, sid, option["label"], (q["attribute"], option["value"])).json()
+    fact = res["debug"]["memory"]["facts"][-1]
+    assert (fact["attribute"], fact["value"], fact["source"], fact["quote"]) == \
+        (q["attribute"], option["value"], "button", option["label"])
+
+
+def test_writer_phrases_the_question(chat):
+    client, parser, writer = chat
+    parser.table["무선으로"] = ParseResult("shopping", [explicit("connection", "wireless")])
+    sid = new_session(client)
+    res = send(client, sid, "무선으로").json()
+
+    q = res["question"]
+    assert res["reply"] == q["text"] == f"[{q['attribute']}] 친구 질문"
+    assert res["debug"]["question_source"] == "llm" and res["debug"]["question_approach"] == "장면"
+    req = writer.requests[-1]
+    assert req.attribute == q["attribute"] and req.first_turn and not req.retry
+    assert req.message == "무선으로" and req.learned == ["연결 방식: 무선"] and req.history == []
+    assert any(line.startswith("연결 방식: 무선") for line in req.known)
+
+    # 다음 턴의 질문 작성기는 최근 대화(DB 기록)를 받고, 세션 조회도 같은 문장을 돌려준다
+    send(client, sid, q["options"][0]["label"], (q["attribute"], q["options"][0]["value"]))
+    assert writer.requests[-1].history == [
+        {"role": "user", "content": "무선으로"}, {"role": "assistant", "content": res["reply"]}]
+    detail = client.get(f"/api/sessions/{sid}").json()
+    assert detail["question"]["text"] == writer.requests[-1].attribute.join(["[", "] 친구 질문"])
+
+
+def test_writer_failure_falls_back_to_fixed_question(tmp_path):
+    db_path = tmp_path / "test.db"
+    seed_catalog(db_path)
+    with make_client(db_path, FakeParser(), FakeWriter(fail=True)) as client:
+        sid = new_session(client)
+        res = send(client, sid, "추천해 줘").json()
+    q = res["question"]
+    assert q["text"] == SPEC.attribute(q["attribute"]).question
+    assert res["debug"]["question_source"] == "template"
+
+
+def test_unrelated_reply_is_asked_again_then_skipped(chat):
+    """질문과 무관한 말에 '보기에서 고르라'고 하지 않는다. 한 번 더 직접적으로 묻고, 또 안 되면 넘어간다."""
+    client, _, writer = chat
+    sid = new_session(client)
+    q = send(client, sid, "추천해 줘").json()["question"]
+    attribute = q["attribute"]
+
+    res = send(client, sid, "근데 요즘 다들 뭐 써?").json()
+    assert "보기에서 골라" not in res["reply"]
+    if res["question"]["attribute"] == attribute:  # 엔진이 같은 속성을 다시 고르면 더 직접적으로
+        assert writer.requests[-1].retry and writer.requests[-1].unclear
+        res = send(client, sid, "글쎄").json()
+    assert attribute in res["debug"]["preferences"]["asked"]
+    assert res["question"] is None or res["question"]["attribute"] != attribute
+
+
+def test_llm_judgement_is_not_overridden_by_text_rules(chat):
+    """LLM이 있으면 보기 이름이 들어 있어도 규칙으로 판정하지 않는다. LLM이 찾은 것만 반영한다."""
+    client, _, _ = chat
+    sid = new_session(client)
+    q = send(client, sid, "추천해 줘").json()["question"]
+    for text in (q["options"][0]["label"], "상관없어"):  # 가짜 파서는 아무 조건도 돌려주지 않는다
+        res = send(client, sid, text).json()
+        prefs = res["debug"]["preferences"]
+        assert q["attribute"] not in prefs["explicit"] and q["attribute"] not in prefs["dont_care"]
+
+
+def test_off_topic_with_writer_continues_the_conversation(chat):
+    client, parser, writer = chat
+    parser.table["오늘 날씨 좋다"] = ParseResult("off_topic")
+    sid = new_session(client)
+    send(client, sid, "추천해 줘")
+    res = send(client, sid, "오늘 날씨 좋다").json()
+    assert res["question"] is not None and res["debug"]["request_type"] == "off_topic"
+    assert writer.requests[-1].unclear
 
 
 def test_serves_built_frontend_when_present(tmp_path):

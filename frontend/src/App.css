@@ -135,6 +135,12 @@ button.primary {
   gap: 0.5rem;
 }
 
+.options-label {
+  align-self: center;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
 .options {
   display: flex;
   flex-wrap: wrap;
@@ -320,4 +326,171 @@ button.primary {
     border-top: 1px solid var(--border);
     max-height: 30vh;
   }
+}
+
+/* ---------------------------------------------------------------- Developer Panel 탭, 평가 모드 */
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.panel-head h2 {
+  margin: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.tab {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.tab.active {
+  background: var(--accent, #3b6cf6);
+  border-color: var(--accent, #3b6cf6);
+  color: #fff;
+}
+
+.eval .card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  margin: 0.6rem 0;
+}
+
+.eval .card ul,
+.eval .card ol {
+  margin: 0.4rem 0;
+  padding-left: 1.2rem;
+}
+
+.eval .wide {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.eval button {
+  margin: 0.25rem 0.25rem 0.25rem 0;
+}
+
+.eval .link {
+  background: none;
+  border: none;
+  color: var(--accent, #3b6cf6);
+  cursor: pointer;
+  padding: 0;
+}
+
+.score-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+}
+
+.score-form textarea {
+  min-height: 3rem;
+  font: inherit;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin-left: 0.5rem;
+}
+
+.star {
+  width: 1.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.star.on {
+  background: var(--accent, #3b6cf6);
+  color: #fff;
+}
+
+.run-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+  align-items: center;
+}
+
+.run-form input[type="number"] {
+  width: 4rem;
+}
+
+.eval-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.eval-table th,
+.eval-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.2rem 0.3rem;
+  text-align: left;
+}
+
+.eval-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.eval-table tr.clickable {
+  cursor: pointer;
+}
+
+.eval-table tr.clickable:hover {
+  background: var(--border);
+}
+
+.eval .target {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.4rem 0;
+}
+
+.eval .target img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.eval li.hit {
+  font-weight: bold;
+}
+
+.transcript {
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 0.4rem 0;
+}
+
+.transcript .line {
+  margin: 0.25rem 0;
+  white-space: pre-wrap;
+}
+
+.transcript .line.assistant {
+  color: var(--muted);
 }

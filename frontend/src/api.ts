@@ -1,4 +1,11 @@
-import type { Answer, ChatResponse, SessionDetail } from "./types";
+import type {
+  Answer,
+  ChatResponse,
+  EvalRun,
+  ManualResult,
+  Scenario,
+  SessionDetail,
+} from "./types";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -52,4 +59,39 @@ export function sendMessage(
     method: "POST",
     body: JSON.stringify(answer ? { message, answer } : { message }),
   });
+}
+
+// ---------------------------------------------------------------- 평가
+
+export function listScenarios(): Promise<Scenario[]> {
+  return request<Scenario[]>("/api/eval/scenarios");
+}
+
+export function scoreManual(body: {
+  session_id: string;
+  scenario_id: string;
+  naturalness: number;
+  satisfaction: number;
+  comment: string;
+}): Promise<ManualResult> {
+  return request<ManualResult>("/api/eval/manual", { method: "POST", body: JSON.stringify(body) });
+}
+
+export function listManual(): Promise<ManualResult[]> {
+  return request<ManualResult[]>("/api/eval/manual");
+}
+
+export function startRun(systems: string[], limit: number): Promise<{ run_id: number }> {
+  return request<{ run_id: number }>("/api/eval/runs", {
+    method: "POST",
+    body: JSON.stringify({ systems, limit }),
+  });
+}
+
+export function listRuns(): Promise<EvalRun[]> {
+  return request<EvalRun[]>("/api/eval/runs");
+}
+
+export function getRun(id: number): Promise<EvalRun> {
+  return request<EvalRun>(`/api/eval/runs/${id}`);
 }

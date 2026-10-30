@@ -43,7 +43,7 @@ sampling:                      # 선택. 없으면 후보 전체를 카탈로그
 attributes:
   - key: connection            # DB·엔진에서 쓰는 이름
     label: 연결 방식            # 사용자에게 보이는 이름
-    question: 무선 제품을 원하시나요?   # askable이면 필수
+    question: 선 있는 것도 괜찮아, 아니면 무선이 좋아?   # askable이면 필수. 질문 작성기(LLM)가 없거나 실패할 때 쓰는 직접 질문
     askable: true              # false면 시스템이 먼저 묻지 않음 (사용자가 말하면 조건으로는 사용)
     values:                    # 비우면 자유값 속성 (예: brand, 소문자로 저장)
       - {value: wireless, label: 무선}
@@ -72,6 +72,8 @@ attributes:
 - 규칙과 `default`가 내는 값은 모두 `values`에 선언되어 있어야 함
 - 정규식 문법 오류 금지, 속성 key 중복 금지
 - `askable` 속성은 `question` 필수, 자유값 속성은 `askable: false`
+- `question`은 대체용 직접 질문이다. 평소 질문은 질문 작성기가 대화에 맞춰 돌려 묻고, 돌려 묻는 질문은 정의에 적지 않는다([LLM 파서 5절](llm-parser.md#5-질문-작성기-친구-페르소나))
+- 서버는 DB에 저장된 정의 스냅샷을 읽는다. 질문 문구 등 정의를 고치면 `uv run python scripts/load_catalog.py <id>`(또는 `build_catalog.py`)로 다시 넣는다
 
 샘플링 구현: [`stratified_sample`](../backend/app/catalog/sampling.py "sym:py:app.catalog.sampling#stratified_sample"), [`allocate`](../backend/app/catalog/sampling.py "sym:py:app.catalog.sampling#allocate")
 

@@ -27,30 +27,30 @@
 | unknown | 1 / k |
 
 - **직접 답한 조건:** c = 1 − ε이다. ε는 응답 노이즈로 기본 0.05다. 사용자가 실수하거나 상품 데이터가 틀릴 가능성을 반영하며, 0이면 한 번의 오답으로 목표 상품이 영원히 탈락한다.
-- **추정 선호 (Phase 3+):** LLM이 매긴 확신도 c를 그대로 쓴다. 직접 답한 조건과 같은 식이라 별도 코드가 없다. c가 1/k보다 낮으면 1/k로 올린다. 그보다 낮으면 일치하는 상품이 오히려 불리해지기 때문이다.
+- **c < 1/k:** 1/k로 올린다. 그보다 낮으면 일치하는 상품이 오히려 불리해지기 때문이다.
+- **LLM 확신도는 쓰지 않는다 (2026-10-31):** 대화에서는 속성 추출기가 뽑은 값도 직접 답과 같은 c = 1 − ε로 넣는다. 처음에는 LLM이 매긴 확신도를 c로 쓰는 추정 선호가 있었으나 없앴다([roadmap Phase 3+](roadmap.md#phase-3-기능-고도화-암묵적-선호-추론과-추천-보정)).
 - **unknown 상품:** 어떤 답에도 똑같이 반응한다. 그래서 그 속성의 답으로는 확률이 오르지도 내리지도 않는다. 속성 정보가 없는 상품을 함부로 탈락시키지 않는다.
 - **"상관없음":** 상품과 무관한 답이라 belief를 바꾸지 않는다. 그 속성은 다시 묻지 않는다.
 - **belief 계산:** belief = 사전분포 × Π 가능도를 정규화한 값이다([`compute_belief`](../backend/app/core/belief_tracker.py "docid:core.compute-belief")). 관측 순서와 무관하다.
 
 ## 2. 대화 상태
 
-[`PreferenceState`](../backend/app/core/model.py "docid:core.preference-state")가 지금까지 알게 된 것을 담는다. 세션에 JSON으로 저장한다.
+[`PreferenceState`](../backend/app/core/model.py "docid:core.preference-state")가 엔진이 쓰는 "지금까지 알게 된 것"이다.
+대화에서는 저장하지 않고 대화 메모리에서 매 턴 만든다([architecture 세션 상태](architecture.md#세션-상태)). 평가 시뮬레이터는 직접 만든다.
 
 ```json
 {
-  "explicit": {"connection": "wireless"},
-  "inferred": {"anc": {"value": "yes", "confidence": 0.8, "reason": "지하철 통학"}},
+  "explicit": {"connection": "wireless", "anc": "yes"},
   "dont_care": ["brand"],
-  "asked": ["connection", "use_case"]
+  "asked": ["connection", "use_case"],
+  "excluded": []
 }
 ```
 
 - **belief는 저장하지 않는다.** 매 턴 이 상태에서 다시 계산한다. 상품 4,628개 기준으로 DB 읽기, 엔진 생성, 한 턴 결정을 합쳐 약 70ms다.
 - **정정:** 같은 속성에 다시 답하면 이전 값을 바꾸고, 그 상태로 belief를 다시 계산한다. 이전 조건이 누적되지 않는다.
-- **우선순위:** 직접 답 > 추정이다.
-  - 직접 답하면 같은 속성의 추정은 지운다.
-  - 직접 답했거나 "상관없음"이라고 한 속성은 추정하지 않는다.
 - **질문 예산:** `asked`(엔진이 물은 속성)로 센다. 사용자가 먼저 말한 조건은 예산을 쓰지 않는다. "상관없음"이라는 답도 질문 하나를 쓴 것으로 센다.
+  - 대화에서는 답이 안 나와 다시 물을 수 있는 질문은 `asked`에 넣지 않고, 두 번 물어 넘어간 질문은 넣는다([LLM 파서 6절](llm-parser.md#6-질문에-답하지-않은-말)).
 
 ## 3. 질문 선택
 
@@ -71,13 +71,10 @@
 | [`RandomPolicy`](../backend/app/core/question_selector.py "sym:py:app.core.question_selector#RandomPolicy") | 무작위 (seed 고정 가능) |
 | [`FixedOrderPolicy`](../backend/app/core/question_selector.py "sym:py:app.core.question_selector#FixedOrderPolicy") | 정해진 순서. 기본은 YAML의 속성 순서 |
 
-**추정 선호가 질문 순서에 주는 영향**
+**조건이 질문 순서에 주는 영향**
 
-추정은 belief만 바꾸고, IG는 바뀐 belief로 다시 계산된다. 방향은 추정 전에 belief가 어떻게 나뉘어 있었는지에 따라 다르다.
-- **원래 반반이던 속성** (예: 연결 방식): 추정하면 한쪽으로 쏠려 그 질문의 IG가 **내려간다.** 이미 거의 아는 것은 덜 묻는다.
-- **드문 값의 속성** (예: ANC가 10%뿐): 추정하면 yes와 no가 반반에 가까워져 IG가 **올라간다.** 엔진이 "통학용이면 노이즈 캔슬링이 필요할 것 같은데, 맞나요?" 같은 확인 질문을 저절로 앞에 둔다.
-
-두 경우 모두 테스트로 확인했다([test_core.py](../backend/tests/test_core.py)).
+조건(답)은 belief만 바꾸고, IG는 바뀐 belief로 다시 계산된다. 이미 답한 속성은 후보에서 빠지고, 남은 속성의 IG는 좁혀진 후보 위에서 다시 계산된다.
+(LLM 확신도로 약한 증거를 넣던 시절에는 "드문 값을 추정하면 그 속성의 IG가 올라 확인 질문이 앞선다"는 효과가 있었다. 확신도를 없애면서 이 효과도 없어졌다.)
 
 ## 4. 추천과 한계 표시
 
@@ -94,15 +91,14 @@
 **추천** ([`recommend`](../backend/app/core/recommender.py "docid:core.recommend"))
 - **정렬:** 확률 내림차순이다. 동률이면 인기도 점수 순이다.
   - 인기도 점수는 평점의 베이지안 평균이다([`popularity_scores`](../backend/app/core/adapters.py "sym:py:app.core.adapters#popularity_scores")). 확률 계산에는 쓰지 않는다.
-- **조건 위반 처리:** 사용자가 직접 말한 조건을 어기는 상품은 뺀다(Safety: 요구와 무관한 추천 방지). 그런 상품을 빼면 k개가 안 될 때만 뒤에 채우고 `violated`로 표시한다.
-- **추정 조건:** 추정 조건으로는 빼지 않는다. 확신이 낮은 추정이 하드 필터가 되면 안 되기 때문이다.
+- **조건 위반 처리:** 사용자가 말한 조건(속성 추출기가 뽑은 값 포함)을 어기는 상품은 뺀다(Safety: 요구와 무관한 추천 방지). 그런 상품을 빼면 k개가 안 될 때만 뒤에 채우고 `violated`로 표시한다.
 - **추천마다 붙는 정보:** `matched`(맞음), `unknown`(데이터에 없어 확인 못 함), `violated`(어긋남)를 붙인다. 대화 관리자가 이를 추천 근거 문장으로 바꾼다.
 
 **추천 후 조정** ([`IGEngine.recommend_now`](../backend/app/core/engine.py "docid:core.engine-recommend-now"))
 - 질문 없이 지금 상태로 바로 추천한다(reason `refined`).
 - `PreferenceState.excluded`의 상품은 사전확률을 0으로 둔다. 모두 제외되면 제외를 무시한다.
 - `tie_key`로 확률이 같은 상품 사이의 순서를 바꾼다(예: 가격 오름차순). 확률 계산 자체는 바꾸지 않는다.
-- 사용 방법: [LLM 파서 6절](llm-parser.md#6-멀티턴-추천-조정)
+- 사용 방법: [LLM 파서 9절](llm-parser.md#9-멀티턴-추천-조정)
 
 **한계** ([`Limitation`](../backend/app/core/engine.py "sym:py:app.core.engine#Limitation")): 대화 관리자가 문장으로 바꿔 사용자에게 알린다.
 

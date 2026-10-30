@@ -22,7 +22,7 @@ sampling:
 attributes:
   - key: connection
     label: 연결 방식
-    question: 무선 제품을 원하시나요, 유선도 괜찮으신가요?
+    question: 선 있는 것도 괜찮아, 아니면 무선이 좋아?
     values:
       - {value: wireless, label: 무선}
       - {value: wired, label: 유선}
@@ -44,7 +44,7 @@ attributes:
 
   - key: form_factor
     label: 착용 방식
-    question: 귀를 덮는 헤드폰과 귀에 넣는 이어폰 중 어떤 형태가 편하신가요?
+    question: 귀에 쏙 넣는 이어폰이 좋아, 귀를 덮는 헤드폰이 좋아?
     values:
       - {value: in_ear, label: 이어폰(인이어)}
       - {value: on_ear, label: 온이어 헤드폰}
@@ -67,7 +67,7 @@ attributes:
 
   - key: anc
     label: 노이즈 캔슬링(ANC)
-    question: 주변 소음을 줄여주는 노이즈 캔슬링 기능이 필요하신가요?
+    question: 주변 소음 막아주는 노이즈 캔슬링 기능 있으면 좋겠어?
     values:
       - {value: "yes", label: 필요}
       - {value: "no", label: 불필요}
@@ -83,7 +83,7 @@ attributes:
 
   - key: price_band
     label: 가격대
-    question: 생각하시는 예산이 어느 정도인가요? ($20 미만 / $20~60 / $60 이상)
+    question: 예산은 어느 정도 생각해? ($20 미만 / $20~60 / $60 이상)
     values:
       - {value: low, label: $20 미만}
       - {value: mid, label: $20~60}
@@ -98,7 +98,7 @@ attributes:
 
   - key: mic
     label: 마이크
-    question: 통화나 음성 채팅용 마이크가 필요하신가요?
+    question: 통화나 음성 채팅할 때도 쓸 거야?
     values:
       - {value: "yes", label: 필요}
       - {value: "no", label: 불필요}
@@ -110,7 +110,7 @@ attributes:
 
   - key: water_resistant
     label: 방수·방진
-    question: 운동하거나 비 오는 날에도 쓸 수 있는 방수 기능이 필요하신가요?
+    question: 운동하면서 땀 흘리거나 비 오는 날에도 쓸 것 같아?
     values:
       - {value: "yes", label: 필요}
       - {value: "no", label: 불필요}
@@ -122,7 +122,7 @@ attributes:
 
   - key: use_case
     label: 주 용도
-    question: 주로 어떤 용도로 쓰실 건가요? (운동 / 게임 / 아이용 / 일상)
+    question: 주로 뭐 할 때 쓸 거야? 운동, 게임, 아이용, 아니면 일상용?
     values:
       - {value: kids, label: 아이용}
       - {value: gaming, label: 게임}

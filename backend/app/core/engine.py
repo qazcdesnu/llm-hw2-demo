@@ -111,7 +111,7 @@ class IGEngine:
 
         @docid core.engine-recommend-now
         @see docs/ig-engine.md#4-추천과-한계-표시
-        @see docs/llm-parser.md#6-멀티턴-추천-조정
+        @see docs/llm-parser.md#9-멀티턴-추천-조정
         """
         belief = self.belief(state)
         top = self._top(belief, state, tie_key)

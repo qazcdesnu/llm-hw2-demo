@@ -7,30 +7,27 @@ const STOP_REASONS: Record<string, string> = {
 };
 
 /**
- * Developer Panel: 엔진 내부 상태(질문별 기대 IG, 엔트로피, 상위 후보 확률, 수집된 선호)를 보여준다.
+ * Developer Panel: 엔진 내부 상태(질문별 기대 IG, 엔트로피, 상위 후보 확률, 수집된 선호),
+ * 대화 메모리(속성 값과 근거 발화, 사용 맥락), 질문 작성기가 고른 접근을 보여준다.
  *
  * @docid ui.debug-panel
  * @see docs/architecture.md#1-한눈에-보기
  */
 export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
   if (!debug) {
-    return (
-      <aside className="debug">
-        <h2>Developer Panel</h2>
-        <p className="muted">아직 대화가 없습니다.</p>
-      </aside>
-    );
+    return <p className="muted">아직 대화가 없습니다.</p>;
   }
 
   const maxIg = Math.max(...debug.question_scores.map((s) => s.expected_ig), 1e-9);
   const explicit = Object.entries(debug.preferences.explicit ?? {});
-  const inferred = Object.entries(debug.preferences.inferred ?? {});
   const dontCare = debug.preferences.dont_care ?? [];
   const excluded = debug.preferences.excluded ?? [];
+  const facts = debug.memory?.facts ?? [];
+  const notes = debug.memory?.notes ?? [];
+  const questions = debug.memory?.questions ?? [];
 
   return (
-    <aside className="debug">
-      <h2>Developer Panel</h2>
+    <div>
       <dl>
         <dt>Turn</dt>
         <dd>{debug.turn}</dd>
@@ -72,21 +69,60 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
             </dd>
           </>
         )}
+        {debug.question_source && (
+          <>
+            <dt>Question</dt>
+            <dd>
+              <code>{debug.question_source}</code>
+              {debug.question_approach && <div className="muted">{debug.question_approach}</div>}
+            </dd>
+          </>
+        )}
+        <dt>Memory</dt>
+        <dd>
+          {facts.length + notes.length === 0 ? (
+            "-"
+          ) : (
+            <ul className="prefs">
+              {facts.map((f, i) => (
+                <li key={i}>
+                  <span className="muted">t{f.turn}</span> {f.attribute}=<b>{f.value}</b>{" "}
+                  <span className="muted">
+                    ← {f.source === "button" ? "버튼" : ""} "{f.quote}"
+                  </span>
+                </li>
+              ))}
+              {notes.map((n) => (
+                <li key={n} className="muted">
+                  맥락: {n}
+                </li>
+              ))}
+            </ul>
+          )}
+        </dd>
+        {questions.length > 0 && (
+          <>
+            <dt>Questions</dt>
+            <dd>
+              <ul className="prefs">
+                {questions.map((q) => (
+                  <li key={q.attribute} className={q.status === "answered" ? undefined : "muted"}>
+                    {q.attribute}: {q.status} ({q.attempts}회)
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </>
+        )}
         <dt>Preferences</dt>
         <dd>
-          {explicit.length + inferred.length + dontCare.length + excluded.length === 0 ? (
+          {explicit.length + dontCare.length + excluded.length === 0 ? (
             "-"
           ) : (
             <ul className="prefs">
               {explicit.map(([k, v]) => (
                 <li key={k}>
                   {k}=<b>{v}</b>
-                </li>
-              ))}
-              {inferred.map(([k, v]) => (
-                <li key={k} className="muted">
-                  {k}={v.value} (추정 {v.confidence.toFixed(2)}
-                  {v.reason ? `, "${v.reason}"` : ""})
                 </li>
               ))}
               {dontCare.map((k) => (
@@ -114,6 +150,6 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
           )}
         </dd>
       </dl>
-    </aside>
+    </div>
   );
 }

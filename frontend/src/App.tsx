@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { ApiError, createSession, getSession, sendMessage } from "./api";
 import ChatView from "./components/ChatView";
 import DebugPanel from "./components/DebugPanel";
-import type { Answer, ChatResponse, Message, Question, Recommendation } from "./types";
+import EvalPanel from "./components/EvalPanel";
+import type { Answer, ChatResponse, Message, Question, Recommendation, Scenario } from "./types";
 
 const SESSION_KEY = "sessionId";
 
@@ -40,6 +41,10 @@ export default function App() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Developer Panel: 디버그 / 평가 모드
+  const [panel, setPanel] = useState<"debug" | "eval">("debug");
+  // 매뉴얼 평가에서 연기 중인 시나리오 (새 대화를 시작하면 해제)
+  const [scenario, setScenario] = useState<Scenario | null>(null);
 
   useEffect(() => {
     // StrictMode의 이중 실행에서 먼저 끝난 쪽이 상태를 덮어쓰지 않도록 한다.
@@ -92,8 +97,9 @@ export default function App() {
     }
   }
 
-  async function handleReset() {
+  async function handleReset(next: Scenario | null = null) {
     setError(null);
+    setScenario(next);
     try {
       setSessionId(await startNewSession());
       setMessages([]);
@@ -110,7 +116,7 @@ export default function App() {
     <div className="layout">
       <header className="header">
         <h1>RecommandShopping</h1>
-        <button onClick={handleReset} disabled={pending}>
+        <button onClick={() => handleReset()} disabled={pending}>
           새 대화
         </button>
       </header>
@@ -124,9 +130,36 @@ export default function App() {
           disabled={!sessionId}
           error={error}
           onSend={handleSend}
-          onReset={handleReset}
+          onReset={() => handleReset()}
         />
-        <DebugPanel debug={last?.debug ?? null} />
+        <aside className="debug">
+          <div className="panel-head">
+            <h2>Developer Panel</h2>
+            <div className="tabs">
+              <button className={panel === "debug" ? "tab active" : "tab"} onClick={() => setPanel("debug")}>
+                디버그
+              </button>
+              <button className={panel === "eval" ? "tab active" : "tab"} onClick={() => setPanel("eval")}>
+                평가 모드
+              </button>
+            </div>
+          </div>
+          {scenario && panel === "debug" && (
+            <p className="muted">평가 중인 시나리오: {scenario.id} (평가 모드에서 채점)</p>
+          )}
+          {panel === "debug" ? (
+            <DebugPanel debug={last?.debug ?? null} />
+          ) : (
+            <EvalPanel
+              sessionId={sessionId}
+              finished={finished}
+              scenario={scenario}
+              pending={pending}
+              onStartScenario={(s) => handleReset(s)}
+              onSend={(text) => handleSend(text)}
+            />
+          )}
+        </aside>
       </main>
     </div>
   );

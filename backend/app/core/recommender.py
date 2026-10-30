@@ -51,9 +51,7 @@ def recommend(
     items: Sequence[Item], belief: Sequence[float], state: PreferenceState, k: int = 3,
     tie_key: TieKey | None = None,
 ) -> list[RankedItem]:
-    """Top-k. 사용자가 직접 말한 조건을 어기는 상품은 빼고, 모자랄 때만 채운다(violated 표시).
-
-    추정(inferred) 조건으로는 빼지 않는다. 확신이 낮은 추정이 하드 필터가 되면 안 되기 때문이다.
+    """Top-k. 사용자가 말한 조건을 어기는 상품은 빼고, 모자랄 때만 채운다(violated 표시).
 
     @docid core.recommend
     @see docs/ig-engine.md#4-추천과-한계-표시

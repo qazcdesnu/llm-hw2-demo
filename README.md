@@ -13,7 +13,8 @@ LLM은 사용자의 자유 입력을 해석하는 데만 쓰고, 무엇을 묻�
 - **자유 입력 해석:**
   - "무선이고 노캔 되는 걸로"처럼 여러 조건을 한 번에 말해도 됩니다.
   - 정정, "상관없어" 같은 답도 처리합니다.
-  - "지하철 출퇴근용"처럼 맥락만 말하면 필요할 속성(ANC 등)을 확신도와 함께 추정해 반영합니다.
+  - "지하철 출퇴근용"처럼 상황만 말해도 필요한 속성(ANC 등)을 알아내 조건으로 반영합니다. 질문과 무관한 말에서도 찾습니다.
+- **친구 같은 질문:** 기능을 직접 묻지 않고 쓰는 상황을 물어 은근히 알아냅니다. 알게 된 것은 "그럼 ~가 좋겠네"처럼 말하고 다음 질문으로 넘어갑니다.
 - **멀티턴 추천 조정:** 추천을 받은 뒤 "더 저렴한 걸로", "1번 말고", "유선으로 바꿔줘"라고 하면 목록을 다시 골라 줍니다.
 - **근거와 한계 표시:**
   - 추천마다 맞는 조건, 확인할 수 없는 조건, 요청과 다른 조건을 표시합니다.
@@ -21,24 +22,24 @@ LLM은 사용자의 자유 입력을 해석하는 데만 쓰고, 무엇을 묻�
 - **Safety:**
   - 위험한 요청(총기, 마약 등)은 거절합니다.
   - 사용자가 직접 말한 조건을 어기는 상품은 추천에서 뺍니다.
-- **Developer Panel:** 질문별 기대 IG, 엔트로피, 상위 후보 확률, 수집된 선호, 요청 분류를 실시간으로 보여줍니다.
+- **Developer Panel:** 질문별 기대 IG, 엔트로피, 상위 후보 확률, 대화 메모리(값과 근거 발화)·질문 기록, 질문 작성기의 접근, 요청 분류를 실시간으로 보여줍니다.
+- **평가 모드:** Developer Panel에서 전환합니다. Amazon-C4의 실제 구매자 시나리오를 직접 연기해 채점하거나(매뉴얼), 가상 사용자(LLM)로 우리 시스템과 비교군(질문 무작위, LLM 자유 대화)을 자동 평가합니다([docs/evaluation.md](docs/evaluation.md)).
 
-### 대화 예시 (실제 실행 결과, 일부 축약)
+### 대화 예시 (실제 실행 결과, 2026-10-31)
 
 ```
-사용자: 지하철로 출퇴근할 때 쓸 이어폰 찾아줘
-봇:     반영했어요: 착용 방식 이어폰(인이어), 연결 방식 무선(추정), 노이즈 캔슬링(ANC) 필요(추정).
-        생각하시는 예산이 어느 정도인가요?            [$20 미만] [$20~60] [$60 이상] [상관없음]
-사용자: 운동할 때도 쓸 거라 땀에 강했으면 좋겠어
-봇:     반영했어요: 주 용도 운동, 방수·방진 필요. …
-  (보기 버튼으로 몇 번 답함)
-봇:     지금 조건으로 골라봤어요. 28개 상품이 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어요.
-        1. Samsung Galaxy Buds Pro  $84.97   2. TOZO T12  $34.99   …
-사용자: 더 저렴한 걸로 보여줘
-봇:     반영했어요: 더 저렴한 순. … 가격이 낮은 순으로 골랐어요.   1. $8.99 … 2. $8.99 … 3. $10.99 …
-사용자: 총 구하는 방법 알려줘
-봇:     죄송하지만 그 요청은 도와드릴 수 없어요. 헤드폰·이어폰을 찾는 건 계속 도와드릴게요.
+사용자: 헤드폰 하나 사려고
+봇:     오, 헤드폰 새로 사려는구나. 혹시 주로 언제 어디서 쓸 생각이야?
+사용자: 아 출퇴근할 때 지하철에서 주로 들어                    → 노이즈 캔슬링: 필요
+봇:     그럼 지하철에서 소음 거의 차단되는 게 좋겠네, ANC가 필요하겠어.
+        혹시 평소엔 주머니에 쏙 넣어다니는 작고 휴대성 좋은 걸 원해, 아니면 귀를 통째로 덮는 큰 걸로 써도 괜찮아?
+사용자: 안경 써서 오래 끼면 귀 아프더라                         → 착용 방식: 이어폰
+봇:     안경 때문에 귀 아프다니 인이어가 낫겠네, 덜 눌리겠다.
+        혹시 이어폰은 잃어버리거나 1~2년에 한 번씩 바꾸는 편이야, 아니면 오래 쓰는 편이야?
+사용자: 학생이라 돈은 많이 없어                                → 가격대: $20 미만
+봇:     학생이라 돈 없으니 싸게 막 쓰는 쪽일 것 같네. 혹시 충전 신경 쓰기 귀찮아서 그냥 꽂아 바로 쓰는 게 더 좋아?
 ```
+(화살표는 Developer Panel의 메모리에 남은 값. 질문 아래에는 보기 버튼도 함께 나온다.)
 
 ## 로컬에서 실행하기
 
@@ -206,7 +207,7 @@ http://<호스트>:8000 으로 접속한다.
 - **동시성:** 과제·데모 규모를 기준으로 했다. 요청마다 연결을 열고 닫으며, 여러 사용자가 동시에 쓰는 운영 부하는 검증하지 않았다.
 - **HTTPS·도메인:** uvicorn 앞에 리버스 프록시(Caddy, nginx 등)를 두고 8000으로 넘기면 된다. 프록시 설정 파일은 저장소에 없다.
 - **API 키:** `.env`는 git에서 제외되어 있다. 키는 서버 환경 변수나 비밀 관리 도구로 주입한다.
-- **비용:** 자유 입력 한 번에 LLM 호출 1회로, 1천 턴에 약 $0.89다(gpt-5-mini). 보기 버튼 답은 호출하지 않는다.
+- **비용:** 자유 입력 한 번에 해석 2회(요청 분류·속성 추출, 동시)와 질문 작성 1회를 호출한다. 해석만 1천 턴에 약 $1.4다(gpt-5-mini). 보기 버튼 답은 질문 작성만 호출한다.
 - **Docker:** 이미지는 제공하지 않는다(개발 환경에 Docker가 없어 검증하지 못함).
 
 ## 문제 해결
@@ -236,14 +237,15 @@ flowchart LR
 ```
 backend/
   app/
-    api/          세션·대화 API
-    services/     대화 관리자(chat.py), LLM 파서(parser.py)
+    api/          세션·대화 API, 평가 API
+    services/     대화 관리자(chat.py), LLM 파서(parser.py: 요청 분류, extractor.py: 속성 추출), 대화 메모리(memory.py), 질문 작성기(questioner.py)
     core/         IG 엔진: belief tracker, question selector, recommender (웹·DB·LLM과 분리)
     catalog/      카테고리 정의 스키마, 속성 추출, 샘플링, DB 저장
     llm/          LLM 클라이언트 (provider 인터페이스 + OpenAI)
-  categories/     카테고리 정의 YAML (속성·값·질문 문구·추출 규칙)
+    evaluation/   평가: C4 시나리오, 가상 사용자, 비교군, LLM 심판, 실행기
+  categories/     카테고리 정의 YAML (속성·값·대체 질문 문구·추출 규칙)
   scripts/        데이터 파이프라인(prepare_data.sh 등), 엔진 데모, 파서 평가
-  evaluation/     파서 평가 세트
+  evaluation/     파서 평가 세트, 평가 시나리오(scenarios/<id>.jsonl)
   data/           raw·interim(git 제외), catalog/<id>.json(git 포함)
   tests/
 frontend/src/     Vite + React + TypeScript
@@ -261,6 +263,7 @@ uv run pytest                                   # 단위·API 테스트 + 저장
 uv run python scripts/ig_demo.py headphones --interactive          # 엔진만으로 대화 (LLM 없음)
 uv run python scripts/ig_demo.py headphones --target B0BHR5VQC9 --policy random
 uv run python scripts/eval_parser.py --verbose  # LLM 파서 평가 (실제 API, 약 $0.04)
+uv run python scripts/run_eval.py headphones --limit 10   # 대화 평가: IG / Random / LLM (실제 API)
 
 cd ..
 uv run --project backend python tools/doclinks/doclinks.py sync    # 심볼을 옮긴 뒤 문서 링크 경로 갱신
@@ -292,6 +295,7 @@ uv run --project backend python tools/doclinks/doclinks.py sync    # 심볼을 �
 | [architecture.md](docs/architecture.md) | 시스템 구조, 대화 흐름, 데이터 파이프라인, DB 모델, 설계 원칙 |
 | [ig-engine.md](docs/ig-engine.md) | 가능도 모델, 질문 선택, 종료 조건·한계 표시, 예비 결과 |
 | [llm-parser.md](docs/llm-parser.md) | LLM 파서, 멀티턴 추천 조정, Safety, 모델 선택 |
+| [evaluation.md](docs/evaluation.md) | 평가: C4 시나리오, 비교군, 지표, 평가 모드, 결과 |
 | [category-spec.md](docs/category-spec.md) | 카테고리 정의 형식, 새 카테고리 추가 절차 |
 | [data-analysis.md](docs/data-analysis.md) | 헤드폰 데이터 분석 (속성 선정 근거) |
 | [doc-links.md](docs/doc-links.md) | 문서 ↔ 코드 링크 규칙과 도구 |

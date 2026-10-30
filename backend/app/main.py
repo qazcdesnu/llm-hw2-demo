@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.api import sessions
+from app.api import evaluation, sessions
 from app.config import settings
 from app.db import init_db
 
@@ -25,6 +25,7 @@ def create_app(db_path: Path | None = None, frontend_dist: Path | None = None) -
     app = FastAPI(title="RecommandShopping", lifespan=lifespan)
     app.state.db_path = db_path
     app.include_router(sessions.router)
+    app.include_router(evaluation.router)
 
     @app.get("/api/health")
     def health() -> dict:

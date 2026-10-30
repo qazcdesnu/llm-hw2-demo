@@ -13,7 +13,7 @@ interface Props {
   onReset: () => void;
 }
 
-const START_MESSAGE = "추천해 주세요";
+const START_MESSAGE = "추천해 줘";
 // 추천 후 목록을 조정할 때 쓸 만한 예시 (누르면 그대로 보낸다)
 const REFINE_SUGGESTIONS = ["더 저렴한 걸로", "노이즈 캔슬링 있는 걸로", "1번 말고 다른 걸로"];
 
@@ -52,7 +52,7 @@ export default function ChatView({
       <div className="messages">
         {messages.length === 0 && (
           <div className="placeholder">
-            <p>원하는 헤드폰이나 이어폰을 찾아드릴게요. 몇 가지 질문에 답해 주세요.</p>
+            <p>헤드폰이나 이어폰 고르는 거 도와줄게. 편하게 얘기해 줘!</p>
             <button
               className="primary"
               onClick={() => onSend(START_MESSAGE)}
@@ -71,6 +71,8 @@ export default function ChatView({
 
         {question && !pending && (
           <div className="options" role="group" aria-label={question.label}>
+            {/* 질문은 돌려 묻는 말이라 보기와 문장이 다를 수 있어, 무엇을 고르는지 이름을 붙인다 */}
+            <span className="options-label">{question.label}</span>
             {question.options.map((o) => (
               <button
                 key={o.value}
@@ -133,10 +135,10 @@ export default function ChatView({
           onChange={(e) => setInput(e.target.value)}
           placeholder={
             question
-              ? "보기를 누르거나 직접 입력하세요"
+              ? "편하게 대답하거나 보기를 눌러 줘"
               : finished
-                ? "더 고려할 점이나 바꿀 조건을 말해 주세요"
-                : "원하는 조건을 자유롭게 말해 주세요 (예: 출퇴근용 무선 이어폰)"
+                ? "더 고려할 점이나 바꿀 조건을 말해 줘"
+                : "어떤 걸 찾는지 편하게 말해 줘 (예: 출퇴근할 때 쓸 이어폰)"
           }
           disabled={disabled}
           maxLength={2000}

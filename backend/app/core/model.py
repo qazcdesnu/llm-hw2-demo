@@ -36,34 +36,27 @@ class Observation:
 
 
 @dataclass
-class Inference:
-    value: str
-    confidence: float
-    reason: str = ""
-
-
-@dataclass
 class PreferenceState:
     """사용자 선호에 대해 지금까지 알게 된 것. 세션에 JSON으로 저장한다.
 
     belief는 저장하지 않고 매 턴 이 상태로 다시 계산한다. 그래서 정정은 값을 바꾸는 것만으로 끝난다.
+    대화에서는 이 상태도 저장하지 않고 대화 메모리에서 매 턴 만든다(app/services/state.py).
 
     @docid core.preference-state
     @see docs/architecture.md#1-한눈에-보기
     @see docs/architecture.md#세션-상태
     @see docs/ig-engine.md#2-대화-상태
+    @see docs/llm-parser.md#4-대화-메모리
     """
 
     explicit: dict[str, str] = field(default_factory=dict)
-    inferred: dict[str, Inference] = field(default_factory=dict)
     dont_care: list[str] = field(default_factory=list)
     asked: list[str] = field(default_factory=list)
     # 사용자가 빼 달라고 한 상품 id ("1번 말고"). 후보에서 제외된다.
     excluded: list[str] = field(default_factory=list)
 
     def answer(self, attribute: str, value: str) -> None:
-        """사용자가 직접 말한 조건. 같은 속성의 이전 답·추정을 대체한다(정정)."""
-        self.inferred.pop(attribute, None)
+        """사용자가 말한 조건. 같은 속성의 이전 답을 대체한다(정정)."""
         if value == DONT_CARE:
             self.explicit.pop(attribute, None)
             if attribute not in self.dont_care:
@@ -72,12 +65,6 @@ class PreferenceState:
             self.explicit[attribute] = value
             if attribute in self.dont_care:
                 self.dont_care.remove(attribute)
-
-    def infer(self, attribute: str, value: str, confidence: float, reason: str = "") -> None:
-        """맥락에서 추정한 선호. 사용자가 직접 답한 속성이면 무시한다."""
-        if attribute in self.explicit or attribute in self.dont_care:
-            return
-        self.inferred[attribute] = Inference(value, confidence, reason)
 
     def exclude(self, item_id: str) -> None:
         if item_id not in self.excluded:
@@ -92,18 +79,12 @@ class PreferenceState:
         return set(self.explicit) | set(self.dont_care) | set(self.asked)
 
     def observations(self, noise: float) -> list[Observation]:
-        """명시 답은 확신도 1-noise, 추정은 자체 확신도의 증거가 된다."""
-        obs = [Observation(a, v, 1.0 - noise) for a, v in self.explicit.items()]
-        obs += [Observation(a, inf.value, inf.confidence) for a, inf in self.inferred.items()]
-        return obs
+        """답은 확신도 1-noise의 증거가 된다(사용자 답에도 오차가 있을 수 있다는 가능도 모델)."""
+        return [Observation(a, v, 1.0 - noise) for a, v in self.explicit.items()]
 
     def to_dict(self) -> dict:
         return {
             "explicit": dict(self.explicit),
-            "inferred": {
-                a: {"value": i.value, "confidence": i.confidence, "reason": i.reason}
-                for a, i in self.inferred.items()
-            },
             "dont_care": list(self.dont_care),
             "asked": list(self.asked),
             "excluded": list(self.excluded),
@@ -113,7 +94,6 @@ class PreferenceState:
     def from_dict(cls, data: dict) -> "PreferenceState":
         return cls(
             explicit=dict(data.get("explicit", {})),
-            inferred={a: Inference(**i) for a, i in data.get("inferred", {}).items()},
             dont_care=list(data.get("dont_care", [])),
             asked=list(data.get("asked", [])),
             excluded=list(data.get("excluded", [])),

@@ -77,6 +77,12 @@ class DebugInfo(BaseModel):
     preferences: dict = {}
     # LLM 파서의 요청 분류 (shopping / other_product / off_topic / unsafe). 파서를 안 쓴 턴은 None
     request_type: str | None = None
+    # 대화 메모리: facts(속성 값과 근거 발화), notes(속성 밖의 사용 맥락)
+    memory: dict = {}
+    # 질문 문장의 출처: llm(질문 작성기) / template(카테고리 정의의 고정 질문). 질문이 없으면 None
+    question_source: str | None = None
+    # 질문 작성기가 고른 접근(어떤 생활 장면을 물어 무엇을 알아내려는지)
+    question_approach: str | None = None
 
 
 class ChatResponse(BaseModel):

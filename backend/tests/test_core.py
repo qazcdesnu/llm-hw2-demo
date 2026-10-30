@@ -89,24 +89,21 @@ def test_noise_lowers_information_gain():
 
 def test_state_answer_correction_and_dont_care():
     s = PreferenceState()
-    s.infer("anc", "yes", 0.8, "통학")
     s.answer("connection", "wired")
     s.answer("connection", "wireless")  # 정정
-    s.answer("anc", "no")  # 명시 답이 추정을 대체
+    s.answer("anc", "no")
     s.answer("form", DONT_CARE)
-    assert s.explicit == {"connection": "wireless", "anc": "no"}
-    assert s.inferred == {} and s.dont_care == ["form"]
-    s.infer("form", "in", 0.9)  # 상관없다고 한 속성은 추정하지 않음
-    assert s.inferred == {}
+    s.answer("anc", DONT_CARE)  # 값 → 상관없음으로 정정
+    assert s.explicit == {"connection": "wireless"}
+    assert s.dont_care == ["form", "anc"]
     assert PreferenceState.from_dict(s.to_dict()) == s
 
 
-def test_observations_use_noise_for_explicit_and_own_confidence_for_inferred():
+def test_observations_use_noise():
     s = PreferenceState()
     s.answer("connection", "wired")
-    s.infer("anc", "yes", 0.7)
-    assert s.observations(0.05) == [Observation("connection", "wired", 0.95),
-                                     Observation("anc", "yes", 0.7)]
+    s.answer("anc", DONT_CARE)  # 상관없음은 증거가 아니다
+    assert s.observations(0.05) == [Observation("connection", "wired", 0.95)]
 
 
 # ------------------------------------------------------------- 추천
@@ -192,26 +189,3 @@ def test_policies_choose_from_same_candidates():
     picks = {RandomPolicy(seed).choose(candidates).attribute for seed in range(20)}
     assert picks == {"connection", "form", "anc"}
     assert RandomPolicy(3).choose(candidates) == RandomPolicy(3).choose(list(reversed(candidates)))
-
-
-def _ig_after(engine: IGEngine, state: PreferenceState) -> dict[str, float]:
-    return {c.attribute: c.expected_ig for c in engine.step(state).action.candidates}
-
-
-def test_inference_on_balanced_attribute_lowers_its_information_gain():
-    # 반반이던 속성을 추정하면 belief가 한쪽으로 쏠려 그 질문의 가치가 떨어진다.
-    engine = IGEngine(ITEMS, ATTRS, EngineConfig(confident_mass=1.1))
-    plain = _ig_after(engine, PreferenceState())
-    state = PreferenceState()
-    state.infer("connection", "wireless", 0.85)
-    assert _ig_after(engine, state)["connection"] < plain["connection"]
-
-
-def test_inference_on_rare_value_raises_its_information_gain():
-    # 드문 값(ANC 1/4)을 추정하면 yes/no가 반반에 가까워져 확인 질문의 가치가 오른다.
-    engine = IGEngine(ITEMS, ATTRS, EngineConfig(confident_mass=1.1))
-    plain = _ig_after(engine, PreferenceState())
-    state = PreferenceState()
-    state.infer("anc", "yes", 0.85)
-    assert engine.belief(state)[0] == max(engine.belief(state))
-    assert _ig_after(engine, state)["anc"] > plain["anc"]
