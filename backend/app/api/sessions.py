@@ -1,3 +1,5 @@
+"""@see docs/architecture.md#1-한눈에-보기"""
+
 import json
 import sqlite3
 import uuid
@@ -18,6 +20,7 @@ router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
 
 def _load_state(db: sqlite3.Connection, session_id: str) -> ChatState:
+    """@see docs/architecture.md#3-대화-한-턴의-흐름"""
     row = db.execute("SELECT state FROM sessions WHERE id = ?", (session_id,)).fetchone()
     if row is None:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -78,7 +81,7 @@ def post_message(
     db: sqlite3.Connection = Depends(get_db),
     parser: Parser | None = Depends(get_parser),
 ) -> ChatResponse:
-    """@see docs/architecture.md#3-대화-한-턴의-흐름"""
+    """@see docs/architecture.md#1-한눈에-보기"""
     state = _load_state(db, session_id)
     catalog = _load_catalog(db, state.category_id)
     answer = (body.answer.attribute, body.answer.value) if body.answer else None

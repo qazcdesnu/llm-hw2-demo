@@ -1,6 +1,8 @@
 """카탈로그(카테고리 정의 + 상품)를 IG 엔진의 입력으로 바꾼다.
 
 엔진은 카탈로그를 모르고, 카탈로그는 엔진을 모른다. 둘을 잇는 곳은 여기뿐이다.
+
+@see docs/ig-engine.md#ig-엔진
 """
 
 from collections.abc import Sequence
@@ -14,7 +16,10 @@ RATING_PRIOR_WEIGHT = 50
 
 
 def popularity_scores(products: Sequence[Product]) -> list[float]:
-    """베이지안 평균 평점. 리뷰가 적은 상품의 극단적인 평점을 전체 평균 쪽으로 당긴다."""
+    """베이지안 평균 평점. 리뷰가 적은 상품의 극단적인 평점을 전체 평균 쪽으로 당긴다.
+
+    @see docs/ig-engine.md#4-추천과-한계-표시
+    """
     rated = [p for p in products if p.average_rating is not None and p.rating_number]
     if not rated:
         return [0.0] * len(products)

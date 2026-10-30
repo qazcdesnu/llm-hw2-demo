@@ -10,7 +10,7 @@ const STOP_REASONS: Record<string, string> = {
  * Developer Panel: 엔진 내부 상태(질문별 기대 IG, 엔트로피, 상위 후보 확률, 수집된 선호)를 보여준다.
  *
  * @docid ui.debug-panel
- * @see docs/architecture.md#3-대화-한-턴의-흐름
+ * @see docs/architecture.md#1-한눈에-보기
  */
 export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
   if (!debug) {

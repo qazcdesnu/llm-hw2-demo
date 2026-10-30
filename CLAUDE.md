@@ -28,8 +28,9 @@ IG 기반 대화형 상품 추천 챗봇 (HW2). Frontend `frontend/` (Vite), Bac
   - 앵커는 GitHub 규칙을 따른다: 소문자로 바꾸고, 공백은 `-`로, 그 밖의 문장부호는 제거
 - 이슈는 `[I-7](docs/issue.md#i-7)`처럼 링크한다. `issue.md`의 각 ID 칸에 `<a id="i-7"></a>` 앵커가 있다.
 - 새 문서를 만들면 위 문서 지도에 추가하고, 문서 맨 위에 `← [CLAUDE.md](../CLAUDE.md)`를 둔다.
-- 코드의 함수·클래스는 줄 번호가 아니라 심볼 ID로 링크한다: `[이름](경로 "sym:py:모듈#이름")` 또는 `"docid:…"` ([doc-links.md](docs/doc-links.md))
-- 코드를 고친 뒤에는 `uv run --project backend python tools/doclinks/doclinks.py sync`로 링크 줄 번호를 갱신한다. 깨진 링크는 `pytest`에서 실패한다.
+- 코드는 줄 번호(`#L10`)로 링크하지 않고 객체·함수·클래스 단위로 링크한다: `[이름](경로 "sym:py:모듈#이름")` 또는 `"docid:…"`. 주소에는 파일 경로만 둔다 ([doc-links.md](docs/doc-links.md))
+- 문서 → 코드 링크가 기준이고 코드의 `@see`는 그 역참조다. `@see`는 손으로 쓰지 않고 `uv run --project backend python tools/doclinks/doclinks.py sync`로 생성한다. 양방향이 어긋나면 `pytest`가 실패한다.
+- Claude Code hook([.claude/settings.json](.claude/settings.json))이 파일 수정 직후 링크 오류와 "방금 고친 코드를 참조하는 문서"를 알려 준다. 알려 준 문서의 설명이 코드와 맞는지 확인하고 함께 고친다. 오류가 남으면 종료 전 hook이 막는다.
 
 ## 실행
 - 처음 한 번: `cd backend && uv sync && uv run python scripts/load_catalog.py headphones` (git의 카탈로그 JSON → SQLite)

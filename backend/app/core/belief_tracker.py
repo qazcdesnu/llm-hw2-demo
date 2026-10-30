@@ -1,6 +1,6 @@
 """목표 상품에 대한 확률분포(belief)를 관측으로부터 계산한다.
 
-@see docs/ig-engine.md#1-답변-가능도-모델
+@see docs/ig-engine.md#ig-엔진
 """
 
 import math
@@ -18,6 +18,7 @@ def likelihood(item: Item, obs: Observation, attr: AttributeDef) -> float:
     c는 1/k 이상으로 올린다. 그보다 낮으면 일치하는 상품이 오히려 불리해진다.
 
     @docid core.likelihood
+    @see docs/ig-engine.md#1-답변-가능도-모델
     """
     k = len(attr.values)
     value = item.attributes.get(obs.attribute)
@@ -47,6 +48,7 @@ def compute_belief(
     """prior × Π 가능도를 정규화한 사후분포. 정의에 없는 속성의 관측은 무시한다.
 
     @docid core.compute-belief
+    @see docs/ig-engine.md#1-답변-가능도-모델
     """
     weights = list(prior) if prior is not None else uniform(len(items))
     for obs in observations:

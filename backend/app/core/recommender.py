@@ -1,6 +1,6 @@
 """현재 belief로 Top-k 상품을 고르고, 조건 충족 여부를 붙인다.
 
-@see docs/ig-engine.md#4-추천과-한계-표시
+@see docs/ig-engine.md#ig-엔진
 """
 
 from collections.abc import Callable, Sequence
@@ -56,6 +56,7 @@ def recommend(
     추정(inferred) 조건으로는 빼지 않는다. 확신이 낮은 추정이 하드 필터가 되면 안 되기 때문이다.
 
     @docid core.recommend
+    @see docs/ig-engine.md#4-추천과-한계-표시
     """
     ranked = []
     for i in rank_items(items, belief, tie_key):

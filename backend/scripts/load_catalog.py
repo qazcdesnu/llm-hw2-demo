@@ -3,8 +3,6 @@
 원본 데이터(5GB)를 받지 않고 앱을 실행할 때 쓴다. 원본에서 다시 만들려면 build_catalog.py.
 
     uv run python scripts/load_catalog.py headphones
-
-@see docs/category-spec.md#새-카테고리-추가-절차
 """
 
 import argparse

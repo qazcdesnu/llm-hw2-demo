@@ -2,8 +2,8 @@
 
 ← [CLAUDE.md](../CLAUDE.md) · 관련: [architecture 3절](architecture.md#3-대화-한-턴의-흐름) · [IG 엔진](ig-engine.md) · [roadmap Phase 3+](roadmap.md#phase-3-기능-고도화-암묵적-선호-추론과-추천-보정)
 
-사용자의 자유 입력을 카테고리 속성 조건과 요청 분류로 바꾸는 파서([`parse_message`](../backend/app/services/parser.py#L178 "docid:chat.parse-message")).
-그리고 그 결과로 대화 상태를 바꾸는 대화 관리자([`handle_message`](../backend/app/services/chat.py#L323 "docid:chat.handle-turn"))를 설명한다.
+사용자의 자유 입력을 카테고리 속성 조건과 요청 분류로 바꾸는 파서([`parse_message`](../backend/app/services/parser.py "docid:chat.parse-message")).
+그리고 그 결과로 대화 상태를 바꾸는 대화 관리자([`handle_message`](../backend/app/services/chat.py "docid:chat.handle-turn"))를 설명한다.
 
 **원칙: LLM은 해석만 한다.** 무엇을 묻고 무엇을 추천할지는 IG 엔진이 상품 데이터로 정한다. LLM은 상품 속성을 만들지 않는다.
 
@@ -13,18 +13,18 @@
 |---|---|---|
 | 보기 버튼 | `answer {attribute, value}`를 그대로 반영 | 없음 |
 | 자유 입력 | LLM 파서 | 1회 |
-| 자유 입력 + 파서 없음(키 미설정) 또는 실패 | 대기 중인 질문의 보기 이름과 문자열 매칭([`match_text`](../backend/app/services/chat.py#L123 "sym:py:app.services.chat#match_text")) | 없음 |
+| 자유 입력 + 파서 없음(키 미설정) 또는 실패 | 대기 중인 질문의 보기 이름과 문자열 매칭([`match_text`](../backend/app/services/chat.py "sym:py:app.services.chat#match_text")) | 없음 |
 
 ## 2. 파서
 
 ### 입력
-- **시스템 지시** ([`build_instructions`](../backend/app/services/parser.py#L81 "docid:chat.parser-instructions")): 카테고리 정의(YAML)의 속성·값·라벨로 매번 만든다. 카테고리별 코드는 없다.
+- **시스템 지시** ([`build_instructions`](../backend/app/services/parser.py "docid:chat.parser-instructions")): 카테고리 정의(YAML)의 속성·값·라벨로 매번 만든다. 카테고리별 코드는 없다.
 - **사용자 입력:** 발화와 함께 맥락을 넘긴다.
   - 현재 질문(있으면)
   - 지금까지 명시된 조건
   - 현재 추천 목록 요약(추천 후일 때): 상품명 | 가격 | 속성들
 
-### 출력 (구조화 출력, [`schema_for`](../backend/app/services/parser.py#L74 "sym:py:app.services.parser#schema_for"))
+### 출력 (구조화 출력, [`schema_for`](../backend/app/services/parser.py "sym:py:app.services.parser#schema_for"))
 
 | 필드 | 내용 |
 |---|---|
@@ -34,7 +34,7 @@
 | `price_order` | "더 싼 걸로" → `cheaper`, "더 비싸도 좋은 걸로" → `pricier`, 그 외 `none` |
 
 - **속성 이름:** enum이라 정의에 없는 속성은 나올 수 없다.
-- **값:** 코드에서 정의와 대조하고, 맞지 않으면 버린다([`validate_constraints`](../backend/app/services/parser.py#L156 "sym:py:app.services.parser#validate_constraints")).
+- **값:** 코드에서 정의와 대조하고, 맞지 않으면 버린다([`validate_constraints`](../backend/app/services/parser.py "sym:py:app.services.parser#validate_constraints")).
 - **자유값 속성(brand):** 영문 소문자로 받는다(소니 → `sony`).
 - **명시 조건의 confidence:** 1로 고정한다. LLM이 매긴 값은 추정에만 쓴다.
 
@@ -69,7 +69,7 @@ uv run python scripts/eval_parser.py --configs gpt-5-mini:low gpt-5-nano:low --v
 - **설정 위치:** `backend/.env`의 `OPENAI_MODEL`, `OPENAI_REASONING_EFFORT`
 
 ## 4. 해석 결과를 대화 상태에 반영
-([`apply_parsed`](../backend/app/services/chat.py#L153 "docid:chat.apply-parsed"))
+([`apply_parsed`](../backend/app/services/chat.py "docid:chat.apply-parsed"))
 
 | 출력 | 처리 |
 |---|---|
@@ -100,7 +100,7 @@ uv run python scripts/eval_parser.py --configs gpt-5-mini:low gpt-5-nano:low --v
 ## 6. 멀티턴 추천 조정
 
 추천을 보여준 뒤에도 대화가 이어진다(`ChatState.finished`는 "추천을 한 번 이상 보여줌"이라는 뜻).
-이후 자유 입력은 추천 목록 조정으로 처리하고, 질문 없이 바로 재추천한다([`IGEngine.recommend_now`](../backend/app/core/engine.py#L100 "docid:core.engine-recommend-now")).
+이후 자유 입력은 추천 목록 조정으로 처리하고, 질문 없이 바로 재추천한다([`IGEngine.recommend_now`](../backend/app/core/engine.py "docid:core.engine-recommend-now")).
 
 | 사용자 | 처리 |
 |---|---|

@@ -1,6 +1,6 @@
 """IG 엔진의 데이터 모델. 카탈로그·DB·웹과 무관한 순수 데이터 구조.
 
-@see docs/ig-engine.md
+@see docs/ig-engine.md#ig-엔진
 """
 
 from dataclasses import dataclass, field
@@ -49,6 +49,8 @@ class PreferenceState:
     belief는 저장하지 않고 매 턴 이 상태로 다시 계산한다. 그래서 정정은 값을 바꾸는 것만으로 끝난다.
 
     @docid core.preference-state
+    @see docs/architecture.md#1-한눈에-보기
+    @see docs/architecture.md#세션-상태
     @see docs/ig-engine.md#2-대화-상태
     """
 

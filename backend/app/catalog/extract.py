@@ -1,7 +1,4 @@
-"""카테고리 정의의 규칙으로 원본 상품(Amazon 메타 JSON)에서 속성 값을 뽑는다.
-
-@see docs/category-spec.md#규칙-종류
-"""
+"""카테고리 정의의 규칙으로 원본 상품(Amazon 메타 JSON)에서 속성 값을 뽑는다."""
 
 import re
 from dataclasses import dataclass
@@ -89,7 +86,11 @@ def _apply(rule: Rule, item: dict) -> Extracted | None:
 
 
 def extract_attribute(attr: AttributeSpec, item: dict) -> Extracted | None:
-    """속성 값. 근거가 없으면 None(unknown)."""
+    """속성 값. 근거가 없으면 None(unknown).
+
+    @see docs/architecture.md#2-설계-원칙
+    @see docs/category-spec.md#규칙-종류
+    """
     for rule in attr.rules:
         result = _apply(rule, item)
         if result is not None:
@@ -104,6 +105,7 @@ def extract_attribute(attr: AttributeSpec, item: dict) -> Extracted | None:
 
 
 def extract_attributes(spec: CategorySpec, item: dict) -> dict[str, Extracted]:
+    """@see docs/architecture.md#1-한눈에-보기"""
     results = {}
     for attr in spec.attributes:
         extracted = extract_attribute(attr, item)

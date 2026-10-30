@@ -187,9 +187,22 @@ def test_load_committed_catalog_json(tmp_path):
 
     db_path = tmp_path / "loaded.db"
     expected = _json.loads((CATALOG_DIR / "headphones.json").read_text(encoding="utf-8"))
-    assert load("headphones", db_path) == len(expected["products"]) == 150
+    assert load("headphones", db_path) == len(expected["products"]) == 4628
     with closing(connect(db_path)) as conn:
         products = {p.id: p for p in load_products(conn, "headphones")}
     sample = expected["products"][0]
     assert products[sample["id"]].attributes == {k: a["value"] for k, a in sample["attributes"].items()}
     assert products[sample["id"]].image_url == sample["image_url"]
+
+
+def test_sampling_without_size_keeps_all_eligible(headphones):
+    from app.catalog.sampling import stratified_sample
+    from app.catalog.spec import SamplingSpec
+
+    rows = []
+    for i in range(30):
+        item = make_item(parent_asin=f"B{i:04d}",
+                         details={"Form Factor": "In Ear"} if i % 3 else {})
+        rows.append((item, extract_attributes(headphones, item)))
+    picked = stratified_sample(rows, SamplingSpec(require_known=["form_factor"]))
+    assert len(picked) == 20  # form_factor가 확인된 것만, 개수 제한 없음

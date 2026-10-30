@@ -11,10 +11,10 @@ candidate_filter:
   require_price: true
   min_rating_number: 100
 
-# 실제 분포 유지: 연결 방식 × 착용 방식 조합의 후보 비율대로 뽑는다.
-# ANC 등 다른 속성도 무작위로 뽑히므로 실제 비율(약 10%)에 가깝게 유지된다.
+# 연결 방식·착용 방식이 확인된 후보를 모두 쓴다 (2026-10-26, 150개 샘플링에서 변경).
+# size를 정하면 연결 방식 × 착용 방식 조합의 실제 비율대로 비례 층화 추출한다.
 sampling:
-  size: 150
+  size: null
   seed: 42
   stratify_by: [connection, form_factor]
   require_known: [connection, form_factor]

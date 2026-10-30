@@ -1,7 +1,5 @@
 /**
  * API 응답 타입. backend/app/schemas.py와 맞춘다.
- *
- * @see backend/README.md#api
  */
 
 export type Role = "user" | "assistant";

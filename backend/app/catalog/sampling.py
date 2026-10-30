@@ -1,7 +1,4 @@
-"""후보 상품에서 카탈로그용 상품을 비례 층화 추출한다.
-
-@see docs/category-spec.md#파일-형식
-"""
+"""후보 상품에서 카탈로그용 상품을 비례 층화 추출한다."""
 
 import math
 import random
@@ -19,7 +16,10 @@ def eligible(rows: list[Row], spec: SamplingSpec) -> list[Row]:
 
 
 def allocate(sizes: dict[tuple, int], n: int) -> dict[tuple, int]:
-    """층별 크기에 비례해 n개를 나눈다 (최대 잉여법). 층 크기를 넘지 않는다."""
+    """층별 크기에 비례해 n개를 나눈다 (최대 잉여법). 층 크기를 넘지 않는다.
+
+    @see docs/category-spec.md#검증-로드-시-자동
+    """
     total = sum(sizes.values())
     quotas = {k: n * s / total for k, s in sizes.items()}
     alloc = {k: min(math.floor(q), sizes[k]) for k, q in quotas.items()}
@@ -41,8 +41,11 @@ def allocate(sizes: dict[tuple, int], n: int) -> dict[tuple, int]:
 
 
 def stratified_sample(rows: list[Row], spec: SamplingSpec) -> list[Row]:
+    """@see docs/architecture.md#1-한눈에-보기
+    @see docs/category-spec.md#검증-로드-시-자동
+    """
     pool = eligible(rows, spec)
-    if len(pool) <= spec.size:
+    if spec.size is None or len(pool) <= spec.size:
         return pool
 
     strata: dict[tuple, list[Row]] = defaultdict(list)

@@ -30,6 +30,7 @@ def _main_image(item: dict) -> str | None:
 
 
 def save_category(conn: sqlite3.Connection, spec: CategorySpec) -> None:
+    """@see docs/architecture.md#5-데이터-모델-sqlite"""
     conn.execute(
         """
         INSERT INTO categories (id, name, spec) VALUES (?, ?, ?)
@@ -118,6 +119,7 @@ def list_categories(conn: sqlite3.Connection) -> list[CategorySpec]:
 
 
 def load_products(conn: sqlite3.Connection, category_id: str) -> list[Product]:
+    """@see docs/architecture.md#1-한눈에-보기"""
     rows = conn.execute(
         """
         SELECT id, category_id, title, store, price, average_rating, rating_number, image_url

@@ -22,14 +22,14 @@ uv run python scripts/eval_parser.py --verbose   # 파서 평가 세트 채점 (
 - `app/main.py`: 앱 생성, 시작 시 SQLite 스키마 초기화
 - `app/db.py`: SQLite 연결과 스키마 (`sessions`, `messages`, `categories`, `products`, `product_attributes`)
 - `app/api/sessions.py`: 세션·대화 API
-- `app/services/chat.py`: 대화 한 턴 처리 [`handle_message`](app/services/chat.py#L323 "docid:chat.handle-turn") (현재 stub, 파서·IG 엔진 연결 지점)
-- `app/llm/`: LLM 클라이언트. [`LLMClient`](app/llm/base.py#L19 "docid:llm.client") 인터페이스(`complete`, `parse`)와 OpenAI 구현, [`get_llm_client`](app/llm/__init__.py#L13 "sym:py:app.llm#get_llm_client")
+- `app/services/chat.py`: 대화 한 턴 처리 [`handle_message`](app/services/chat.py "docid:chat.handle-turn") (입력 해석 → IG 엔진 결정 → 질문·추천 응답, 추천 후 조정)
+- `app/llm/`: LLM 클라이언트. [`LLMClient`](app/llm/base.py "docid:llm.client") 인터페이스(`complete`, `parse`)와 OpenAI 구현, [`get_llm_client`](app/llm/__init__.py "sym:py:app.llm#get_llm_client")
 - `app/catalog/`: 카테고리 정의 스키마, 속성 추출, 카탈로그 DB 저장·조회
 - `categories/`: 카테고리 정의 YAML (작성법: [category-spec.md](../docs/category-spec.md))
-- `app/core/`: IG 엔진 (웹·DB와 무관한 순수 Python, 평가 코드에서도 사용). 진입점 [`IGEngine`](app/core/engine.py#L71 "docid:core.engine"), 설명 [ig-engine.md](../docs/ig-engine.md)
-- `scripts/`: 데이터 스크립트 (`filter_category.py` → `build_catalog.py` → `export_validation.py`, 원본 없이 적재 `load_catalog.py`, 분석 `analyze_headphones.py`, 엔진 데모 `ig_demo.py`)
+- `app/core/`: IG 엔진 (웹·DB와 무관한 순수 Python, 평가 코드에서도 사용). 진입점 [`IGEngine`](app/core/engine.py "docid:core.engine"), 설명 [ig-engine.md](../docs/ig-engine.md)
+- `scripts/`: 데이터 스크립트 (`filter_category.py` → `build_catalog.py` → `export_validation.py`, 원본 없이 적재 `load_catalog.py`, 평가 데이터 `download_amazon_c4.py`, 분석 `analyze_headphones.py`, 엔진 데모 `ig_demo.py`)
 - `data/catalog/<id>.json`: 빌드된 카탈로그 (git 포함)
-- `data/raw/`: Amazon Reviews 2023 원본 (git 제외)
+- `data/raw/`: 외부 원본 데이터 (git 제외). Amazon Reviews 2023 메타(`meta_*.jsonl`), Amazon-C4 평가 질의(`amazon-c4/`)
 
 ## API
 | Method | Path | 설명 |

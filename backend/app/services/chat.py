@@ -2,9 +2,6 @@
 
 입력 해석 순서: 버튼 답(answer) → LLM 파서 → (파서가 없거나 실패하면) 보기 문자열 매칭.
 추천을 보여준 뒤에도 대화가 이어져, 조건 추가·변경·상품 제외로 추천 목록을 조정한다.
-
-@see docs/architecture.md#3-대화-한-턴의-흐름
-@see docs/llm-parser.md
 """
 
 import re
@@ -55,7 +52,10 @@ def build_catalog(
 
 @dataclass
 class ChatState:
-    """sessions.state에 저장되는 대화 상태."""
+    """sessions.state에 저장되는 대화 상태.
+
+    @see docs/architecture.md#세션-상태
+    """
 
     category_id: str
     turn: int = 0
@@ -124,6 +124,9 @@ def match_text(attr: AttributeSpec, text: str) -> str | None:
     """보기 이름·값과 문자열로 맞춰 본다. 하나로 정해지지 않으면 None.
 
     "불필요"처럼 다른 보기("필요")를 포함하는 표현은 더 긴 쪽만 인정한다.
+
+    @see docs/architecture.md#3-대화-한-턴의-흐름
+    @see docs/llm-parser.md#1-입력-해석-순서
     """
     normalized = text.casefold()
     if any(w in normalized for w in DONT_CARE_WORDS):
@@ -154,6 +157,7 @@ def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> l
     """해석 결과를 상태에 반영하고, 반영한 내용을 사람이 읽을 문구로 돌려준다.
 
     @docid chat.apply-parsed
+    @see docs/llm-parser.md#4-해석-결과를-대화-상태에-반영
     """
     pref, applied = state.preference, []
     for c in parsed.constraints:
@@ -331,7 +335,10 @@ def handle_message(
     2. 결정: 질문 단계면 엔진이 질문/추천, 추천을 보여준 뒤면 바로 재추천
 
     @docid chat.handle-turn
-    @see docs/architecture.md#3-대화-한-턴의-흐름
+    @see backend/README.md#구조
+    @see docs/architecture.md#1-한눈에-보기
+    @see docs/doc-links.md#3-docid
+    @see docs/llm-parser.md#llm-파서와-멀티턴-대화
     """
     spec, pref = catalog.spec, state.preference
     state.turn += 1

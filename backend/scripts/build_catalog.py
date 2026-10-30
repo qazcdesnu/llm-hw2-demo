@@ -8,6 +8,9 @@
     uv run python scripts/build_catalog.py headphones --dry-run    # 리포트만
     uv run python scripts/build_catalog.py headphones
     uv run python scripts/build_catalog.py headphones --no-sample  # 후보 전체 저장
+
+@see README.md#방법-b-원본에서-만들기
+@see docs/architecture.md#1-한눈에-보기
 """
 
 import argparse

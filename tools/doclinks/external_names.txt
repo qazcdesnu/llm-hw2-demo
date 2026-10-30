@@ -1,0 +1,9 @@
+# 문서에서 백틱으로 언급해도 되는, 우리 코드가 아닌 이름 (라이브러리·프레임워크 등)
+# 한 줄에 하나. "Name"이면 "Name.attr" 형태도 허용한다.
+FastAPI
+StaticFiles
+TestClient
+BaseModel
+BaseSettings
+SecretStr
+OpenAI

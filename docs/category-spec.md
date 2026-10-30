@@ -36,7 +36,7 @@ candidate_filter:
   require_price: true
   min_rating_number: 100
 sampling:                      # 선택. 없으면 후보 전체를 카탈로그로 사용
-  size: 150
+  size: 150                    # null이면 require_known을 통과한 후보 전체
   seed: 42
   stratify_by: [connection, form_factor]   # 이 조합의 후보 비율대로 비례 층화 추출 (최대 잉여법)
   require_known: [connection, form_factor] # unknown인 상품은 제외
@@ -57,23 +57,23 @@ attributes:
 
 | type | 대상 | 설명 |
 |---|---|---|
-| [`details`](../backend/app/catalog/spec.py#L30 "sym:py:app.catalog.spec#DetailsRule") | `details[keys]` | 처음 존재하는 키의 값에 `map` 정규식 적용. `map`이 없으면 값 자체를 사용 (자유값 속성만) |
-| [`categories`](../backend/app/catalog/spec.py#L40 "sym:py:app.catalog.spec#CategoriesRule") | 카테고리 경로 | `" > "`로 이은 경로에 `map` 정규식 적용 |
-| [`keywords`](../backend/app/catalog/spec.py#L49 "sym:py:app.catalog.spec#KeywordsRule") | `fields`의 텍스트 | 기본 `title, features, description`. `details`도 지정 가능 |
-| [`band`](../backend/app/catalog/spec.py#L64 "sym:py:app.catalog.spec#BandRule") | 숫자 필드 | `bands`를 위에서부터 보고 `값 < max`인 첫 구간. 마지막은 `max` 생략 |
+| [`details`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#DetailsRule") | `details[keys]` | 처음 존재하는 키의 값에 `map` 정규식 적용. `map`이 없으면 값 자체를 사용 (자유값 속성만) |
+| [`categories`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#CategoriesRule") | 카테고리 경로 | `" > "`로 이은 경로에 `map` 정규식 적용 |
+| [`keywords`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#KeywordsRule") | `fields`의 텍스트 | 기본 `title, features, description`. `details`도 지정 가능 |
+| [`band`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#BandRule") | 숫자 필드 | `bands`를 위에서부터 보고 `값 < max`인 첫 구간. 마지막은 `max` 생략 |
 
-- 규칙 적용 순서·`default`·`unknown_if` 처리: [`extract_attribute`](../backend/app/catalog/extract.py#L91 "sym:py:app.catalog.extract#extract_attribute")
+- 규칙 적용 순서·`default`·`unknown_if` 처리: [`extract_attribute`](../backend/app/catalog/extract.py "sym:py:app.catalog.extract#extract_attribute")
 - `map`은 `값: 정규식`이고 위쪽 값이 우선한다. 정규식은 대소문자를 무시한다.
 - YAML에서 `yes`/`no`는 불리언으로 읽히므로 반드시 따옴표로 감싼다 (`"yes"`).
 
 ### 검증 (로드 시 자동)
-구현: [`AttributeSpec._check_consistency`](../backend/app/catalog/spec.py#L109 "sym:py:app.catalog.spec#AttributeSpec._check_consistency"), [`CategorySpec._check_keys`](../backend/app/catalog/spec.py#L163 "sym:py:app.catalog.spec#CategorySpec._check_keys")
+구현: [`AttributeSpec._check_consistency`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#AttributeSpec._check_consistency"), [`CategorySpec._check_keys`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#CategorySpec._check_keys")
 
 - 규칙과 `default`가 내는 값은 모두 `values`에 선언되어 있어야 함
 - 정규식 문법 오류 금지, 속성 key 중복 금지
 - `askable` 속성은 `question` 필수, 자유값 속성은 `askable: false`
 
-샘플링 구현: [`stratified_sample`](../backend/app/catalog/sampling.py#L43 "sym:py:app.catalog.sampling#stratified_sample"), [`allocate`](../backend/app/catalog/sampling.py#L21 "sym:py:app.catalog.sampling#allocate")
+샘플링 구현: [`stratified_sample`](../backend/app/catalog/sampling.py "sym:py:app.catalog.sampling#stratified_sample"), [`allocate`](../backend/app/catalog/sampling.py "sym:py:app.catalog.sampling#allocate")
 
 ## DB 구조
 전체 모델: [architecture 5절](architecture.md#5-데이터-모델-sqlite)

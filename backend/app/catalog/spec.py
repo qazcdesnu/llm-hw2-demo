@@ -2,8 +2,6 @@
 
 카테고리가 다루는 속성, 값, 질문 문구, 원본 데이터에서 값을 뽑는 규칙을 한 파일에 담는다.
 추출(extract.py), DB 저장(repository.py), IG 엔진, LLM 파서는 모두 이 정의만 보고 동작한다.
-
-@see docs/category-spec.md#파일-형식
 """
 
 import re
@@ -28,7 +26,10 @@ def _check_patterns(patterns: dict[str, str]) -> dict[str, str]:
 
 
 class DetailsRule(BaseModel):
-    """details의 keys 중 처음 있는 키 값을 본다. map이 없으면 값을 그대로(자유값) 쓴다."""
+    """details의 keys 중 처음 있는 키 값을 본다. map이 없으면 값을 그대로(자유값) 쓴다.
+
+    @see docs/category-spec.md#규칙-종류
+    """
 
     type: Literal["details"]
     keys: list[str]
@@ -38,7 +39,10 @@ class DetailsRule(BaseModel):
 
 
 class CategoriesRule(BaseModel):
-    """categories 경로(" > "로 이은 문자열)에 정규식을 적용한다."""
+    """categories 경로(" > "로 이은 문자열)에 정규식을 적용한다.
+
+    @see docs/category-spec.md#규칙-종류
+    """
 
     type: Literal["categories"]
     map: dict[str, str]
@@ -47,7 +51,10 @@ class CategoriesRule(BaseModel):
 
 
 class KeywordsRule(BaseModel):
-    """fields의 텍스트에 정규식을 적용한다. map의 위쪽 값이 우선한다."""
+    """fields의 텍스트에 정규식을 적용한다. map의 위쪽 값이 우선한다.
+
+    @see docs/category-spec.md#규칙-종류
+    """
 
     type: Literal["keywords"]
     fields: list[str] = Field(default_factory=lambda: list(TEXT_FIELDS))
@@ -62,7 +69,10 @@ class Band(BaseModel):
 
 
 class BandRule(BaseModel):
-    """숫자 필드를 구간으로 나눈다. bands는 max 오름차순."""
+    """숫자 필드를 구간으로 나눈다. bands는 max 오름차순.
+
+    @see docs/category-spec.md#규칙-종류
+    """
 
     type: Literal["band"]
     field: str
@@ -108,6 +118,7 @@ class AttributeSpec(BaseModel):
 
     @model_validator(mode="after")
     def _check_consistency(self) -> "AttributeSpec":
+        """@see docs/category-spec.md#검증-로드-시-자동"""
         if self.askable and not self.question:
             raise ValueError(f"{self.key}: askable 속성에는 question이 필요하다")
         if self.is_open:
@@ -144,7 +155,8 @@ class CandidateFilter(BaseModel):
 class SamplingSpec(BaseModel):
     """후보 중 카탈로그에 넣을 상품을 뽑는 방법. stratify_by 조합의 실제 비율을 유지한다."""
 
-    size: int = Field(gt=0)
+    # None이면 조건(require_known)을 통과한 후보를 모두 쓴다.
+    size: int | None = Field(default=None, gt=0)
     seed: int = 42
     stratify_by: list[str] = []
     # 이 속성들이 unknown인 상품은 뽑지 않는다.
@@ -152,6 +164,7 @@ class SamplingSpec(BaseModel):
 
 
 class CategorySpec(BaseModel):
+    """@see docs/architecture.md#1-한눈에-보기"""
     id: str = Field(pattern=r"^[a-z][a-z0-9_]*$")
     name: str
     description: str = ""
@@ -162,6 +175,7 @@ class CategorySpec(BaseModel):
 
     @model_validator(mode="after")
     def _check_keys(self) -> "CategorySpec":
+        """@see docs/category-spec.md#검증-로드-시-자동"""
         keys = [a.key for a in self.attributes]
         if len(keys) != len(set(keys)):
             raise ValueError(f"{self.id}: 속성 key 중복")

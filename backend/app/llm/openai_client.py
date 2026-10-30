@@ -9,7 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 class OpenAIClient:
-    """OpenAI Responses API 클라이언트."""
+    """OpenAI Responses API 클라이언트.
+
+    @see docs/architecture.md#1-한눈에-보기
+    """
 
     def __init__(
         self,

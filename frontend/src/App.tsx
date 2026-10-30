@@ -28,6 +28,9 @@ async function startNewSession(): Promise<string> {
   return id;
 }
 
+/**
+ * @see docs/architecture.md#1-한눈에-보기
+ */
 export default function App() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);

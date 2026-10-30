@@ -39,13 +39,13 @@ flowchart LR
 
 | 구성 요소 | 위치 | 역할 | 상태 |
 |---|---|---|---|
-| 채팅 UI | [`App`](../frontend/src/App.tsx#L31 "sym:ts:src/App#App"), [`DebugPanel`](../frontend/src/components/DebugPanel.tsx#L15 "docid:ui.debug-panel"), [`sendMessage`](../frontend/src/api.ts#L46 "docid:ui.send-message") | 대화, Top-3 추천 표시, Developer Panel(선택 속성·기대 IG·후보 확률) | ✅ |
-| 세션 API | [`post_message`](../backend/app/api/sessions.py#L74 "sym:py:app.api.sessions#post_message") ([sessions.py](../backend/app/api/sessions.py)) | 세션 생성, 대화 기록, 메시지 처리 | ✅ |
-| 대화 관리자 | [`handle_message`](../backend/app/services/chat.py#L323 "docid:chat.handle-turn") | 한 턴의 처리 순서를 조율 ([3절](#3-대화-한-턴의-흐름)). 답 반영 → 엔진 결정 → 질문(보기 포함)·추천(근거·한계 문장) 응답 | ✅ 버튼 답 + 보기 문자열 매칭 / 📝 자연어 파싱 |
-| LLM 클라이언트 | [`LLMClient`](../backend/app/llm/base.py#L19 "docid:llm.client"), [`OpenAIClient`](../backend/app/llm/openai_client.py#L11 "sym:py:app.llm.openai_client#OpenAIClient"), [`get_llm_client`](../backend/app/llm/__init__.py#L13 "sym:py:app.llm#get_llm_client") | provider 공통 인터페이스 `complete` / `parse`, OpenAI 구현 | ✅ |
-| LLM 파서 | [`parse_message`](../backend/app/services/parser.py#L178 "docid:chat.parse-message") ([LLM 파서 문서](llm-parser.md)) | 발화 → 요청 분류(Safety), 명시 조건·추정 선호·정정, 추천 조정(제외, 가격 정렬) | ✅ |
-| IG 엔진 | [`IGEngine`](../backend/app/core/engine.py#L71 "docid:core.engine"), [`PreferenceState`](../backend/app/core/model.py#L45 "docid:core.preference-state") ([IG 엔진 문서](ig-engine.md)) | belief tracker, question selector(IG/Random/Fixed), recommender, 종료·한계 판단 | ✅ (대화 API 연결은 Phase 3) |
-| 카탈로그 | [`CategorySpec`](../backend/app/catalog/spec.py#L154 "sym:py:app.catalog.spec#CategorySpec"), [`extract_attributes`](../backend/app/catalog/extract.py#L106 "sym:py:app.catalog.extract#extract_attributes"), [`stratified_sample`](../backend/app/catalog/sampling.py#L43 "sym:py:app.catalog.sampling#stratified_sample"), [`load_products`](../backend/app/catalog/repository.py#L120 "sym:py:app.catalog.repository#load_products") | 카테고리 정의 검증, 속성 추출, 샘플링, DB 저장·조회 | ✅ |
+| 채팅 UI | [`App`](../frontend/src/App.tsx "sym:ts:src/App#App"), [`DebugPanel`](../frontend/src/components/DebugPanel.tsx "docid:ui.debug-panel"), [`sendMessage`](../frontend/src/api.ts "docid:ui.send-message") | 대화, Top-3 추천 표시, Developer Panel(선택 속성·기대 IG·후보 확률) | ✅ |
+| 세션 API | [`post_message`](../backend/app/api/sessions.py "sym:py:app.api.sessions#post_message") ([sessions.py](../backend/app/api/sessions.py)) | 세션 생성, 대화 기록, 메시지 처리 | ✅ |
+| 대화 관리자 | [`handle_message`](../backend/app/services/chat.py "docid:chat.handle-turn") | 한 턴의 처리 순서를 조율 ([3절](#3-대화-한-턴의-흐름)). 답 반영 → 엔진 결정 → 질문(보기 포함)·추천(근거·한계 문장) 응답 | ✅ 버튼 답 + 보기 문자열 매칭 / 📝 자연어 파싱 |
+| LLM 클라이언트 | [`LLMClient`](../backend/app/llm/base.py "docid:llm.client"), [`OpenAIClient`](../backend/app/llm/openai_client.py "sym:py:app.llm.openai_client#OpenAIClient"), [`get_llm_client`](../backend/app/llm/__init__.py "sym:py:app.llm#get_llm_client") | provider 공통 인터페이스 `complete` / `parse`, OpenAI 구현 | ✅ |
+| LLM 파서 | [`parse_message`](../backend/app/services/parser.py "docid:chat.parse-message") ([LLM 파서 문서](llm-parser.md)) | 발화 → 요청 분류(Safety), 명시 조건·추정 선호·정정, 추천 조정(제외, 가격 정렬) | ✅ |
+| IG 엔진 | [`IGEngine`](../backend/app/core/engine.py "docid:core.engine"), [`PreferenceState`](../backend/app/core/model.py "docid:core.preference-state") ([IG 엔진 문서](ig-engine.md)) | belief tracker, question selector(IG/Random/Fixed), recommender, 종료·한계 판단 | ✅ (대화 API 연결은 Phase 3) |
+| 카탈로그 | [`CategorySpec`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#CategorySpec"), [`extract_attributes`](../backend/app/catalog/extract.py "sym:py:app.catalog.extract#extract_attributes"), [`stratified_sample`](../backend/app/catalog/sampling.py "sym:py:app.catalog.sampling#stratified_sample"), [`load_products`](../backend/app/catalog/repository.py "sym:py:app.catalog.repository#load_products") | 카테고리 정의 검증, 속성 추출, 샘플링, DB 저장·조회 | ✅ |
 | 데이터 스크립트 | [`build_catalog`](../backend/scripts/build_catalog.py "sym:py:scripts.build_catalog"), [`filter_category`](../backend/scripts/filter_category.py "sym:py:scripts.filter_category") | 원본 → 카탈로그 오프라인 파이프라인 ([4절](#4-데이터-파이프라인-오프라인)) | ✅ |
 | 평가 | (예정) `backend/evaluation/` | Synthetic user, Random/Fixed/IG 비교 | 📝 |
 
@@ -68,7 +68,7 @@ flowchart LR
    - 자세한 내용: [roadmap Phase 3+](roadmap.md#phase-3-기능-고도화-암묵적-선호-추론과-추천-보정)
 5. **모르는 것은 unknown으로 둔다.**
    - 근거 없는 속성은 저장하지 않는다(행이 없으면 unknown).
-   - 애매한 언급은 기본값으로 단정하지 않는다(`unknown_if`, [`extract_attribute`](../backend/app/catalog/extract.py#L91 "sym:py:app.catalog.extract#extract_attribute")).
+   - 애매한 언급은 기본값으로 단정하지 않는다(`unknown_if`, [`extract_attribute`](../backend/app/catalog/extract.py "sym:py:app.catalog.extract#extract_attribute")).
    - 추천 근거로는 저장된 원문(`evidence`)만 보여준다.
 6. **LLM 호출을 최소화한다.**
    - 한 턴에 파서 호출 1회가 원칙이다.
@@ -77,9 +77,9 @@ flowchart LR
 
 ## 3. 대화 한 턴의 흐름
 
-전 단계가 구현되어 웹에서 동작한다. 대화 관리자가 LLM 파서와 IG 엔진([`IGEngine.step`](../backend/app/core/engine.py#L120 "docid:core.engine-step"))을 호출한다.
+전 단계가 구현되어 웹에서 동작한다. 대화 관리자가 LLM 파서와 IG 엔진([`IGEngine.step`](../backend/app/core/engine.py "docid:core.engine-step"))을 호출한다.
 - 보기 버튼을 누르면 `answer`를 그대로 쓴다. 이때는 LLM을 부르지 않는다.
-- 자유 입력은 LLM 파서로 해석한다. 키가 없거나 호출이 실패하면 보기 이름 문자열 매칭([`match_text`](../backend/app/services/chat.py#L123 "sym:py:app.services.chat#match_text"))으로 대신한다.
+- 자유 입력은 LLM 파서로 해석한다. 키가 없거나 호출이 실패하면 보기 이름 문자열 매칭([`match_text`](../backend/app/services/chat.py "sym:py:app.services.chat#match_text"))으로 대신한다.
 - 추천을 보여준 뒤에도 대화가 이어진다. 조건 추가·변경, "1번 말고", "더 싼 걸로"로 추천을 조정한다([LLM 파서 6절](llm-parser.md#6-멀티턴-추천-조정)).
 
 ```mermaid
@@ -111,7 +111,7 @@ sequenceDiagram
     A-->>U: ChatResponse
 ```
 
-1. **상태 읽기:** 세션 상태 JSON을 SQLite에서 읽는다([`_load_state`](../backend/app/api/sessions.py#L20 "sym:py:app.api.sessions#_load_state")) ✅
+1. **상태 읽기:** 세션 상태 JSON을 SQLite에서 읽는다([`_load_state`](../backend/app/api/sessions.py "sym:py:app.api.sessions#_load_state")) ✅
 2. **파싱:** LLM 1회 호출로 아래를 함께 받는다. 출력 스키마는 카테고리 정의에서 자동 생성한다 ✅ ([LLM 파서](llm-parser.md#2-파서))
    - 안전 분류
    - 명시 조건과 정정
@@ -131,13 +131,13 @@ sequenceDiagram
 6. **응답 생성** ✅ 템플릿 (질문은 YAML 문구 + 보기, 추천은 근거·한계 문장. LLM 문장 생성은 하지 않음)
    - 추천일 때: Top-3와 근거를 보여준다. 명시 조건을 어기는 상품은 빼서 사용자 요구와 무관한 추천을 막는다(Safety 1).
    - 질문일 때: `askable` 속성 중 기대 IG가 최대인 것을 묻는다.
-7. **상태 저장:** 메시지와 상태를 저장하고 `debug`([`DebugInfo`](../backend/app/schemas.py#L64 "sym:py:app.schemas#DebugInfo"): 선택 속성, 질문별 기대 IG, 엔트로피, 종료 이유, 상위 후보, 수집된 선호)를 함께 반환한다 ✅
+7. **상태 저장:** 메시지와 상태를 저장하고 `debug`([`DebugInfo`](../backend/app/schemas.py "sym:py:app.schemas#DebugInfo"): 선택 속성, 질문별 기대 IG, 엔트로피, 종료 이유, 상위 후보, 수집된 선호)를 함께 반환한다 ✅
 
 ### 세션 상태
 `sessions.state`에 JSON으로 저장한다. belief는 저장하지 않고, 조건 목록에서 매번 다시 계산한다.
 이렇게 하면 정정 처리가 단순해지고 상태와 belief가 어긋나지 않는다.
-[`ChatState`](../backend/app/services/chat.py#L56 "sym:py:app.services.chat#ChatState")가 저장 형식이다 ✅.
-- `preference`: [`PreferenceState`](../backend/app/core/model.py#L45 "docid:core.preference-state")
+[`ChatState`](../backend/app/services/chat.py "sym:py:app.services.chat#ChatState")가 저장 형식이다 ✅.
+- `preference`: [`PreferenceState`](../backend/app/core/model.py "docid:core.preference-state")
 - `pending`: 지금 답을 기다리는 질문
 - `finished`: 추천 완료 여부
 
@@ -177,11 +177,11 @@ flowchart LR
 
 - 스크립트 사용법과 YAML 형식: [카테고리 정의](category-spec.md#새-카테고리-추가-절차)
 - 헤드폰 데이터의 근거 수치: [데이터 분석](data-analysis.md)
-- 현재 카탈로그: 헤드폰 150개, 실제 분포를 유지한 비례 층화 추출 ([done](done.md))
+- 현재 카탈로그: 헤드폰·이어폰 4,628개. 가격이 있고 리뷰 100개 이상이며, 연결 방식·착용 방식이 확인된 후보 전체다. 처음엔 150개 층화 추출이었으나 조건 조합 공백 때문에 확대했다([done](done.md)).
 
 ## 5. 데이터 모델 (SQLite)
 
-스키마: [`SCHEMA`](../backend/app/db.py#L13 "sym:py:app.db#SCHEMA") ([db.py](../backend/app/db.py))
+스키마: [`SCHEMA`](../backend/app/db.py "sym:py:app.db#SCHEMA") ([db.py](../backend/app/db.py))
 
 ```mermaid
 erDiagram
@@ -225,7 +225,7 @@ erDiagram
 ```
 
 - **`product_attributes`:** 카테고리와 무관한 key-value 형태다. 행이 없으면 unknown이다.
-- **`categories.spec`:** 카탈로그를 빌드할 때 YAML 정의를 함께 저장한다([`save_category`](../backend/app/catalog/repository.py#L32 "sym:py:app.catalog.repository#save_category")). 런타임은 이 스냅샷을 읽으므로, DB 안의 상품 속성과 정의의 버전이 항상 일치한다.
+- **`categories.spec`:** 카탈로그를 빌드할 때 YAML 정의를 함께 저장한다([`save_category`](../backend/app/catalog/repository.py "sym:py:app.catalog.repository#save_category")). 런타임은 이 스냅샷을 읽으므로, DB 안의 상품 속성과 정의의 버전이 항상 일치한다.
 
 ## 6. 외부 의존성과 설정
 

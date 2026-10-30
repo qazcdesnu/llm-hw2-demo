@@ -6,6 +6,8 @@
 전체 집합과 "후보 집합"(가격 있음, 리뷰 수 MIN_RATINGS 이상)에 대해 각각 계산한다.
 
     uv run python scripts/analyze_headphones.py
+
+@see docs/data-analysis.md#헤드폰-데이터-분석-2026-10-26
 """
 
 import json

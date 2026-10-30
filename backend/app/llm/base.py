@@ -20,7 +20,8 @@ class LLMClient(Protocol):
     """LLM provider 공통 인터페이스. 새 provider는 이 두 메서드를 구현한다.
 
     @docid llm.client
-    @see docs/architecture.md#2-설계-원칙
+    @see backend/README.md#구조
+    @see docs/architecture.md#1-한눈에-보기
     """
 
     def complete(self, messages: list[ChatMessage], *, instructions: str | None = None) -> str:

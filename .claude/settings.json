@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run -q --project \"$CLAUDE_PROJECT_DIR/backend\" python \"$CLAUDE_PROJECT_DIR/tools/doclinks/hook.py\" post",
+            "timeout": 60,
+            "statusMessage": "문서↔코드 링크 검사"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run -q --project \"$CLAUDE_PROJECT_DIR/backend\" python \"$CLAUDE_PROJECT_DIR/tools/doclinks/hook.py\" stop",
+            "timeout": 60,
+            "statusMessage": "문서↔코드 링크 최종 검사"
+          }
+        ]
+      }
+    ]
+  }
+}

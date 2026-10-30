@@ -3,6 +3,10 @@
 어떤 원본 파일의 어떤 카테고리를 쓸지는 categories/<id>.yaml의 source에 정의한다.
 
     uv run python scripts/filter_category.py headphones
+
+@see README.md#방법-b-원본에서-만들기
+@see docs/architecture.md#1-한눈에-보기
+@see docs/data-analysis.md#헤드폰-데이터-분석-2026-10-26
 """
 
 import argparse

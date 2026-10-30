@@ -3,7 +3,7 @@
 상태(PreferenceState)를 받아 결정(Ask | Recommend)을 돌려줄 뿐 상태를 바꾸지 않는다.
 답변 반영(state.answer)과 질문 기록(state.mark_asked)은 호출하는 쪽(대화 관리자, 시뮬레이터)이 한다.
 
-@see docs/ig-engine.md
+@see docs/ig-engine.md#ig-엔진
 """
 
 from collections.abc import Mapping, Sequence
@@ -22,6 +22,7 @@ TIE_TOLERANCE = 1e-9
 
 @dataclass(frozen=True)
 class EngineConfig:
+    """@see docs/ig-engine.md#4-추천과-한계-표시"""
     noise: float = 0.05  # 사용자 답이 상품 데이터와 어긋날 확률 ε
     max_questions: int = 4
     min_information_gain: float = 0.05  # bits. 이보다 작으면 더 물어도 소용없다고 본다
@@ -37,6 +38,8 @@ class Limitation:
       tied_candidates      detail: {"count": 1위와 같은 확률인 상품 수}
       unknown_attributes   detail: {속성: 추천 상품 중 그 속성이 unknown인 수}
       constraint_relaxed   detail: {"count": 조건을 어기는데 포함된 추천 수}
+
+    @see docs/ig-engine.md#4-추천과-한계-표시
     """
 
     code: str
@@ -69,7 +72,10 @@ class Decision:
 
 
 class IGEngine:
-    """@docid core.engine"""
+    """@docid core.engine
+    @see backend/README.md#구조
+    @see docs/architecture.md#1-한눈에-보기
+    """
 
     def __init__(
         self,
@@ -104,6 +110,8 @@ class IGEngine:
         tie_key: 확률이 같은 상품 사이의 순서 (예: "더 싼 걸로" → 가격 오름차순)
 
         @docid core.engine-recommend-now
+        @see docs/ig-engine.md#4-추천과-한계-표시
+        @see docs/llm-parser.md#6-멀티턴-추천-조정
         """
         belief = self.belief(state)
         top = self._top(belief, state, tie_key)
@@ -118,7 +126,10 @@ class IGEngine:
         return [r for r in ranked if r.item.id not in excluded][: max(self.config.top_k, 5)]
 
     def step(self, state: PreferenceState) -> Decision:
-        """@docid core.engine-step"""
+        """@docid core.engine-step
+        @see docs/architecture.md#3-대화-한-턴의-흐름
+        @see docs/ig-engine.md#4-추천과-한계-표시
+        """
         cfg = self.config
         belief = self.belief(state)
         top = self._top(belief, state)

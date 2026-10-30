@@ -30,6 +30,7 @@
 - [x] 속성 추출 (규칙 기반, 증거 없으면 `unknown`, 근거 원문 `evidence` 저장)
 - [ ] mic·방수 기본값 결정 ([I-7](issue.md#i-7))
 - [x] 150개 샘플링(실제 분포 유지, 비례 층화), SQLite + [headphones.json](../backend/data/catalog/headphones.json)
+- [x] 카탈로그를 후보 전체 4,628개로 확대 (조건 조합 공백 해소, [I-11](issue.md#i-11))
 - [ ] 40개 수동 검증 ([headphones_validation.csv](validation/headphones_validation.csv))
 - [ ] ANC unknown 38개 확정 ([I-8](issue.md#i-8))
 
@@ -69,7 +70,7 @@ IG는 갱신된 belief에서 다시 계산되므로 따로 보정하지 않아�
 **할 일**
 - [x] 파서 출력 확장: 속성마다 `{value, confidence, kind: explicit | inferred, reason}`. 명시 조건 추출과 같은 LLM 호출 1회로 처리
 - [x] 파서 프롬프트와 출력 스키마를 카테고리 정의(YAML)의 속성·값 목록에서 자동 생성 (카테고리별 코드 없음)
-- [x] belief tracker에 soft evidence 업데이트 추가. 명시 조건과 추정 조건을 상태에 따로 저장 (Phase 2에서 같은 가능도 식으로 구현: [`PreferenceState.infer`](../backend/app/core/model.py#L74 "sym:py:app.core.model#PreferenceState.infer"))
+- [x] belief tracker에 soft evidence 업데이트 추가. 명시 조건과 추정 조건을 상태에 따로 저장 (Phase 2에서 같은 가능도 식으로 구현: [`PreferenceState.infer`](../backend/app/core/model.py "sym:py:app.core.model#PreferenceState.infer"))
 - [x] 우선순위: 사용자의 명시·정정 > 추정. 사용자가 부정하면("노캔은 필요 없어") 추정을 버리고 belief를 처음부터 다시 계산
 - [ ] 확인 질문 문구: 추정이 있는 속성을 물을 때 "~일 것 같은데 맞나요?" 형태로 묻기 (IG 계산은 별도 작업 없이 이미 반영됨)
 - [x] 추천 근거에 추정 여부 표시("(말씀하신 상황을 고려)"), Developer Panel에 추정 선호와 확신도 표시
@@ -140,6 +141,8 @@ IG는 갱신된 belief에서 다시 계산되므로 따로 보정하지 않아�
   - 이상적인 흐름: 1턴 "$30 미만 반영 + 바로 추천"
 
 ## Phase 4. 정량 평가
+- [x] Amazon-C4 평가 데이터 확보 (`backend/data/raw/amazon-c4/`, 카탈로그 안 정답 126개)
+- [ ] C4 질의를 첫 발화로 쓰는 평가 (LLM 파서 + IG 질문 → Hit@k). 126개는 보조 세트 규모라 필요하면 카탈로그 상품 리뷰로 같은 방식의 질의를 추가 생성
 - [ ] Synthetic user 시뮬레이터
 - [ ] Random / Fixed / IG 비교 (Hit@1, Hit@3, Turn-AUC, Constraint Satisfaction). 지표 정의 [I-4](issue.md#i-4)
 - [ ] 응답 노이즈 실험, 그래프 2~3개

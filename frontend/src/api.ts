@@ -41,7 +41,7 @@ export function getSession(sessionId: string): Promise<SessionDetail> {
  * 보기 버튼을 누른 경우 answer를 함께 보내 문자열 해석 없이 그대로 반영한다.
  *
  * @docid ui.send-message
- * @see docs/architecture.md#3-대화-한-턴의-흐름
+ * @see docs/architecture.md#1-한눈에-보기
  */
 export function sendMessage(
   sessionId: string,

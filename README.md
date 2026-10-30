@@ -68,7 +68,7 @@ npm install
 
 ```bash
 cd backend
-uv run python scripts/load_catalog.py headphones   # → loaded 150 products -> data/app.db
+uv run python scripts/load_catalog.py headphones   # → loaded 4,628 products -> data/app.db
 ```
 
 ### 3. 실행 (개발 모드)
@@ -88,11 +88,11 @@ cd frontend && npm run dev
 
 ## 데이터 준비
 
-카탈로그(상품 150개와 추출된 속성)를 DB에 넣는 방법은 두 가지다.
+카탈로그(헤드폰·이어폰 4,628개와 추출된 속성)를 DB에 넣는 방법은 두 가지다.
 
 | 방법 | 명령 | 시간 | 디스크 | 언제 |
 |---|---|---|---|---|
-| A. 저장소의 카탈로그 사용 | `scripts/load_catalog.py headphones` | 몇 초 | 1MB | 앱 실행, 데모, 평가 |
+| A. 저장소의 카탈로그 사용 | `scripts/load_catalog.py headphones` | 1초 미만 | 16MB (JSON) | 앱 실행, 데모, 평가 |
 | B. 원본에서 다시 만들기 | `scripts/prepare_data.sh headphones` | 다운로드 + 약 10초 | 약 5.1GB | 속성 규칙·샘플링을 바꿨거나 새 카테고리를 추가할 때 |
 
 ### 방법 B: 원본에서 만들기
@@ -117,7 +117,7 @@ scripts/prepare_data.sh headphones
 1. 가격이 있고 리뷰 100개 이상인 후보만 남긴다(5,099개).
 2. 제목이 같은 상품을 하나로 줄인다(4,909개).
 3. 규칙으로 속성 8개를 추출한다.
-4. 연결 방식 × 착용 방식 비율을 유지해 150개를 층화 추출한다.
+4. 연결 방식·착용 방식이 확인된 상품을 모두 남긴다(4,628개). YAML에 `sampling.size`를 정하면 그 개수만큼 비율을 유지해 층화 추출한다.
 5. SQLite와 JSON으로 저장한다.
 
 어떤 원본 파일·카테고리를 쓰고 어떤 규칙으로 속성을 뽑을지는 [backend/categories/headphones.yaml](backend/categories/headphones.yaml)에 정의되어 있다.
@@ -128,7 +128,7 @@ scripts/prepare_data.sh headphones
 uv run python scripts/filter_category.py headphones
 uv run python scripts/build_catalog.py headphones --dry-run    # 저장하지 않고 속성별 분포(후보 vs 카탈로그)만 출력
 uv run python scripts/build_catalog.py headphones              # 저장
-uv run python scripts/build_catalog.py headphones --no-sample  # 샘플링 없이 후보 전체(4,628개) 저장
+uv run python scripts/build_catalog.py headphones --no-sample  # 샘플링 설정을 무시하고 중복 제거 후 전체(4,909개, 연결 방식·착용 방식 unknown 포함) 저장
 uv run python scripts/analyze_headphones.py                    # 데이터 분석 리포트 (docs/data-analysis.md의 근거)
 ```
 
@@ -145,6 +145,21 @@ uv run python scripts/analyze_headphones.py                    # 데이터 분�
 - 자세한 절차: [docs/category-spec.md](docs/category-spec.md)
 - 서비스할 카테고리는 환경 변수 `DEFAULT_CATEGORY`로 정한다.
 
+### 평가 데이터: Amazon-C4 (선택)
+
+[Amazon-C4](https://huggingface.co/datasets/McAuley-Lab/Amazon-C4)는 Amazon Reviews 2023의 5점 리뷰를 ChatGPT가 1인칭 요구 문장으로 바꿔 쓴 질의와, 그 리뷰의 상품(정답)의 쌍이다(질의 21,223개).
+LLM이 바꿔 쓴 반합성 데이터라 실제 구매 전 문장은 아니지만, 자연어 첫 발화로 추천까지 평가하는 데 쓸 수 있다.
+
+```bash
+cd backend
+uv run python scripts/download_amazon_c4.py                   # 질의(test.csv, 12.5MB) + README → data/raw/amazon-c4/
+uv run python scripts/download_amazon_c4.py --with-item-pool  # BLaIR 평가용 상품 풀(643MB)까지
+```
+
+- [download_amazon_c4.py](backend/scripts/download_amazon_c4.py)는 데이터셋 버전(커밋)을 고정해 받는다. 크기와 해시를 검증하고, 받은 내역을 `MANIFEST.json`에 남긴다.
+- 이미 받은 파일은 건너뛰고, 끊기면 이어받는다.
+- 정답 상품이 헤드폰 카탈로그(4,628개)에 있는 질의는 126개(상품 105개)다. 헤드폰 카테고리 전체로 넓히면 163개다.
+
 ## 배포
 
 | 모드 | 프로세스 | 주소 | 용도 |
@@ -153,7 +168,7 @@ uv run python scripts/analyze_headphones.py                    # 데이터 분�
 | 단일 서버 | uvicorn 하나 | http://<호스트>:8000 | 데모, 공유, 서버 배포 |
 
 단일 서버 모드는 아래처럼 동작한다.
-- 프론트를 빌드하면 FastAPI가 `frontend/dist`를 찾아 `/`에서 화면을 서비스한다. `/api`는 API로 간다.
+- 프론트를 빌드하면 FastAPI가 `frontend/dist`를 찾아 `/`에서 화면을 서비스한다. `/api`는 API로 간다([`create_app`](backend/app/main.py "sym:py:app.main#create_app")).
 - 같은 출처라 CORS 설정이나 프록시가 필요 없다.
 
 ### 단일 서버로 띄우기
@@ -203,7 +218,7 @@ http://<호스트>:8000 으로 접속한다.
 | 자유 입력에 "잘 이해하지 못했어요"만 나옴 | `OPENAI_API_KEY`가 없거나 호출에 실패했다(서버 로그 확인). 보기 버튼은 키 없이 동작한다 |
 | `http://localhost:8000/`이 404 | 프론트를 빌드하지 않았다. `cd frontend && npm run build` 후 서버 재시작 |
 | `prepare_data.sh`에서 다운로드가 끊김 | 다시 실행하면 이어받는다 |
-| 문서 링크 검사 실패(pytest) | 코드를 옮긴 뒤 `uv run --project backend python tools/doclinks/doclinks.py sync` |
+| 문서 링크 검사 실패(pytest) | 심볼을 옮기거나 이름을 바꿨다. `uv run --project backend python tools/doclinks/doclinks.py sync`로 경로를 고치고, 이름 변경은 문서의 `sym:`을 직접 수정 |
 
 ## 구조
 
@@ -227,7 +242,7 @@ backend/
     catalog/      카테고리 정의 스키마, 속성 추출, 샘플링, DB 저장
     llm/          LLM 클라이언트 (provider 인터페이스 + OpenAI)
   categories/     카테고리 정의 YAML (속성·값·질문 문구·추출 규칙)
-  scripts/        데이터 파이프라인, 엔진 데모, 파서 평가
+  scripts/        데이터 파이프라인(prepare_data.sh 등), 엔진 데모, 파서 평가
   evaluation/     파서 평가 세트
   data/           raw·interim(git 제외), catalog/<id>.json(git 포함)
   tests/
@@ -248,13 +263,13 @@ uv run python scripts/ig_demo.py headphones --target B0BHR5VQC9 --policy random
 uv run python scripts/eval_parser.py --verbose  # LLM 파서 평가 (실제 API, 약 $0.04)
 
 cd ..
-uv run --project backend python tools/doclinks/doclinks.py sync    # 코드 수정 후 문서 링크 줄 번호 갱신
+uv run --project backend python tools/doclinks/doclinks.py sync    # 심볼을 옮긴 뒤 문서 링크 경로 갱신
 ```
 
 ## 현재 결과
 
 **IG 엔진 예비 확인** ([docs/ig-engine.md](docs/ig-engine.md#6-예비-확인-결과-2026-10-26))
-- 카탈로그 150개 상품 각각을 목표로 하는 가상 사용자로 측정했습니다.
+- 이전 150개 카탈로그에서 각 상품을 목표로 하는 가상 사용자로 측정했습니다. 4,628개 카탈로그로는 Phase 4에서 다시 측정합니다.
 - 질문 4회 후 Hit@3: **IG 0.63** / Fixed 0.46 / Random 0.32
 - 정식 평가(지표 정의, 응답 노이즈, 그래프)는 아직 하지 않았습니다(roadmap Phase 4).
 
@@ -264,7 +279,7 @@ uv run --project backend python tools/doclinks/doclinks.py sync    # 코드 수�
 
 ## 한계와 진행 상황
 
-- **데이터:** Amazon Reviews 2023(2023년 9월 시점) 기준이고 헤드폰·이어폰 150개만 다룹니다.
+- **데이터:** Amazon Reviews 2023(2023년 9월 시점) 기준이고 헤드폰·이어폰만 다룹니다. 가격이 있고 리뷰 100개 이상인 4,628개입니다.
 - **속성 추출 오류:** Amazon 상품 정보 자체가 틀린 경우가 있습니다. 예: 오픈형 제품이 인이어로 표기됨([I-9](docs/issue.md#i-9)). 40개 수동 검증이 진행 중입니다.
 - **대화 견고성:** "잘 몰라", "노캔이 뭔데?", "일단 목록 볼래", "$30 미만" 같은 입력은 아직 처리하지 못합니다. 개선 계획은 [roadmap Phase 3++](docs/roadmap.md#phase-3-대화-견고성-모름되묻기바로-보기숫자-가격)에 있습니다.
 

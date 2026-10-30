@@ -10,6 +10,7 @@ from pathlib import Path
 
 from fastapi import Request
 
+# @see docs/architecture.md#5-데이터-모델-sqlite
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY,

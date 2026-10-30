@@ -62,7 +62,10 @@ class QuestionScore(BaseModel):
 
 
 class DebugInfo(BaseModel):
-    """프론트엔드 Developer Panel에 표시할 엔진 내부 상태."""
+    """프론트엔드 Developer Panel에 표시할 엔진 내부 상태.
+
+    @see docs/architecture.md#3-대화-한-턴의-흐름
+    """
 
     turn: int
     selected_attribute: str | None = None

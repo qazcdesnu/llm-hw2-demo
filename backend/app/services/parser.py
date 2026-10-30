@@ -2,8 +2,6 @@
 
 출력 스키마와 프롬프트는 카테고리 정의(YAML)에서 만든다. 카테고리별 코드는 없다.
 속성은 enum이라 없는 속성은 나올 수 없고, 값은 코드에서 정의와 대조해 맞지 않으면 버린다.
-
-@see docs/llm-parser.md
 """
 
 import logging
@@ -72,14 +70,19 @@ def _schema_for(spec_json: str) -> type[BaseModel]:
 
 
 def schema_for(spec: CategorySpec) -> type[BaseModel]:
-    """카테고리 정의로 만든 구조화 출력 스키마. 정의가 같으면 캐시한다."""
+    """카테고리 정의로 만든 구조화 출력 스키마. 정의가 같으면 캐시한다.
+
+    @see docs/llm-parser.md#출력-구조화-출력-schema_for
+    """
     return _schema_for(spec.model_dump_json())
 
 
 # ---------------------------------------------------------------- 프롬프트
 
 def build_instructions(spec: CategorySpec) -> str:
-    """@docid chat.parser-instructions"""
+    """@docid chat.parser-instructions
+    @see docs/llm-parser.md#입력
+    """
     lines = [
         f"너는 '{spec.name}' 쇼핑 도우미의 입력 해석기다.",
         "사용자 발화를 (1) 요청 분류와 (2) 속성 조건 목록으로 바꾼다.",
@@ -154,7 +157,10 @@ def build_input(message: str, pending_label: str | None, known: dict[str, str],
 # ---------------------------------------------------------------- 실행
 
 def validate_constraints(spec: CategorySpec, raw: list) -> tuple[list[ParsedConstraint], list[str]]:
-    """정의에 맞는 조건만 남긴다. 같은 속성이 여러 번 나오면 explicit, 그다음 마지막 것을 쓴다."""
+    """정의에 맞는 조건만 남긴다. 같은 속성이 여러 번 나오면 explicit, 그다음 마지막 것을 쓴다.
+
+    @see docs/llm-parser.md#출력-구조화-출력-schema_for
+    """
     kept: dict[str, ParsedConstraint] = {}
     rejected = []
     for c in raw:
@@ -186,6 +192,8 @@ def parse_message(
     """발화 하나를 해석한다. LLM 호출 실패는 LLMError로 올린다.
 
     @docid chat.parse-message
+    @see docs/architecture.md#1-한눈에-보기
+    @see docs/llm-parser.md#llm-파서와-멀티턴-대화
     """
     pending_label = spec.attribute(pending).label if pending else None
     parsed = client.parse(

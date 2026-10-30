@@ -3,7 +3,7 @@
 모든 정책은 같은 후보 목록(기대 정보량 포함)에서 고르고, 고르는 방법만 다르다.
 평가에서 Random / Fixed / IG를 공정하게 비교하기 위함이다.
 
-@see docs/ig-engine.md#3-질문-선택
+@see docs/ig-engine.md#ig-엔진
 """
 
 import math
@@ -31,6 +31,7 @@ def expected_information_gain(
     답변은 belief_tracker.likelihood와 같은 모델(확신도 1-noise)로 생성된다고 본다.
 
     @docid core.expected-ig
+    @see docs/ig-engine.md#3-질문-선택
     """
     rows = [
         [likelihood(item, Observation(attr.key, v, 1.0 - noise), attr) for v in attr.values]
@@ -54,7 +55,10 @@ def candidate_questions(
     state: PreferenceState,
     noise: float,
 ) -> list[QuestionScore]:
-    """물을 수 있는 속성(askable, 아직 답·질문하지 않음)과 기대 정보량. 정보량 내림차순."""
+    """물을 수 있는 속성(askable, 아직 답·질문하지 않음)과 기대 정보량. 정보량 내림차순.
+
+    @see docs/ig-engine.md#3-질문-선택
+    """
     resolved = state.resolved()
     scores = [
         QuestionScore(a.key, expected_information_gain(items, belief, a, noise))
@@ -71,7 +75,10 @@ class QuestionPolicy(Protocol):
 
 
 class InformationGainPolicy:
-    """기대 정보량이 가장 큰 질문."""
+    """기대 정보량이 가장 큰 질문.
+
+    @see docs/ig-engine.md#3-질문-선택
+    """
 
     name = "ig"
 
@@ -80,7 +87,10 @@ class InformationGainPolicy:
 
 
 class RandomPolicy:
-    """무작위 질문 (baseline)."""
+    """무작위 질문 (baseline).
+
+    @see docs/ig-engine.md#3-질문-선택
+    """
 
     name = "random"
 
@@ -93,7 +103,10 @@ class RandomPolicy:
 
 
 class FixedOrderPolicy:
-    """정해진 순서대로 질문 (baseline)."""
+    """정해진 순서대로 질문 (baseline).
+
+    @see docs/ig-engine.md#3-질문-선택
+    """
 
     name = "fixed"
 
