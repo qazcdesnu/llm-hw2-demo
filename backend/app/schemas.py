@@ -83,6 +83,8 @@ class DebugInfo(BaseModel):
     question_source: str | None = None
     # 질문 작성기가 고른 접근(어떤 생활 장면을 물어 무엇을 알아내려는지)
     question_approach: str | None = None
+    # 추천 때 조건이 같은 상품 사이의 정렬 기준 (cheaper / pricier / relevance / rating)
+    tie_order: str | None = None
 
 
 class ChatResponse(BaseModel):

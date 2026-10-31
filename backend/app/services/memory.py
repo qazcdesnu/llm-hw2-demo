@@ -11,6 +11,7 @@ from app.core.model import DONT_CARE
 
 MAX_FACTS = 50
 MAX_NOTES = 10
+MAX_KEYWORDS = 40
 
 
 @dataclass
@@ -32,6 +33,8 @@ class ConversationMemory:
     facts: list[Fact] = field(default_factory=list)
     # 속성으로 표현되지 않는 사용 맥락 (예: "지하철 출퇴근 1시간", "안경을 씀")
     notes: list[str] = field(default_factory=list)
+    # 상품 설명 검색용 영어 키워드 (조건이 똑같이 맞는 상품 사이를 대화와 가까운 순으로 정렬할 때 쓴다)
+    keywords: list[str] = field(default_factory=list)
 
     def remember(self, fact: Fact) -> bool:
         """사실을 남긴다. 같은 속성의 마지막 값과 같으면 남기지 않고 False."""
@@ -52,6 +55,22 @@ class ConversationMemory:
         del self.notes[:-MAX_NOTES]
         return added
 
+    def add_keywords(self, keywords: list[str]) -> None:
+        known = {k.casefold() for k in self.keywords}
+        for word in (k.strip() for k in keywords):
+            if word and word.casefold() not in known:
+                self.keywords.append(word)
+                known.add(word.casefold())
+        del self.keywords[:-MAX_KEYWORDS]
+
+    def search_text(self) -> str:
+        """대화에서 나온 요구를 한 덩어리 글로 (텍스트 관련도 질의). 근거 발화, 맥락, 영어 키워드.
+
+        @see docs/llm-parser.md#4-대화-메모리
+        """
+        quotes = [f.quote for f in self.facts if f.source == "said" and f.quote]
+        return "\n".join([*dict.fromkeys(quotes), *self.notes, " ".join(self.keywords)]).strip()
+
     def latest(self) -> dict[str, Fact]:
         """속성별 가장 최근 사실 (정정하면 새 값이 이긴다)."""
         return {f.attribute: f for f in self.facts}
@@ -63,11 +82,13 @@ class ConversationMemory:
         return lines + [f"맥락: {n}" for n in self.notes]
 
     def to_dict(self) -> dict:
-        return {"facts": [asdict(f) for f in self.facts], "notes": list(self.notes)}
+        return {"facts": [asdict(f) for f in self.facts], "notes": list(self.notes),
+                "keywords": list(self.keywords)}
 
     @classmethod
     def from_dict(cls, data: dict) -> "ConversationMemory":
-        return cls(facts=[Fact(**f) for f in data.get("facts", [])], notes=list(data.get("notes", [])))
+        return cls(facts=[Fact(**f) for f in data.get("facts", [])], notes=list(data.get("notes", [])),
+                   keywords=list(data.get("keywords", [])))
 
 
 def label_of(spec: CategorySpec, attribute: str, value: str) -> str:

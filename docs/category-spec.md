@@ -20,14 +20,16 @@ categories/<id>.yaml ──▶ app/catalog/spec.py      (Pydantic으로 검증)
 3. `uv run python scripts/filter_category.py <id>` → `data/interim/<id>.jsonl`
 4. `uv run python scripts/build_catalog.py <id> --dry-run` → 속성별 커버리지 확인, 규칙 조정
 5. `uv run python scripts/build_catalog.py <id>` → SQLite에 저장 + `data/catalog/<id>.json` 내보내기 (git에 포함). 원본 없이 이 JSON으로 DB를 만들 때는 `scripts/load_catalog.py <id>`
-6. `uv run python scripts/export_validation.py <id> --n 40` → `docs/validation/<id>_validation.csv` 수동 검증
-7. `uv run pytest` (모든 yaml이 스키마 검증을 통과하는지 함께 확인됨)
+6. `uv run python scripts/build_embeddings.py <id>` → 상품 글 임베딩을 SQLite에 저장 (동률 정렬의 텍스트 관련도. 없으면 BM25만, [IG 엔진 4절](ig-engine.md#4-추천과-한계-표시))
+7. `uv run python scripts/export_validation.py <id> --n 40` → `docs/validation/<id>_validation.csv` 수동 검증
+8. `uv run pytest` (모든 yaml이 스키마 검증을 통과하는지 함께 확인됨)
 
 ## 파일 형식
 
 ```yaml
 id: headphones                 # 파일명과 같아야 함, 소문자·숫자·_
 name: 헤드폰·이어폰
+name_en: headphones & earbuds     # 선택. 영어 사용자에게 보일 이름 (*_en이 없으면 한국어)
 description: ...
 source:
   raw_file: meta_Electronics.jsonl   # data/raw/ 아래 원본
@@ -43,11 +45,15 @@ sampling:                      # 선택. 없으면 후보 전체를 카탈로그
 attributes:
   - key: connection            # DB·엔진에서 쓰는 이름
     label: 연결 방식            # 사용자에게 보이는 이름
+    label_en: Connection       # 선택. 영어 사용자용
     question: 선 있는 것도 괜찮아, 아니면 무선이 좋아?   # askable이면 필수. 질문 작성기(LLM)가 없거나 실패할 때 쓰는 직접 질문
+    question_en: Are you okay with a cable, or do you want wireless?   # 선택. 영어 사용자용
     askable: true              # false면 시스템이 먼저 묻지 않음 (사용자가 말하면 조건으로는 사용)
+    ask_directly: false        # true면 질문 작성기가 돌려 묻지 않고 바로 물음 (예산처럼 생활 장면으로 갈리지 않는 속성)
+    constraint: true           # false면 추천 조건으로 쓰지 않고 동률 정렬에만 씀 (값 하나로 정하기 어려운 속성, 예: 주 용도). askable과 함께 쓸 수 없음
     values:                    # 비우면 자유값 속성 (예: brand, 소문자로 저장)
-      - {value: wireless, label: 무선}
-      - {value: wired, label: 유선}
+      - {value: wireless, label: 무선, label_en: Wireless}
+      - {value: wired, label: 유선, label_en: Wired}
     rules: [...]               # 위에서부터 적용, 처음 값을 낸 규칙 사용
     default: "no"              # 규칙이 모두 실패하고 features가 있을 때의 값 (없으면 unknown)
     unknown_if: noise[- ]?cancel   # 이 표현이 있으면 default로 단정하지 않고 unknown (애매한 언급 처리)
@@ -72,6 +78,8 @@ attributes:
 - 규칙과 `default`가 내는 값은 모두 `values`에 선언되어 있어야 함
 - 정규식 문법 오류 금지, 속성 key 중복 금지
 - `askable` 속성은 `question` 필수, 자유값 속성은 `askable: false`
+- `constraint: false` 속성은 `askable: false`여야 함 (엔진에 넣지 않으므로 물을 수 없음)
+- `*_en`은 선택이다. 없으면 영어 사용자에게도 한국어 문구를 보여준다
 - `question`은 대체용 직접 질문이다. 평소 질문은 질문 작성기가 대화에 맞춰 돌려 묻고, 돌려 묻는 질문은 정의에 적지 않는다([LLM 파서 5절](llm-parser.md#5-질문-작성기-친구-페르소나))
 - 서버는 DB에 저장된 정의 스냅샷을 읽는다. 질문 문구 등 정의를 고치면 `uv run python scripts/load_catalog.py <id>`(또는 `build_catalog.py`)로 다시 넣는다
 

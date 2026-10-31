@@ -4,6 +4,8 @@
 않는다. 시스템 프롬프트가 "그 속성 값에 따라 달라지는 생활 장면을 떠올려 그 장면을 묻는" 방법만 알려 주고,
 모델이 지금까지의 대화에 맞춰 장면을 고른다. 예시는 일부러 다른 상품으로만 든다(질문이 예시로 굳지 않게).
 LLM 호출이 실패하면 None을 돌려, 대화 관리자가 카테고리 정의의 고정 질문을 쓰게 한다.
+
+@see docs/briefing.md#4-아키텍처와-코드-지도
 """
 
 import logging
@@ -13,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from app.catalog.spec import CategorySpec
 from app.llm import LLMClient, LLMError
+from app.services.extractor import KRW_PER_USD
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +34,7 @@ class QuestionRequest:
     learned: list[str] = field(default_factory=list)  # 방금 한 말로 새로 알게 된 것 ("노이즈 캔슬링(ANC): 필요")
     known: list[str] = field(default_factory=list)  # 메모리 요약
     history: list[dict[str, str]] = field(default_factory=list)  # 최근 대화 (이번 발화 전까지)
+    language: str = "ko"  # 사용자 발화의 언어 (ko / en). 이 언어로 쓴다
 
 
 @dataclass
@@ -61,7 +65,9 @@ def build_instructions(spec: CategorySpec) -> str:
         "   (예: '그럼 시끄러운 소리 막아 주는 게 좋겠네', '그럼 무선이 편하겠다'). 이 결론에는 쉬운 일상어나",
         "   흔한 줄임말을 써도 된다. 결론에는 알게 된 값이 무엇인지 분명히 드러나야 한다",
         "   ('편한 걸 원하겠네'처럼 흐리게 말하지 않는다). '맞지?', '그렇게 할까?'처럼 확인을 구하지 않는다.",
-        "   틀렸으면 친구가 말해 준다."
+        "   틀렸으면 친구가 말해 준다. 방금 알게 된 것만 말하고, 거기서 다른 기능이 필요하겠다고 짐작해",
+        "   덧붙이지 않는다('그럼 그것도 꼭 있어야겠다' 금지). '방금 알게 된 것'이 없으면 결론 없이 공감만 한다.",
+        "   특히 '알아낼 것'의 답을 미리 짐작해 말하지 않는다. 그건 지금 물어서 알아낼 것이다.",
         "2. 질문: 이어서 '알아낼 것'을 돌려 묻는 질문 하나로 자연스럽게 넘어간다(예: '혹시 …?').",
         "",
         "## 돌려 묻는 방법 (approach에 한 줄로 짧게 정리하고 text를 쓴다)",
@@ -69,10 +75,12 @@ def build_instructions(spec: CategorySpec) -> str:
         "   어디서·언제·누구와·무엇을 하면서 쓰는지, 몸이나 습관, 예전에 겪은 불편, 아끼는 것.",
         "2. 그중 지금까지의 대화와 가장 자연스럽게 이어지는 장면 하나를 고른다.",
         "   친구가 이미 말한 상황이 있으면 그 상황을 이어서 파고든다.",
-        "3. 답을 들으면 값이 바로 갈리는 장면이어야 한다. approach에 '그럴듯한 답 → 값'을 두 개 이상 적어 확인하고,",
-        "   답이 값으로 곧장 이어지지 않으면(장면과 속성이 따로 노는 경우) 다른 장면을 고른다.",
-        "   돌려 물을 장면이 마땅치 않은 속성(예산처럼)은 무리하게 돌리지 말고 부담 없는 말투로 가볍게 묻는다.",
-        "4. 질문에서는 기능 이름·전문 용어·보기 이름을 꺼내지 않는다. 예를 나열하지 않는다('예: A, B, C' 금지).",
+        "3. 장소·환경만 묻고 끝내지 않는다. 같은 곳에서 써도 원하는 게 다를 수 있다",
+        "   (새벽에 커피를 내려도 소리를 신경 안 쓰는 집이 있다). 그 장면에서 친구가 무엇을 바라는지, 무엇이 불편한지를 묻는다.",
+        "   이미 장소를 알면 그 장소에서의 바람을 묻는다.",
+        "4. 답을 들으면 값이 바로 갈리는 질문이어야 한다. approach에 '그럴듯한 답 → 값'을 두 개 이상 적어 확인하고,",
+        "   답이 값으로 곧장 이어지지 않으면(장면과 속성이 따로 노는 경우) 다른 질문을 고른다.",
+        "5. 질문에서는 기능 이름·전문 용어·보기 이름을 꺼내지 않는다. 예를 나열하지 않는다('예: A, B, C' 금지).",
         "",
         "## 지킬 것",
         "- '알아낼 것' 하나만 묻는다. 궁금한 게 더 있어도 다른 속성은 묻지 않는다.",
@@ -84,8 +92,12 @@ def build_instructions(spec: CategorySpec) -> str:
         "  '그건 추천할 때 같이 보여 줄게'처럼 한마디로 받은 뒤 넘어간다.",
         "- '다시 묻기'이면 돌려 물은 질문으로는 답이 안 나온 것이다. 이번에는 쉬운 말로 직접,",
         "  둘 중 하나를 고르기 쉽게 묻는다(용어 대신 그 기능이 해 주는 일로 말한다).",
+        "- '직접 묻기'이면 돌려 묻지 않는다. 생활 장면으로 짐작하지 말고 그 속성을 부담 없는 말투로 바로 묻는다.",
+        "  금액처럼 답이 숫자인 속성은 원화 금액으로 답하기 쉽게 묻는다. 범위를 보여 줄 때는 어림한 금액",
+        "  (3만 원, 8만 원처럼 만 원 단위)으로 말한다. 달러면 보기의 금액을 그대로 쓴다.",
         "- '첫 턴'이면 반갑게 한마디 하고 바로 묻는다.",
         "- 이모지는 많아야 하나. 따옴표·머리말 없이 할 말만 쓴다.",
+        "- '답할 언어'로 쓴다. 영어면 같은 친구 말투의 자연스러운 구어체 영어로 쓰고, 금액은 달러로 말한다.",
         "",
         f"## 방법 예시 (다른 상품 예시다. {spec.name} 질문에 그대로 옮기지 말 것)",
         "- 러닝화 · 알아낼 것: 쿠션 정도 → approach: 장면: 달리는 거리·무릎 부담; 10km 넘게·무릎 아픔 → 푹신, 짧게·괜찮음 → 단단",
@@ -94,6 +106,11 @@ def build_instructions(spec: CategorySpec) -> str:
         "  text: \"카페 가면 보통 뭐 시켜? 아아파야, 라떼파야?\"",
         "- 커피 머신 · 방금 알게 된 것: 용량: 대용량 · 알아낼 것: 원두 분쇄 기능 →",
         "  text: \"식구가 넷이면 넉넉한 게 낫겠다. 혹시 원두는 갈아서 파는 거 사 와, 통원두 사 와?\"",
+        "- 커피 머신 · 알아낼 것: 소음 → (나쁜 예: \"주로 새벽에 마셔?\" — 새벽에 마셔도 소리를 신경 안 쓸 수 있다)",
+        "  text: \"새벽에 내릴 때 식구들 깰까 봐 신경 쓰여, 아니면 다들 잠귀가 어두워?\"",
+        "- 커피 머신 · 알아낼 것: 예산(직접 묻기) → text: \"예산은 대충 얼마 생각해? 10만 원 안쪽, 30만 원쯤, 그 이상?\"",
+        "- 커피 머신 · 알아낼 것: 우유 스팀 기능 · 답할 언어: 영어 →",
+        "  text: \"Oh nice, a new machine! At a café, are you more of an americano or a latte person?\"",
         "- 커피 머신 · 다시 묻기 → text: \"우유 데워서 거품 내 주는 것도 있으면 좋겠어, 아니면 커피만 내리면 돼?\"",
     ])
 
@@ -101,8 +118,15 @@ def build_instructions(spec: CategorySpec) -> str:
 def build_input(spec: CategorySpec, req: QuestionRequest) -> str:
     attr = spec.attribute(req.attribute)
     options = ", ".join(v.label for v in attr.values)
-    parts = [f"알아낼 것: {attr.label} (가능한 값: {options}. 친구에게 이 이름들을 그대로 말하지 않는다)"]
-    flags = [name for name, on in (("첫 턴", req.first_turn), ("다시 묻기", req.retry),
+    if attr.ask_directly and req.language == "en":
+        hint = "금액은 달러로 말한다"
+    elif attr.ask_directly:
+        hint = f"금액은 1달러={KRW_PER_USD}원으로 바꿔 원화로 말한다"
+    else:
+        hint = "친구에게 이 이름들을 그대로 말하지 않는다"
+    parts = [f"알아낼 것: {attr.label} (가능한 값: {options}. {hint})",
+             "답할 언어: " + ("영어" if req.language == "en" else "한국어")]
+    flags = [name for name, on in (("첫 턴", req.first_turn), ("직접 묻기", attr.ask_directly), ("다시 묻기", req.retry),
                                    ("방금 한 말에서 알아들은 것 없음", req.unclear)) if on]
     if flags:
         parts.append("상황: " + ", ".join(flags))
@@ -125,6 +149,7 @@ def write_question(client: LLMClient, spec: CategorySpec, req: QuestionRequest) 
     @docid chat.write-question
     @see docs/architecture.md#1-한눈에-보기
     @see docs/architecture.md#3-대화-한-턴의-흐름
+    @see docs/briefing.md#대화-한-턴
     @see docs/llm-parser.md#5-질문-작성기-친구-페르소나
     @see docs/llm-parser.md#llm-파서와-멀티턴-대화
     """

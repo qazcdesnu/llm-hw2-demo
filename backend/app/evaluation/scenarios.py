@@ -20,7 +20,7 @@ from app.catalog.repository import Product
 from app.catalog.spec import CategorySpec
 from app.config import BACKEND_DIR
 from app.llm import LLMClient
-from app.services.memory import label_of
+from app.services.responses import change_label
 
 C4_TEST = BACKEND_DIR / "data" / "raw" / "amazon-c4" / "test.csv"
 SCENARIO_DIR = BACKEND_DIR / "evaluation" / "scenarios"
@@ -87,28 +87,32 @@ def sample_rows(rows: list[dict], n: int, seed: int = 42) -> list[dict]:
 # ---------------------------------------------------------------- 생성
 
 class ScenarioDraft(BaseModel):
-    persona: list[str] = Field(description="가상 사용자의 선호와 상황. 한국어 문장 3~6개")
-    opening: str = Field(description="가상 사용자의 첫 마디. 한국어 한 문장")
-    brief: str = Field(description="이 사람의 상황 한 줄 요약. 한국어")
+    persona: list[str] = Field(description="The shopper's preferences and situation. 4-7 English sentences")
+    opening: str = Field(description="The shopper's first message. One English sentence")
+    brief: str = Field(description="One-line summary of this shopper's situation, in English")
 
 
 def _instructions(spec: CategorySpec) -> str:
     return "\n".join([
-        f"너는 '{spec.name}' 추천 챗봇을 평가할 가상 사용자 시나리오를 만든다.",
-        "실제 구매자의 요청(query)과 리뷰(review), 실제로 산 상품의 속성이 주어진다.",
+        f"You create simulated shopper scenarios for evaluating a {spec.name_for('en')} recommendation chatbot.",
+        "You get a real Amazon shopper's request (query), their review, and the attributes of the product they bought.",
         "",
-        "## persona (숨겨진 선호, 3~6개 문장)",
-        "- 이 사람이 왜, 어디서, 어떻게 쓰려는지 리뷰에 근거해 쓴다.",
-        "- 주어진 상품 속성은 이 사람의 선호로 바꿔 쓴다(예: 무선 → '선 없는 게 좋다'). 속성과 어긋나는 선호는 쓰지 않는다.",
-        "- 가격은 실제 가격을 넘지 않는 상한이 아니라, 실제 가격이 들어가는 예산으로 쓴다(예: $35 → '5만 원 안쪽').",
-        "- '상품 정보 없음'인 속성은 쓰지 않는다.",
-        "- 브랜드·상품명·모델명은 쓰지 않는다.",
+        "## persona (hidden preferences, 4-7 sentences, first person is fine)",
+        "- Based on the review, describe why, where, when, and how this person will use it, and what bothers them",
+        "  (e.g. commute length, workouts, calls, wearing glasses, past problems). The chatbot asks about everyday",
+        "  situations, so the persona should cover the person's daily context, not only features.",
+        "- Turn the product attributes into this person's preferences (e.g. Wireless → 'hates dealing with cables').",
+        "  Do not write preferences that contradict the attributes.",
+        "- Write the budget as a range that contains the actual price, not an upper bound below it",
+        "  (e.g. $35 → 'about $30-40, no more than $50').",
+        "- Skip attributes marked 'not listed'.",
+        "- Do not mention brands, product names, or model names.",
         "",
-        "## opening (첫 마디)",
-        "- 실제 사용자처럼 막연하게 시작한다. 선호를 많아야 하나만 드러낸다(예: '출퇴근할 때 쓸 이어폰 찾고 있어').",
+        "## opening (first message)",
+        "- Start vaguely like a real shopper, revealing at most one preference (e.g. 'Looking for earbuds for my commute').",
         "",
         "## brief",
-        "- 사람이 이 사용자를 연기할 때 볼 상황 요약 한 줄.",
+        "- A one-line situation summary for a person who will role-play this shopper.",
     ])
 
 
@@ -118,13 +122,13 @@ def _input(spec: CategorySpec, row: dict, product: Product) -> str:
         if attr.key == "brand":
             continue
         value = product.attributes.get(attr.key)
-        attrs.append(label_of(spec, attr.key, value) if value else f"{attr.label}: 상품 정보 없음")
-    price = f"${product.price:.2f}" if product.price is not None else "가격 정보 없음"
+        attrs.append(change_label(spec, attr.key, value, "en") if value else f"{attr.label_for('en')}: not listed")
+    price = f"${product.price:.2f}" if product.price is not None else "price not listed"
     return "\n".join([
         f"query: {row['query']}",
         f"review: {review_text(row)[:REVIEW_CHARS]}",
-        f"실제 산 상품: {product.title[:120]} ({price})",
-        "상품 속성:", *[f"- {a}" for a in attrs],
+        f"product bought: {product.title[:120]} ({price})",
+        "product attributes:", *[f"- {a}" for a in attrs],
     ])
 
 

@@ -16,7 +16,7 @@ class ChatAgent:
         """incoming에 답한다. note는 이번 턴에만 붙이는 지시(대화 기록에는 남기지 않음)."""
         self.history.append({"role": "user", "content": incoming})
         messages = self.history if note is None else [
-            *self.history[:-1], {"role": "user", "content": f"{incoming}\n\n[지시] {note}"}]
+            *self.history[:-1], {"role": "user", "content": f"{incoming}\n\n[Instruction] {note}"}]
         out = self.client.complete(messages, instructions=self.instructions).strip()
         self.history.append({"role": "assistant", "content": out})
         return out
@@ -26,18 +26,22 @@ def simulated_user(client: LLMClient, scenario: Scenario, category_name: str) ->
     """시나리오의 페르소나를 숨겨진 선호로 가진 가상 사용자.
 
     @docid eval.simulated-user
+    @see docs/briefing.md#5-평가-방법-evaluationmd
     @see docs/evaluation.md#3-에피소드와-지표
     """
     persona = "\n".join(f"- {p}" for p in scenario.persona)
     return ChatAgent(client, "\n".join([
-        f"너는 {category_name}을(를) 사려는 쇼핑몰 고객이다. 추천 챗봇과 메신저로 대화한다.",
-        "너의 실제 상황과 선호는 아래와 같다. 이 내용은 상대가 묻기 전에 한꺼번에 말하지 않는다.",
+        f"You are an online shopper looking to buy {category_name}. You are chatting with a recommendation chatbot.",
+        "Your real situation and preferences are below. Do not reveal them all at once before you are asked.",
         persona,
         "",
-        "규칙:",
-        "- 상대가 물은 것에만 짧게 1~2문장으로, 편한 말투로 답한다.",
-        "- 위 선호에서 답을 알 수 있으면 그대로 답한다. 돌려 물어도 네 상황에 비춰 솔직하게 답한다.",
-        "- 위 선호에 없는 것을 물으면 '잘 모르겠어' 또는 '상관없어'라고 답한다.",
-        "- 상품명·브랜드는 먼저 말하지 않는다.",
-        "- 너는 고객이다. 질문하거나 추천하지 않는다. 따옴표·머리말 없이 할 말만 쓴다.",
+        "Rules:",
+        "- Write in casual, natural English, like a real person texting. Answer only what was asked, in 1-2 sentences.",
+        "- If your preferences above answer the question, answer accordingly. If the chatbot asks indirectly",
+        "  about your daily life, answer honestly from your situation.",
+        "- If your preferences do not cover it, answer the way this person would most plausibly answer given their",
+        "  situation. Say you're not sure or don't mind only when you really can't tell. Do not invent strong",
+        "  requirements that are not in your preferences.",
+        "- Do not bring up product names or brands first.",
+        "- You are the customer. Do not ask questions or recommend anything. No quotes or labels, just your message.",
     ]))

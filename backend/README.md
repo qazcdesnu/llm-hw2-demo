@@ -13,6 +13,7 @@ uv run pytest
 ## 환경 변수
 `.env.example`을 `.env`로 복사하고 `OPENAI_API_KEY`를 넣는다. 키가 없어도 서버는 뜨고, LLM을 호출할 때만 에러가 난다.
 질문 작성의 모델과 추론 강도는 `OPENAI_QUESTION_MODEL`(비우면 `OPENAI_MODEL`), `OPENAI_QUESTION_REASONING_EFFORT`(기본 `low`)로 따로 정한다.
+동률 정렬의 임베딩은 `OPENAI_EMBEDDING_MODEL`(기본 `text-embedding-3-small`), `OPENAI_EMBEDDING_DIMENSIONS`(기본 512). 바꾸면 `scripts/build_embeddings.py`를 다시 실행한다.
 
 ```bash
 uv run python scripts/llm_smoke.py   # 실제 API 호출 확인 (텍스트 1회 + 구조화 응답 1회)
@@ -36,7 +37,7 @@ uv run python scripts/run_eval.py headphones --limit 10          # 대화 평가
 - `categories/`: 카테고리 정의 YAML (작성법: [category-spec.md](../docs/category-spec.md))
 - `app/evaluation/`: 평가 (시나리오, 가상 사용자, 비교군, LLM 심판, 실행기). 설명 [evaluation.md](../docs/evaluation.md)
 - `app/core/`: IG 엔진 (웹·DB와 무관한 순수 Python, 평가 코드에서도 사용). 진입점 [`IGEngine`](app/core/engine.py "docid:core.engine"), 설명 [ig-engine.md](../docs/ig-engine.md)
-- `scripts/`: 데이터 스크립트 (`filter_category.py` → `build_catalog.py` → `export_validation.py`, 원본 없이 적재 `load_catalog.py`, 평가 데이터 `download_amazon_c4.py`·`build_scenarios.py`·`run_eval.py`, 분석 `analyze_headphones.py`, 엔진 데모 `ig_demo.py`)
+- `scripts/`: 데이터 스크립트 (`filter_category.py` → `build_catalog.py` → `export_validation.py`, 원본 없이 적재 `load_catalog.py`, 상품 임베딩 `build_embeddings.py`, 평가 데이터 `download_amazon_c4.py`·`build_scenarios.py`·`run_eval.py`, 분석 `analyze_headphones.py`, 엔진 데모 `ig_demo.py`)
 - `data/catalog/<id>.json`: 빌드된 카탈로그 (git 포함)
 - `data/raw/`: 외부 원본 데이터 (git 제외). Amazon Reviews 2023 메타(`meta_*.jsonl`), Amazon-C4 평가 질의(`amazon-c4/`)
 

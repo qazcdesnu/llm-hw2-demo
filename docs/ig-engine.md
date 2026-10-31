@@ -89,7 +89,7 @@
 | `no_informative_question` | 남은 질문의 기대 정보량이 모두 임계값 미만. 수집 가능한 속성으로는 후보를 더 구별할 수 없음 | 0.05 bits |
 
 **추천** ([`recommend`](../backend/app/core/recommender.py "docid:core.recommend"))
-- **정렬:** 확률 내림차순이다. 동률이면 인기도 점수 순이다.
+- **정렬:** 확률 내림차순이다. 확률이 같은(조건이 똑같이 맞는) 상품 사이의 순서는 대화 관리자가 `tie_key`로 준다. 주지 않으면 인기도 점수 순이다.
   - 인기도 점수는 평점의 베이지안 평균이다([`popularity_scores`](../backend/app/core/adapters.py "sym:py:app.core.adapters#popularity_scores")). 확률 계산에는 쓰지 않는다.
 - **조건 위반 처리:** 사용자가 말한 조건(속성 추출기가 뽑은 값 포함)을 어기는 상품은 뺀다(Safety: 요구와 무관한 추천 방지). 그런 상품을 빼면 k개가 안 될 때만 뒤에 채우고 `violated`로 표시한다.
 - **추천마다 붙는 정보:** `matched`(맞음), `unknown`(데이터에 없어 확인 못 함), `violated`(어긋남)를 붙인다. 대화 관리자가 이를 추천 근거 문장으로 바꾼다.
@@ -99,6 +99,23 @@
 - `PreferenceState.excluded`의 상품은 사전확률을 0으로 둔다. 모두 제외되면 제외를 무시한다.
 - `tie_key`로 확률이 같은 상품 사이의 순서를 바꾼다(예: 가격 오름차순). 확률 계산 자체는 바꾸지 않는다.
 - 사용 방법: [LLM 파서 9절](llm-parser.md#9-멀티턴-추천-조정)
+
+**동률 정렬 (2026-10-31)** ([`tie_order`](../backend/app/services/chat.py "docid:chat.tie-order"))
+
+속성 8개로는 같은 조건의 상품이 수십~수백 개씩 남는다. 질문은 속성으로만 고르되, 그 안의 순서는 상품 정보 전체로 정한다. 추천할 때만 계산한다(질의 임베딩 호출 1회, [`decide`](../backend/app/services/chat.py "sym:py:app.services.chat#decide")).
+
+| 순서 | 기준 | 비고 |
+|---|---|---|
+| 1 | 사용자가 요청한 가격순 | "더 싼 걸로" ([LLM 파서 9절](llm-parser.md#9-멀티턴-추천-조정)) |
+| 2 | 조건이 아닌 속성(`constraint: false`, 헤드폰은 주 용도)이 말한 값과 맞는가 | 맞지 않는 개수가 적은 순 |
+| 3 | 텍스트 관련도: BM25 + 임베딩 순위를 RRF(k = 60)로 합침 | [`relevance_scores`](../backend/app/services/relevance.py "docid:chat.text-relevance") |
+| 4 | 인기도 점수 | |
+
+- **상품 글:** 상품명 + 특징(features) + 세부 정보(details, 판매 순위·출시일 등 제외), 최대 6,000자([`product_text`](../backend/app/services/relevance.py "sym:py:app.services.relevance#product_text")).
+- **BM25 질의:** 속성 추출기가 매 턴 뽑는 영어 키워드(메모리 `keywords`). 상품 글이 영어라, 한국어 대화도 키워드는 영어로 뽑는다.
+- **임베딩:** 상품 임베딩은 미리 만들어 SQLite `product_embeddings`에 저장한다([build_embeddings.py](../backend/scripts/build_embeddings.py), `text-embedding-3-small` 512차원, 4,628개). 실행 중에는 질의 글(근거 발화 + 맥락 + 키워드) 하나만 임베딩한다. 색인은 카탈로그·임베딩이 바뀔 때까지 캐시한다([`load_text_index`](../backend/app/services/relevance.py "sym:py:app.services.relevance#load_text_index")). 임베딩이 없거나 호출이 실패하면 BM25만 쓴다.
+- **주 용도를 조건에서 뺀 이유:** 상품도 사용자도 용도 하나로 정하기 어렵다(업무용으로 산 게이밍 헤드셋, 운동에도 쓰는 일상용 헤드폰). 평가에서 정답이 1위 동률 묶음 밖으로 밀린 7건 중 5건이 주 용도 불일치였다([evaluation.md 5절](evaluation.md#5-결과)). 그래서 묻지 않고(askable: false) 거르지도 않으며, 사용자가 말하면 정렬에만 쓴다.
+- 사용자에게는 "N개가 똑같이 잘 맞아서, 얘기해 준 내용에 가까운 순으로 골랐어"로 알린다. Developer Panel의 `Tie order`에 기준이 보인다.
 
 **한계** ([`Limitation`](../backend/app/core/engine.py "sym:py:app.core.engine#Limitation")): 대화 관리자가 문장으로 바꿔 사용자에게 알린다.
 

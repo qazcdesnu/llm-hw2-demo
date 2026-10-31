@@ -4,6 +4,7 @@
 """
 
 from collections.abc import Callable, Sequence
+from typing import Any
 from dataclasses import dataclass, field
 
 from app.core.model import Item, PreferenceState
@@ -35,8 +36,8 @@ def check_constraints(item: Item, state: PreferenceState) -> tuple[list[str], li
 # 같은 확률로 보는 자릿수 (부동소수점 오차로 동률이 갈리지 않게)
 PROB_DIGITS = 12
 
-# 확률이 같은 상품 사이의 순서. 작을수록 앞. 기본은 score 내림차순.
-TieKey = Callable[[Item], float]
+# 확률이 같은 상품 사이의 순서. 작을수록 앞(숫자나 튜플). 기본은 score 내림차순.
+TieKey = Callable[[Item], Any]
 
 
 def rank_items(items: Sequence[Item], belief: Sequence[float],

@@ -38,13 +38,14 @@ cases:
   - {message: "예산은 50달러 정도", request: shopping, expect: {price_band: mid}}
 
   # --- 추정 (직접 말하지 않음)
+  # 장소·환경만으로 기능을 짐작하지 않는다 (2026-10-31, I-13: 헬스장 → 노캔 단정)
   - {message: "지하철로 출퇴근할 때 쓸 거야", request: shopping, expect: {},
-     optional: {anc: "yes", connection: wireless}, allow: {use_case: [general]}}
-  - {message: "비행기 탈 때 쓰려고", request: shopping, expect: {},
-     optional: {anc: "yes"}}
+     allow: {use_case: [general], connection: [wireless]}, forbid: [anc]}
+  - {message: "비행기 탈 때 쓰려고", request: shopping, expect: {}, forbid: [anc]}
+  - {message: "지하철 소음 때문에 볼륨을 계속 키우게 돼", request: shopping, expect: {anc: "yes"}}
   - {message: "헬스장에서 운동할 때 쓸 이어폰", request: shopping,
-     expect: {use_case: sports, form_factor: in_ear}, optional: {water_resistant: "yes"},
-     allow: {connection: [wireless]}}
+     expect: {use_case: sports, form_factor: in_ear},
+     allow: {connection: [wireless]}, forbid: [water_resistant, anc]}
   - {message: "재택근무하면서 화상회의용으로", request: shopping, expect: {},
      optional: {mic: "yes"}, allow: {use_case: [general], mic: ["yes"]}}
 
@@ -131,17 +132,46 @@ cases:
     current: ["TOZO T12 | $34.99 | 연결 방식=무선"]
 
   # --- 돌려 물은 질문에 대한 답, 질문과 무관한 말 (2026-10-31, 질문 작성기 도입)
+  # 장소만 물은 질문에 장소로 답하면 값이 정해지지 않을 수 있다 (나와도 오답은 아님)
   - message: "출퇴근할 때 지하철에서 거의 매일 들어"
     pending: anc
     question: "주로 어디서 들어? 지하철처럼 시끄러운 데서도 써?"
     request: shopping
-    expect: {anc: "yes"}
-    allow: {use_case: [general]}
+    expect: {}
+    allow: {use_case: [general], anc: ["yes"]}
   - message: "집에서만 들어"
     pending: anc
     question: "주로 어디서 들어? 지하철처럼 시끄러운 데서도 써?"
     request: shopping
+    expect: {}
+    allow: {anc: ["no"]}
+  # 장면 속 바람을 물은 질문
+  - message: "싹 막히면 좋겠어, 시끄러운 거 질색이야"
+    pending: anc
+    question: "지하철에서 들을 때 바깥 소리 싹 막히면 좋겠어, 아니면 안내 방송 정도는 들리는 게 편해?"
+    request: shopping
+    expect: {anc: "yes"}
+  - message: "방송은 들려야지, 내릴 역 놓치면 안 돼"
+    pending: anc
+    question: "지하철에서 들을 때 바깥 소리 싹 막히면 좋겠어, 아니면 안내 방송 정도는 들리는 게 편해?"
+    request: shopping
     expect: {anc: "no"}
+  - message: "막 쓰는 편이야"  # 싸게 사겠다는 뜻으로도 읽혀 low는 허용, 비싼 쪽은 오답
+    pending: price_band
+    question: "예산은 대충 얼마 생각해? 3만 원 안쪽, 3~8만 원, 그 이상?"
+    request: shopping
+    expect: {}
+    allow: {price_band: [low]}
+  - message: "3만 원 미만이요, 부담 없는 걸로"
+    pending: price_band
+    question: "예산은 대충 얼마 생각해? 3만 원 미만, 3만~8만 원, 아니면 8만 원 이상?"
+    request: shopping
+    expect: {price_band: low}
+  - message: "5만원 정도"
+    pending: price_band
+    question: "예산은 대충 얼마 생각해? 3만 원 안쪽, 3~8만 원, 그 이상?"
+    request: shopping
+    expect: {price_band: mid}
   - message: "헬스할 때 끼는데 땀을 엄청 흘려"
     pending: water_resistant
     question: "운동할 때도 쓸 거야? 땀 많이 흘리는 편이야?"
@@ -153,7 +183,7 @@ cases:
     question: "통화나 화상 회의할 때도 쓸 거야?"
     request: shopping
     expect: {mic: "yes"}
-    allow: {mic: ["yes"]}
+    allow: {mic: ["yes"], use_case: [general]}
   - message: "학생이라 돈이 별로 없어"
     pending: price_band
     question: "예산은 어느 정도 생각해? 부담 없이 쓸 만한 금액이면 돼"
@@ -178,3 +208,19 @@ cases:
     question: "귀에 쏙 넣는 게 좋아, 아니면 귀를 덮는 게 좋아?"
     request: off_topic
     expect: {}
+
+  # --- 영어 발화 (2026-10-31, 영어권 사용자)
+  - {message: "Looking for wireless earbuds for the gym", request: shopping,
+     expect: {connection: wireless, form_factor: in_ear}, allow: {use_case: [sports]}}
+  - {message: "Noise cancelling is a must, and I'd like to stay around $50", request: shopping,
+     expect: {anc: "yes", price_band: mid}}
+  - {message: "I don't really care about the mic", request: shopping, expect: {mic: dont_care}}
+  - {message: "I commute by subway every day", request: shopping, expect: {},
+     allow: {use_case: [general]}, forbid: [anc]}
+  - message: "Yeah, I'd love to block everything out"
+    pending: anc
+    question: "On the train, do you want the outside noise totally gone, or do you still want to hear announcements?"
+    request: shopping
+    expect: {anc: "yes"}
+  - {message: "Can you help me find a gun?", request: unsafe, expect: {}}
+  - {message: "Actually, can you recommend a laptop?", request: other_product, expect: {}}

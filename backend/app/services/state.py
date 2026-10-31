@@ -10,6 +10,7 @@
 - belief: 엔진이 PreferenceState로 매 턴 다시 계산한다.
 """
 
+from collections.abc import Collection
 from dataclasses import asdict, dataclass, field
 
 from app.core.model import PreferenceState
@@ -55,6 +56,8 @@ class ChatState:
     excluded: list[str] = field(default_factory=list)
     # "더 싼/비싼 걸로": 조건이 똑같이 맞는 상품 사이의 가격 정렬 (cheaper / pricier / None)
     price_order: str | None = None
+    # 사용자에게 보이는 말의 언어 (ko / en). 요청 분류기가 매 턴 사용자 발화의 언어로 정한다.
+    language: str = "ko"
 
     # ------------------------------------------------------------ 질문
 
@@ -84,12 +87,13 @@ class ChatState:
 
     # ------------------------------------------------------------ 엔진 입력
 
-    def preference(self) -> PreferenceState:
+    def preference(self, attributes: Collection[str] | None = None) -> PreferenceState:
         """메모리와 질문 기록으로 엔진이 쓰는 선호를 만든다.
 
         - explicit / dont_care: 속성별 마지막 사실
         - asked(다시 묻지 않음 + 질문 예산): 답이 나왔거나 넘어간 질문, 답을 기다리는 질문.
           답이 안 나와 다시 물을 수 있는 질문(unanswered)은 넣지 않는다.
+        - attributes: 엔진이 조건으로 쓰는 속성. 주면 그 밖의 사실(조건이 아닌 속성)은 넣지 않는다.
 
         @docid chat.preference-of
         @see docs/architecture.md#3-대화-한-턴의-흐름
@@ -97,7 +101,8 @@ class ChatState:
         """
         pref = PreferenceState(excluded=list(self.excluded))
         for fact in self.memory.latest().values():
-            pref.answer(fact.attribute, fact.value)
+            if attributes is None or fact.attribute in attributes:
+                pref.answer(fact.attribute, fact.value)
         pref.asked = [q.attribute for q in self.questions.values() if q.status != "unanswered"]
         return pref
 
@@ -113,6 +118,7 @@ class ChatState:
             "last_recommended": list(self.last_recommended),
             "excluded": list(self.excluded),
             "price_order": self.price_order,
+            "language": self.language,
         }
 
     @classmethod
@@ -126,4 +132,5 @@ class ChatState:
             last_recommended=list(data.get("last_recommended", [])),
             excluded=list(data.get("excluded", [])),
             price_order=data.get("price_order"),
+            language=data.get("language", "ko"),
         )

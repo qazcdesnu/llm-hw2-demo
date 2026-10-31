@@ -7,6 +7,7 @@
 C4 질의 중 limit개를 seed로 뽑아, LLM으로 페르소나·첫 마디를 만든다.
 결과: evaluation/scenarios/<id>.jsonl (git 포함)
 
+@see docs/briefing.md#8-남은-문제-다음-단계-일-나누기
 @see docs/evaluation.md#1-시나리오-amazon-c4
 """
 

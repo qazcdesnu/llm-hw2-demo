@@ -62,6 +62,16 @@ CREATE TABLE IF NOT EXISTS product_attributes (
     evidence TEXT,
     PRIMARY KEY (product_id, attribute)
 );
+
+-- 상품 설명 임베딩 (동률 정렬의 텍스트 관련도, scripts/build_embeddings.py). 카탈로그를 다시 로드해도
+-- 지워지지 않게 products와 묶지 않고, 설명이 바뀐 상품만 다시 만들도록 글의 해시를 둔다.
+CREATE TABLE IF NOT EXISTS product_embeddings (
+    product_id TEXT PRIMARY KEY,
+    model TEXT NOT NULL,
+    dimensions INTEGER NOT NULL,
+    text_hash TEXT NOT NULL,
+    vector BLOB NOT NULL             -- float32
+);
 """
 
 

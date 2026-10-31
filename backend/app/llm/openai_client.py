@@ -36,6 +36,14 @@ class OpenAIClient:
             kwargs["reasoning"] = {"effort": self.reasoning_effort}
         return kwargs
 
+    def embed(self, texts: list[str], *, model: str, dimensions: int) -> list[list[float]]:
+        try:
+            response = self._client.embeddings.create(model=model, input=texts, dimensions=dimensions)
+        except openai.OpenAIError as e:
+            raise LLMError(f"OpenAI embedding request failed: {e}") from e
+        logger.info("openai embedding model=%s input_tokens=%s", model, response.usage.prompt_tokens)
+        return [d.embedding for d in response.data]
+
     def _log_usage(self, response: Any) -> None:
         # $20 예산 관리를 위해 호출마다 토큰 사용량을 남긴다.
         usage = getattr(response, "usage", None)

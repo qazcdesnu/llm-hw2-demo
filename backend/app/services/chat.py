@@ -6,6 +6,8 @@
 - 결정: IG 엔진이 다음 질문 또는 추천을 정한다.
 - 표현: 질문은 질문 작성기(친구 말투, 실패하면 고정 질문), 추천·안내는 템플릿(responses.py).
 추천을 보여준 뒤에도 대화가 이어져, 조건 추가·변경·상품 제외로 추천 목록을 조정한다.
+
+@see docs/briefing.md#4-아키텍처와-코드-지도
 """
 
 import re
@@ -18,11 +20,13 @@ from app.core.adapters import from_catalog
 from app.core.engine import Ask, Decision, EngineConfig, IGEngine, Recommend
 from app.core.model import DONT_CARE, PreferenceState
 from app.core.question_selector import QuestionPolicy
+from app.core.recommender import TieKey
 from app.schemas import DebugInfo, Question, QuestionScore, Recommendation
 from app.services import responses as say
-from app.services.memory import Fact, label_of
+from app.services.memory import Fact
 from app.services.parser import ParseContext, ParseResult
 from app.services.questioner import QuestionRequest, WrittenQuestion
+from app.services.relevance import Embedder, TextIndex, relevance_scores
 from app.services.state import ChatState
 
 DEBUG_TOP_N = 5
@@ -44,15 +48,23 @@ class Catalog:
     spec: CategorySpec
     products: dict[str, Product]
     engine: IGEngine
+    # 동률 정렬의 텍스트 관련도 (없으면 조건이 아닌 속성 → 평점순으로만 정렬)
+    text: TextIndex | None = None
+    embed: Embedder | None = None
+
+    def preference(self, state: ChatState) -> PreferenceState:
+        """엔진 입력. 조건이 아닌 속성(constraint: false)의 사실은 넣지 않는다."""
+        return state.preference(self.engine.attributes)
 
 
 def build_catalog(
     spec: CategorySpec, products: Sequence[Product], config: EngineConfig = EngineConfig(),
-    policy: QuestionPolicy | None = None,
+    policy: QuestionPolicy | None = None, text: TextIndex | None = None, embed: Embedder | None = None,
 ) -> Catalog:
     """policy: 질문 선택 정책 (기본 IG. 평가의 비교군은 RandomPolicy)."""
     attributes, items = from_catalog(spec, products)
-    return Catalog(spec, {p.id: p for p in products}, IGEngine(items, attributes, config, policy))
+    return Catalog(spec, {p.id: p for p in products}, IGEngine(items, attributes, config, policy),
+                   text, embed)
 
 
 @dataclass
@@ -107,9 +119,9 @@ def validate_answer(spec: CategorySpec, attribute: str, value: str) -> None:
 
 def remember(state: ChatState, spec: CategorySpec, attribute: str, value: str, quote: str,
              source: str = "said") -> str | None:
-    """사실을 메모리에 남긴다. 새로 알게 된 것이면 사람이 읽는 문구, 이미 알던 값이면 None."""
+    """사실을 메모리에 남긴다. 새로 알게 된 것이면 사용자에게 알릴 문구, 이미 알던 값이면 None."""
     if state.memory.remember(Fact(attribute, value, quote, state.turn, source)):
-        return label_of(spec, attribute, value)
+        return say.change_label(spec, attribute, value, state.language)
     return None
 
 
@@ -124,6 +136,7 @@ def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> l
     """
     changes = []
     state.memory.add_notes(parsed.notes)
+    state.memory.add_keywords(parsed.keywords)
     for c in parsed.constraints:
         if (label := remember(state, spec, c.attribute, c.value, c.quote)) is not None:
             changes.append(label)
@@ -132,24 +145,46 @@ def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> l
             item_id = state.last_recommended[rank - 1]
             if item_id not in state.excluded:
                 state.excluded.append(item_id)
-            changes.append(f"{rank}번 상품 제외")
+            changes.append(say.t(state.language, "excluded", rank=rank))
     if parsed.price_order in ("cheaper", "pricier"):
         state.price_order = parsed.price_order
-        changes.append("더 저렴한 순" if parsed.price_order == "cheaper" else "더 비싼 순")
+        changes.append(say.t(state.language, f"order.{parsed.price_order}"))
     return changes
 
 
-def price_tie_key(catalog: Catalog, order: str | None):
-    """확률이 같은 상품 사이를 가격순으로. 가격이 없으면 뒤로."""
-    if order not in ("cheaper", "pricier"):
-        return None
+def tie_order(catalog: Catalog, state: ChatState, use_text: bool = True) -> tuple[TieKey, str]:
+    """조건이 똑같이 맞는(확률이 같은) 상품 사이의 순서와, 그 순서를 사용자에게 설명할 기준.
+
+    1. 사용자가 요청한 가격순 ("더 싼 걸로")
+    2. 조건이 아닌 속성(예: 주 용도)이 말한 값과 맞는 상품
+    3. 대화와 상품 설명의 텍스트 관련도 (BM25 + 임베딩, RRF)
+    4. 평점(인기도)
+    텍스트 관련도는 질의 임베딩 호출이 들어서, 추천할 때만 이 함수를 부른다(decide).
+    use_text=False면 3을 뺀다 (평가에서 텍스트 관련도의 효과를 따로 잴 때).
+
+    @docid chat.tie-order
+    @see docs/architecture.md#1-한눈에-보기
+    @see docs/briefing.md#ig-엔진-ig-enginemd
+    @see docs/ig-engine.md#4-추천과-한계-표시
+    """
+    order = state.price_order if state.price_order in ("cheaper", "pricier") else None
     sign = 1 if order == "cheaper" else -1
+    soft = {f.attribute: f.value for f in state.memory.latest().values()
+            if not catalog.spec.attribute(f.attribute).constraint and f.value != DONT_CARE}
+    relevance: dict[str, float] = {}
+    if use_text and catalog.text is not None:
+        relevance = relevance_scores(catalog.text, " ".join(state.memory.keywords),
+                                     state.memory.search_text(), catalog.embed)
 
-    def key(item) -> float:
-        price = catalog.products[item.id].price
-        return float("inf") if price is None else sign * price
+    def key(item) -> tuple:
+        product = catalog.products[item.id]
+        price = 0.0 if order is None else (
+            float("inf") if product.price is None else sign * product.price)
+        mismatch = sum(product.attributes.get(a) != v for a, v in soft.items())
+        return (price, mismatch, -relevance.get(item.id, 0.0), -item.score)
 
-    return key
+    basis = order or ("relevance" if relevance or soft else "rating")
+    return key, basis
 
 
 def recommendation_context(catalog: Catalog, state: ChatState) -> list[str] | None:
@@ -172,10 +207,20 @@ def recommendation_context(catalog: Catalog, state: ChatState) -> list[str] | No
 
 # ---------------------------------------------------------------- 결정·표현
 
-def decide(catalog: Catalog, state: ChatState, pref: PreferenceState) -> Decision:
+def decide(catalog: Catalog, state: ChatState, pref: PreferenceState) -> tuple[Decision, str | None]:
+    """엔진의 결정과, 추천이면 동률 정렬 기준(tie_order의 basis).
+
+    @see docs/architecture.md#3-대화-한-턴의-흐름
+    @see docs/ig-engine.md#4-추천과-한계-표시
+    """
     if state.finished:
-        return catalog.engine.recommend_now(pref, tie_key=price_tie_key(catalog, state.price_order))
-    return catalog.engine.step(pref)
+        key, basis = tie_order(catalog, state)
+        return catalog.engine.recommend_now(pref, tie_key=key), basis
+    decision = catalog.engine.step(pref)
+    if isinstance(decision.action, Recommend):  # 추천할 때만 동률 정렬(텍스트 관련도)을 계산한다
+        key, basis = tie_order(catalog, state)
+        return catalog.engine.recommend_now(pref, decision.action.reason, key), basis
+    return decision, None
 
 
 def build_debug(catalog: Catalog, decision: Decision, state: ChatState, pref: PreferenceState,
@@ -209,13 +254,13 @@ def build_debug(catalog: Catalog, decision: Decision, state: ChatState, pref: Pr
 def _same_question(catalog: Catalog, state: ChatState, prefix: str,
                    request_type: str | None = None) -> TurnResult:
     """상태를 바꾸지 않고 안내 문구와 함께 대기 중인 질문을 다시 보여준다 (질문이 없으면 문구만)."""
-    pref = state.preference()
-    debug = build_debug(catalog, decide(catalog, state, pref), state, pref, request_type)
+    pref = catalog.preference(state)
+    debug = build_debug(catalog, decide(catalog, state, pref)[0], state, pref, request_type)
     pending = state.pending
     if pending is None:
-        hint = f"\n{say.REFINE_HINT}" if state.finished else ""
+        hint = f"\n{say.t(state.language, 'refine_hint')}" if state.finished else ""
         return TurnResult(prefix + hint, state, debug)
-    question = say.build_question(catalog.spec, pending.attribute, pending.text)
+    question = say.build_question(catalog.spec, pending.attribute, pending.text, state.language)
     return TurnResult(f"{prefix}\n\n{question.text}", state, debug, question)
 
 
@@ -243,6 +288,7 @@ def handle_message(
     @see backend/README.md#구조
     @see docs/architecture.md#1-한눈에-보기
     @see docs/architecture.md#3-대화-한-턴의-흐름
+    @see docs/briefing.md#대화-한-턴
     @see docs/doc-links.md#3-docid
     @see docs/llm-parser.md#llm-파서와-멀티턴-대화
     """
@@ -256,12 +302,14 @@ def handle_message(
         return understood
 
     # 3. 결정
-    pref = state.preference()
-    decision = decide(catalog, state, pref)
+    pref = catalog.preference(state)
+    decision, basis = decide(catalog, state, pref)
     debug = build_debug(catalog, decision, state, pref, understood.request_type)
+    debug.tie_order = basis
     action = decision.action
 
-    # 4. 표현
+    # 4. 표현 (사용자 발화의 언어로)
+    lang = state.language
     if isinstance(action, Ask):
         written = None
         if writer is not None:
@@ -269,18 +317,18 @@ def handle_message(
                 attribute=action.attribute, message=message, first_turn=first_turn,
                 retry=action.attribute in state.questions, unclear=understood.unclear,
                 learned=understood.changes, known=state.memory.describe(spec),
-                history=list(history or []),
+                history=list(history or []), language=lang,
             ))
         if written is not None:
-            question = say.build_question(spec, action.attribute, written.text)
+            question = say.build_question(spec, action.attribute, written.text, lang)
             reply = written.text
             debug.question_source, debug.question_approach = "llm", written.approach
         else:
-            question = say.build_question(spec, action.attribute)
-            prefix = f"{say.intro(spec)}\n\n" if first_turn else ""
+            question = say.build_question(spec, action.attribute, lang=lang)
+            prefix = f"{say.intro(spec, lang)}\n\n" if first_turn else ""
             if understood.unclear and not understood.changes:
-                prefix += f"{say.UNCLEAR_PREFIX}\n"
-            reply = prefix + say.acknowledgement(understood.changes) + question.text
+                prefix += f"{say.t(lang, 'unclear_prefix')}\n"
+            reply = prefix + say.acknowledgement(understood.changes, lang) + question.text
             debug.question_source = "template"
         state.ask(action.attribute, question.text)
         return TurnResult(reply, state, debug, question)
@@ -289,10 +337,10 @@ def handle_message(
     state.finished = True
     state.last_recommended = [r.item.id for r in action.items]
     return TurnResult(
-        say.recommendation_reply(spec, action.reason, action.limitations, state.price_order,
-                                 understood.changes),
+        say.recommendation_reply(spec, action.reason, action.limitations, basis,
+                                 understood.changes, lang),
         state, debug,
-        recommendations=[say.to_recommendation(spec, catalog.products[r.item.id], r, pref)
+        recommendations=[say.to_recommendation(spec, catalog.products[r.item.id], r, pref, lang)
                          for r in action.items],
     )
 
@@ -329,20 +377,22 @@ def _understand(
 
     if parsed is None:  # LLM 없음·실패: 보기 이름 매칭만
         if state.finished:
-            return _same_question(catalog, state, say.REFINE_NEEDS_LLM)
+            return _same_question(catalog, state, say.t(state.language, "refine_needs_llm"))
         if pending is None:
             return _Understanding()
         value = match_text(spec.attribute(pending.attribute), message)
         if value is None:
-            return _same_question(catalog, state, say.NOT_UNDERSTOOD)
+            return _same_question(catalog, state, say.t(state.language, "not_understood"))
         label = remember(state, spec, pending.attribute, value, message)
         state.close_pending(answered=True)
         return _Understanding(changes=[label] if label else [])
 
     request_type = parsed.request_type
+    state.language = parsed.language
     if request_type in ("unsafe", "other_product") or (
             request_type == "off_topic" and (writer is None or state.finished)):
-        return _same_question(catalog, state, say.non_shopping_reply(spec, request_type), request_type)
+        return _same_question(catalog, state, say.non_shopping_reply(spec, request_type, state.language),
+                              request_type)
     if request_type == "off_topic":
         state.close_pending(answered=False)
         return _Understanding(request_type, unclear=True)
@@ -350,7 +400,7 @@ def _understand(
     changes = apply_parsed(state, parsed, spec)
     said = {c.attribute for c in parsed.constraints}
     if state.finished and not (said or changes):
-        return _same_question(catalog, state, say.REFINE_UNCLEAR, request_type)
+        return _same_question(catalog, state, say.t(state.language, "refine_unclear"), request_type)
     if pending is not None:
         state.close_pending(answered=pending.attribute in said)
     return _Understanding(request_type, changes, unclear=not (said or changes))

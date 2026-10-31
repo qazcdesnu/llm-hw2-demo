@@ -83,6 +83,7 @@ export interface DebugInfo {
   memory: Memory;
   question_source: "llm" | "template" | null;
   question_approach: string | null;
+  tie_order: string | null;
 }
 
 export interface ChatResponse {
@@ -135,6 +136,8 @@ export interface SystemSummary {
   hit3: number | null;
   mrr: number | null;
   median_rank: number | null;
+  median_rank_no_text: number | null;
+  hit3_no_text: number | null;
   attribute_match: number | null;
   questions: number | null;
   fit: number | null;

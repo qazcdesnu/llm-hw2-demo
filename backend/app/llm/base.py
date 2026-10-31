@@ -17,7 +17,7 @@ class LLMNotConfiguredError(LLMError):
 
 
 class LLMClient(Protocol):
-    """LLM provider 공통 인터페이스. 새 provider는 이 두 메서드를 구현한다.
+    """LLM provider 공통 인터페이스. 새 provider는 이 세 메서드를 구현한다.
 
     @docid llm.client
     @see backend/README.md#구조
@@ -32,4 +32,8 @@ class LLMClient(Protocol):
         self, messages: list[ChatMessage], schema: type[T], *, instructions: str | None = None
     ) -> T:
         """schema(Pydantic 모델)에 맞춘 구조화 응답."""
+        ...
+
+    def embed(self, texts: list[str], *, model: str, dimensions: int) -> list[list[float]]:
+        """글마다 임베딩 벡터."""
         ...

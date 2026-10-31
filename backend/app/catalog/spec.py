@@ -15,6 +15,10 @@ CATEGORIES_DIR = Path(__file__).resolve().parents[2] / "categories"
 
 TEXT_FIELDS = ["title", "features", "description"]
 
+# 사용자에게 보이는 말의 언어. 사용자 발화의 언어를 따른다. 영어 문구(*_en)가 없으면 한국어를 쓴다.
+Lang = Literal["ko", "en"]
+LANGS: tuple[str, ...] = Lang.__args__  # type: ignore[attr-defined]
+
 
 def _check_patterns(patterns: dict[str, str]) -> dict[str, str]:
     for value, pattern in patterns.items():
@@ -87,14 +91,25 @@ Rule = Annotated[
 class ValueSpec(BaseModel):
     value: str
     label: str
+    label_en: str | None = None
+
+    def label_for(self, lang: str) -> str:
+        return (self.label_en or self.label) if lang == "en" else self.label
 
 
 class AttributeSpec(BaseModel):
     key: str
     label: str
+    label_en: str | None = None
     question: str | None = None
+    question_en: str | None = None
     # False면 시스템이 먼저 묻지 않는다. 사용자가 말한 조건으로는 쓴다.
     askable: bool = True
+    # True면 질문 작성기가 돌려 묻지 않고 가볍게 직접 묻는다 (예산처럼 생활 장면으로 갈리지 않는 속성).
+    ask_directly: bool = False
+    # False면 추천 조건(엔진)으로 쓰지 않는다. 사용자가 말하면 메모리에 남기고, 조건이 똑같이 맞는 상품
+    # 사이의 정렬에만 쓴다 (상품·사용자 모두 값 하나로 정하기 어려운 속성, 예: 주 용도).
+    constraint: bool = True
     # 비어 있으면 자유값 속성(예: brand). 값은 소문자로 정규화해 저장한다.
     values: list[ValueSpec] = []
     # 위에서부터 적용해 처음 값을 내는 규칙을 쓴다.
@@ -116,11 +131,19 @@ class AttributeSpec(BaseModel):
     def is_open(self) -> bool:
         return not self.values
 
+    def label_for(self, lang: str) -> str:
+        return (self.label_en or self.label) if lang == "en" else self.label
+
+    def question_for(self, lang: str) -> str | None:
+        return (self.question_en or self.question) if lang == "en" else self.question
+
     @model_validator(mode="after")
     def _check_consistency(self) -> "AttributeSpec":
         """@see docs/category-spec.md#검증-로드-시-자동"""
         if self.askable and not self.question:
             raise ValueError(f"{self.key}: askable 속성에는 question이 필요하다")
+        if self.askable and not self.constraint:
+            raise ValueError(f"{self.key}: 조건으로 쓰지 않는 속성(constraint: false)은 askable일 수 없다")
         if self.is_open:
             if self.askable:
                 raise ValueError(f"{self.key}: 자유값 속성은 askable일 수 없다")
@@ -167,6 +190,7 @@ class CategorySpec(BaseModel):
     """@see docs/architecture.md#1-한눈에-보기"""
     id: str = Field(pattern=r"^[a-z][a-z0-9_]*$")
     name: str
+    name_en: str | None = None
     description: str = ""
     source: SourceSpec
     candidate_filter: CandidateFilter = CandidateFilter()
@@ -184,6 +208,9 @@ class CategorySpec(BaseModel):
             if missing:
                 raise ValueError(f"{self.id}: sampling에 없는 속성 {sorted(missing)}")
         return self
+
+    def name_for(self, lang: str) -> str:
+        return (self.name_en or self.name) if lang == "en" else self.name
 
     def attribute(self, key: str) -> AttributeSpec:
         for a in self.attributes:

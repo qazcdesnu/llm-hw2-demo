@@ -15,13 +15,13 @@ from dataclasses import dataclass, field
 
 from pydantic import BaseModel, Field
 
+from app.catalog.search import CatalogSearch
 from app.core.engine import IGEngine
 from app.core.question_selector import RandomPolicy
 from app.core.recommender import recommend
 from app.evaluation.agents import ChatAgent
-from app.evaluation.search import CatalogSearch
 from app.llm import LLMClient, LLMError
-from app.services.chat import Catalog, Parser, QuestionWriter, handle_message, price_tie_key
+from app.services.chat import Catalog, Parser, QuestionWriter, handle_message, tie_order
 from app.services.state import ChatState
 
 SYSTEMS = ("ig", "random", "llm")
@@ -53,23 +53,26 @@ class EngineSystem:
         recs = [r.product_id for r in result.recommendations] or None
         return SystemTurn(result.reply, recs, {"asked": result.debug.selected_attribute})
 
-    def target_rank(self, target_id: str) -> int | None:
-        return target_rank(self.catalog, self.state, target_id)
+    def target_rank(self, target_id: str, use_text: bool = True) -> int | None:
+        return target_rank(self.catalog, self.state, target_id, use_text)
 
 
-def target_rank(catalog: Catalog, state: ChatState, target_id: str) -> int | None:
-    """지금 상태에서 정답 상품의 순위 (전체 카탈로그 기준, 1부터). 사용자에게 보이는 정렬과 같다."""
-    engine, pref = catalog.engine, state.preference()
+def target_rank(catalog: Catalog, state: ChatState, target_id: str, use_text: bool = True) -> int | None:
+    """지금 상태에서 정답 상품의 순위 (전체 카탈로그 기준, 1부터). 사용자에게 보이는 정렬과 같다.
+
+    use_text=False: 동률 정렬에서 텍스트 관련도를 뺀 순위 (효과 비교용)
+    """
+    engine, pref = catalog.engine, catalog.preference(state)
     ranked = recommend(engine.items, engine.belief(pref), pref, k=len(engine.items),
-                       tie_key=price_tie_key(catalog, state.price_order))
+                       tie_key=tie_order(catalog, state, use_text)[0])
     excluded = set(pref.excluded)
     ids = [r.item.id for r in ranked if r.item.id not in excluded]
     return ids.index(target_id) + 1 if target_id in ids else None
 
 
 class Pick(BaseModel):
-    product_ids: list[str] = Field(description="후보 목록에서 고른 상품 id 3개, 잘 맞는 순서")
-    message: str = Field(description="사용자에게 보낼 추천 메시지 (한국어, 짧게)")
+    product_ids: list[str] = Field(description="3 product ids from the candidates, best fit first")
+    message: str = Field(description="Short recommendation message to the user, in the user's language")
 
 
 class LLMSystem:
@@ -85,17 +88,18 @@ class LLMSystem:
         self.client, self.search = client, search
         self.questions = 0
         self.agent = ChatAgent(client, "\n".join([
-            f"너는 {category_name} 추천 쇼핑 어시스턴트다. 사용자와 편한 반말로 대화한다.",
-            "규칙:",
-            "- 한 턴에 질문은 하나만 한다. 사용자의 선호를 가장 많이 좁혀 줄 질문을 고른다.",
-            "- 충분히 파악했다고 판단되면 다른 말 없이 한 줄로 'RECOMMEND: <상품 검색용 영어 키워드>'만 출력한다.",
-            "  (예: RECOMMEND: wireless earbuds noise cancelling under 50 dollars)",
-            f"- 최대 {LLM_MAX_QUESTIONS}번 질문 안에 추천한다.",
+            f"You are a shopping assistant recommending {category_name}. Chat casually and friendly,",
+            "in the same language the user writes in.",
+            "Rules:",
+            "- Ask only one question per turn. Pick the question that narrows the user's preferences the most.",
+            "- When you know enough, output only one line: 'RECOMMEND: <English product search keywords>'.",
+            "  (e.g. RECOMMEND: wireless earbuds noise cancelling under 50 dollars)",
+            f"- Recommend within at most {LLM_MAX_QUESTIONS} questions.",
         ]))
 
     def respond(self, message: str) -> SystemTurn:
         force = self.questions >= LLM_MAX_QUESTIONS
-        out = self.agent.reply(message, note="이번에는 반드시 RECOMMEND: 한 줄로 답한다." if force else None)
+        out = self.agent.reply(message, note="This time you must answer with the single RECOMMEND: line." if force else None)
         if not out.upper().startswith("RECOMMEND:"):
             self.questions += 1
             return SystemTurn(out)
@@ -114,14 +118,15 @@ class LLMSystem:
         if not hits:
             return []
         candidates = "\n".join(
-            f"{h.id} | {h.title[:100]} | {'$%.2f' % h.price if h.price is not None else '가격 정보 없음'}"
+            f"{h.id} | {h.title[:100]} | {'$%.2f' % h.price if h.price is not None else 'price not listed'}"
             for h in hits)
-        conversation = "\n".join(f"{'사용자' if m['role'] == 'user' else '나'}: {m['content']}"
+        conversation = "\n".join(f"{'User' if m['role'] == 'user' else 'Me'}: {m['content']}"
                                  for m in self.agent.history)
         try:
             pick = self.client.parse(
-                [{"role": "user", "content": f"대화:\n{conversation}\n\n후보 (id | 상품명 | 가격):\n{candidates}"}],
-                Pick, instructions="대화로 파악한 사용자 선호에 가장 잘 맞는 상품 3개를 후보 목록에서만 고른다.")
+                [{"role": "user", "content": f"Conversation:\n{conversation}\n\nCandidates (id | title | price):\n{candidates}"}],
+                Pick, instructions="Pick the 3 products that best fit the user's preferences from the conversation, "
+                                   "only from the candidate list.")
             valid = {h.id for h in hits}
             ids = list(dict.fromkeys(p for p in pick.product_ids if p in valid))
         except LLMError:
@@ -142,7 +147,8 @@ def make_system(name: str, catalog: Catalog, *, parser: Parser | None, writer: Q
     if name == "random":
         engine = catalog.engine  # 상품·속성은 그대로, 질문 선택 정책만 바꾼다
         random_engine = IGEngine(engine.items, engine.attributes, engine.config, RandomPolicy(seed))
-        return EngineSystem("random", Catalog(catalog.spec, catalog.products, random_engine), parser, writer)
+        return EngineSystem("random", Catalog(catalog.spec, catalog.products, random_engine,
+                                              catalog.text, catalog.embed), parser, writer)
     if name == "llm":
-        return LLMSystem(client, search, catalog.spec.name)
+        return LLMSystem(client, search, catalog.spec.name_for("en"))
     raise ValueError(f"unknown system: {name}")

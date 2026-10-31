@@ -1,6 +1,7 @@
 # 헤드폰·이어폰 카테고리 정의. 작성법은 docs/category-spec.md 참고.
 id: headphones
 name: 헤드폰·이어폰
+name_en: headphones & earbuds
 description: 유선·무선 헤드폰, 이어폰, 이어버드
 
 source:
@@ -22,10 +23,12 @@ sampling:
 attributes:
   - key: connection
     label: 연결 방식
+    label_en: Connection
     question: 선 있는 것도 괜찮아, 아니면 무선이 좋아?
+    question_en: Are you okay with a cable, or do you want wireless?
     values:
-      - {value: wireless, label: 무선}
-      - {value: wired, label: 유선}
+      - {value: wireless, label: 무선, label_en: Wireless}
+      - {value: wired, label: 유선, label_en: Wired}
     rules:
       # "Wireless, Wired"처럼 둘 다 적힌 경우 무선으로 본다 (map은 위에서부터 먼저 맞는 값).
       - type: details
@@ -44,12 +47,14 @@ attributes:
 
   - key: form_factor
     label: 착용 방식
+    label_en: Fit
     question: 귀에 쏙 넣는 이어폰이 좋아, 귀를 덮는 헤드폰이 좋아?
+    question_en: Do you like earbuds that sit in your ears, or headphones that cover them?
     values:
-      - {value: in_ear, label: 이어폰(인이어)}
-      - {value: on_ear, label: 온이어 헤드폰}
-      - {value: over_ear, label: 오버이어 헤드폰}
-      - {value: open_ear, label: 오픈형(골전도 등)}
+      - {value: in_ear, label: 이어폰(인이어), label_en: In-ear}
+      - {value: on_ear, label: 온이어 헤드폰, label_en: On-ear}
+      - {value: over_ear, label: 오버이어 헤드폰, label_en: Over-ear}
+      - {value: open_ear, label: 오픈형(골전도 등), label_en: Open-ear (bone conduction etc.)}
     rules:
       - type: details
         keys: [Form Factor, Ear Placement]
@@ -67,10 +72,12 @@ attributes:
 
   - key: anc
     label: 노이즈 캔슬링(ANC)
+    label_en: Noise cancelling (ANC)
     question: 주변 소음 막아주는 노이즈 캔슬링 기능 있으면 좋겠어?
+    question_en: Would you like noise cancelling that blocks out the sound around you?
     values:
-      - {value: "yes", label: 필요}
-      - {value: "no", label: 불필요}
+      - {value: "yes", label: 필요, label_en: Needed}
+      - {value: "no", label: 불필요, label_en: Not needed}
     rules:
       - type: keywords
         map:
@@ -83,11 +90,15 @@ attributes:
 
   - key: price_band
     label: 가격대
+    label_en: Price
+    # 돌려 물으면("오래 쓸 거야?") 답을 가격대로 과하게 해석해서 직접 묻는다 (I-13).
+    ask_directly: true
     question: 예산은 어느 정도 생각해? ($20 미만 / $20~60 / $60 이상)
+    question_en: What's your budget roughly? (under $20 / $20-60 / $60+)
     values:
-      - {value: low, label: $20 미만}
-      - {value: mid, label: $20~60}
-      - {value: high, label: $60 이상}
+      - {value: low, label: $20 미만, label_en: Under $20}
+      - {value: mid, label: $20~60, label_en: $20-60}
+      - {value: high, label: $60 이상, label_en: $60+}
     rules:
       - type: band
         field: price
@@ -98,10 +109,12 @@ attributes:
 
   - key: mic
     label: 마이크
+    label_en: Mic
     question: 통화나 음성 채팅할 때도 쓸 거야?
+    question_en: Will you use them for calls or voice chat too?
     values:
-      - {value: "yes", label: 필요}
-      - {value: "no", label: 불필요}
+      - {value: "yes", label: 필요, label_en: Needed}
+      - {value: "no", label: 불필요, label_en: Not needed}
     rules:
       - type: keywords
         fields: [title, features, description, details]
@@ -110,10 +123,12 @@ attributes:
 
   - key: water_resistant
     label: 방수·방진
+    label_en: Water/sweat resistance
     question: 운동하면서 땀 흘리거나 비 오는 날에도 쓸 것 같아?
+    question_en: Will you wear them while sweating at the gym or out in the rain?
     values:
-      - {value: "yes", label: 필요}
-      - {value: "no", label: 불필요}
+      - {value: "yes", label: 필요, label_en: Needed}
+      - {value: "no", label: 불필요, label_en: Not needed}
     rules:
       - type: keywords
         fields: [title, features, description, details]
@@ -122,12 +137,18 @@ attributes:
 
   - key: use_case
     label: 주 용도
+    label_en: Main use
+    # 상품도 사용자도 용도 하나로 정하기 어렵다(업무용으로 산 게이밍 헤드셋, 운동에도 쓰는 일상용).
+    # 평가에서 정답이 밀린 원인의 대부분이라 묻지도 거르지도 않고, 동률 정렬에만 쓴다 (2026-10-31, I-13).
+    askable: false
+    constraint: false
     question: 주로 뭐 할 때 쓸 거야? 운동, 게임, 아이용, 아니면 일상용?
+    question_en: What will you mostly use them for? Workouts, gaming, for a kid, or everyday?
     values:
-      - {value: kids, label: 아이용}
-      - {value: gaming, label: 게임}
-      - {value: sports, label: 운동}
-      - {value: general, label: 일상}
+      - {value: kids, label: 아이용, label_en: Kids}
+      - {value: gaming, label: 게임, label_en: Gaming}
+      - {value: sports, label: 운동, label_en: Sports}
+      - {value: general, label: 일상, label_en: Everyday}
     rules:
       - type: keywords
         fields: [title, features]
@@ -139,6 +160,7 @@ attributes:
 
   - key: brand
     label: 브랜드
+    label_en: Brand
     # 값이 많아 IG가 과대평가될 수 있어 일단 질문 대상에서 뺀다. 사용자가 먼저 말하면 조건으로는 쓴다.
     askable: false
     rules:

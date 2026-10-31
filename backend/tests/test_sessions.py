@@ -8,7 +8,7 @@ from app.catalog.repository import replace_products
 from app.catalog.spec import load_category_spec
 from app.core.model import DONT_CARE
 from app.db import connect, init_db
-from app.api.sessions import get_parser, get_question_writer
+from app.api.sessions import get_embedder, get_parser, get_question_writer
 from app.main import create_app
 from app.services.chat import match_text
 from app.services.parser import ParsedConstraint, ParseResult
@@ -73,6 +73,7 @@ def make_client(db_path, parser=None, writer=None):
     # 테스트에서는 실제 LLM을 부르지 않는다 (.env에 키가 있어도).
     app.dependency_overrides[get_parser] = lambda: parser
     app.dependency_overrides[get_question_writer] = lambda: writer
+    app.dependency_overrides[get_embedder] = lambda: None
     return TestClient(app)
 
 
@@ -236,7 +237,7 @@ def test_multiple_conditions_in_one_message(parser_client):
 
     prefs = res["debug"]["preferences"]
     assert prefs["explicit"] == {"connection": "wireless", "anc": "yes"}
-    assert "반영했어: 연결 방식: 무선, 노이즈 캔슬링(ANC): 필요" in res["reply"]
+    assert "좋아, 연결 방식 무선, 노이즈 캔슬링(ANC) 필요까지 챙길게" in res["reply"]
     # 이미 답한 속성은 묻지 않는다
     if res["question"]:
         assert res["question"]["attribute"] not in {"connection", "anc"}
@@ -377,6 +378,19 @@ def test_cheaper_sorts_equally_matching_items_by_price(tmp_path):
         assert [r["product_id"] for r in res["recommendations"]] == ["D", "A", "C"]
 
 
+def test_replies_follow_the_user_language(parser_client):
+    """영어로 말하면 고정 문구·보기·추천 근거도 영어로 (카테고리 정의의 *_en)."""
+    client, parser = parser_client
+    parser.table["wireless please"] = ParseResult(
+        "shopping", [explicit("connection", "wireless")], language="en")
+    sid = new_session(client)
+    res = send(client, sid, "wireless please").json()
+    assert "Got it, I'll keep Connection: Wireless in mind." in res["reply"]
+    assert res["question"]["text"] in res["reply"]
+    assert all(o["label"].isascii() for o in res["question"]["options"])
+    assert res["question"]["options"][-1]["label"] == "Doesn't matter"
+
+
 def test_repeated_condition_is_not_acknowledged_again(parser_client):
     client, parser = parser_client
     parser.table["무선으로"] = ParseResult("shopping", [explicit("connection", "wireless")])
@@ -385,7 +399,7 @@ def test_repeated_condition_is_not_acknowledged_again(parser_client):
     sid = new_session(client)
     send(client, sid, "무선으로")
     res = send(client, sid, "무선이고 노캔도").json()
-    assert "반영했어: 노이즈 캔슬링(ANC): 필요." in res["reply"]
+    assert "좋아, 노이즈 캔슬링(ANC) 필요까지 챙길게." in res["reply"]
     assert "연결 방식" not in res["reply"].split("\n")[0]
 
 
@@ -446,11 +460,11 @@ def test_writer_phrases_the_question(chat):
     assert res["debug"]["question_source"] == "llm" and res["debug"]["question_approach"] == "장면"
     req = writer.requests[-1]
     assert req.attribute == q["attribute"] and req.first_turn and not req.retry
-    assert req.message == "무선으로" and req.learned == ["연결 방식: 무선"] and req.history == []
+    assert req.message == "무선으로" and req.learned == ["연결 방식 무선"] and req.history == []
     assert any(line.startswith("연결 방식: 무선") for line in req.known)
 
     # 다음 턴의 질문 작성기는 최근 대화(DB 기록)를 받고, 세션 조회도 같은 문장을 돌려준다
-    send(client, sid, q["options"][0]["label"], (q["attribute"], q["options"][0]["value"]))
+    send(client, sid, q["options"][-1]["label"], (q["attribute"], q["options"][-1]["value"]))  # 상관없음
     assert writer.requests[-1].history == [
         {"role": "user", "content": "무선으로"}, {"role": "assistant", "content": res["reply"]}]
     detail = client.get(f"/api/sessions/{sid}").json()

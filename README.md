@@ -70,7 +70,10 @@ npm install
 ```bash
 cd backend
 uv run python scripts/load_catalog.py headphones   # → loaded 4,628 products -> data/app.db
+uv run python scripts/build_embeddings.py headphones   # 상품 임베딩 (OpenAI 키 필요, 약 $0.04, 선택)
 ```
+
+임베딩은 추천할 때 조건이 똑같이 맞는 상품을 대화와 가까운 순으로 정렬하는 데 쓴다. 없으면 키워드 검색(BM25)만 쓴다.
 
 ### 3. 실행 (개발 모드)
 

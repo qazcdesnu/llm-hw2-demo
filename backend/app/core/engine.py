@@ -75,6 +75,7 @@ class IGEngine:
     """@docid core.engine
     @see backend/README.md#구조
     @see docs/architecture.md#1-한눈에-보기
+    @see docs/briefing.md#4-아키텍처와-코드-지도
     """
 
     def __init__(

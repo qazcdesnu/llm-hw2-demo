@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     openai_question_model: str | None = None
     openai_question_reasoning_effort: str | None = "low"
     openai_timeout: float = 30.0
+    # 텍스트 관련도(동률 정렬)용 임베딩. 상품 임베딩(scripts/build_embeddings.py)과 같은 설정이어야 한다.
+    openai_embedding_model: str = "text-embedding-3-small"
+    openai_embedding_dimensions: int = 512
 
 
 settings = Settings()

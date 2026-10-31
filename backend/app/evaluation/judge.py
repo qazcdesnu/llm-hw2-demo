@@ -10,29 +10,30 @@ from app.catalog.repository import Product
 from app.catalog.spec import CategorySpec
 from app.evaluation.scenarios import Scenario
 from app.llm import LLMClient
-from app.services.memory import label_of
+from app.services.responses import change_label
 
 
 class JudgeScores(BaseModel):
-    fit: int = Field(description="추천 상품들이 사용자의 숨겨진 선호를 얼마나 충족하는가 1~5")
-    naturalness: int = Field(description="챗봇의 대화가 친구처럼 자연스럽고 편했는가 1~5")
-    efficiency: int = Field(description="불필요하거나 반복된 질문 없이 필요한 것만 물었는가 1~5")
-    comment: str = Field(description="채점 근거 한두 문장 (한국어)")
+    fit: int = Field(description="How well the recommended products meet the shopper's hidden preferences, 1-5")
+    naturalness: int = Field(description="How natural and friendly the chatbot's conversation felt, 1-5")
+    efficiency: int = Field(description="Asked only what was needed, without unnecessary or repeated questions, 1-5")
+    comment: str = Field(description="One or two sentences explaining the scores")
 
 
 INSTRUCTIONS = "\n".join([
-    "너는 상품 추천 챗봇 평가자다. 가상 사용자의 숨겨진 선호, 대화 기록, 추천된 상품이 주어진다.",
-    "각 항목을 1~5 정수로 채점한다. 5가 가장 좋다.",
-    "- fit: 추천 상품(특히 1위)이 숨겨진 선호를 충족하는 정도. 상품 정보에 없는 것은 감점하지 않는다.",
-    "- naturalness: 챗봇 말투와 흐름이 자연스러운 정도. 딱딱한 설문식이면 낮게.",
-    "- efficiency: 같은 것을 다시 묻거나 쓸모없는 질문이 많으면 낮게. 질문이 적어도 추천이 맞으면 높게.",
-    "대화에 나온 챗봇 응답의 길이나 시스템 종류로 판단하지 말고 내용으로 판단한다.",
+    "You evaluate a product recommendation chatbot. You get a simulated shopper's hidden preferences,",
+    "the conversation, and the recommended products. Score each item as an integer 1-5 (5 is best).",
+    "- fit: how well the recommendations (especially #1) meet the hidden preferences. Do not penalize what the",
+    "  product info does not list.",
+    "- naturalness: how natural the chatbot's tone and flow are. Low if it feels like a stiff survey.",
+    "- efficiency: low if it repeats questions or asks useless ones. High if few questions still led to good picks.",
+    "Judge by content, not by response length or which system it seems to be.",
 ])
 
 
 def describe_product(spec: CategorySpec, product: Product) -> str:
-    attrs = ", ".join(label_of(spec, k, v) for k, v in product.attributes.items() if k != "brand")
-    price = f"${product.price:.2f}" if product.price is not None else "가격 정보 없음"
+    attrs = ", ".join(change_label(spec, k, v, "en") for k, v in product.attributes.items() if k != "brand")
+    price = f"${product.price:.2f}" if product.price is not None else "price not listed"
     return f"{product.title[:100]} | {price} | {attrs}"
 
 
@@ -41,10 +42,10 @@ def judge_episode(client: LLMClient, spec: CategorySpec, scenario: Scenario,
     """@docid eval.judge
     @see docs/evaluation.md#3-에피소드와-지표
     """
-    dialogue = "\n".join(f"{'사용자' if m['role'] == 'user' else '챗봇'}: {m['content']}" for m in transcript)
-    recs = "\n".join(f"{i}. {describe_product(spec, p)}" for i, p in enumerate(recommended, 1)) or "(추천 없음)"
+    dialogue = "\n".join(f"{'Shopper' if m['role'] == 'user' else 'Chatbot'}: {m['content']}" for m in transcript)
+    recs = "\n".join(f"{i}. {describe_product(spec, p)}" for i, p in enumerate(recommended, 1)) or "(none)"
     persona = "\n".join(f"- {p}" for p in scenario.persona)
-    content = f"숨겨진 선호:\n{persona}\n\n대화:\n{dialogue}\n\n추천:\n{recs}"
+    content = f"Hidden preferences:\n{persona}\n\nConversation:\n{dialogue}\n\nRecommendations:\n{recs}"
     scores = client.parse([{"role": "user", "content": content}], JudgeScores, instructions=INSTRUCTIONS)
     for name in ("fit", "naturalness", "efficiency"):
         setattr(scores, name, min(max(int(getattr(scores, name)), 1), 5))

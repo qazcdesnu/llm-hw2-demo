@@ -13,6 +13,8 @@ const METRICS: { key: keyof SystemSummary; label: string; digits: number }[] = [
   { key: "hit1", label: "Hit@1", digits: 2 },
   { key: "mrr", label: "MRR", digits: 3 },
   { key: "median_rank", label: "정답 순위(중앙)", digits: 0 },
+  { key: "median_rank_no_text", label: "순위(텍스트 정렬 없이)", digits: 0 },
+  { key: "hit3_no_text", label: "Hit@3(텍스트 정렬 없이)", digits: 2 },
   { key: "attribute_match", label: "속성 일치", digits: 2 },
   { key: "fit", label: "적합(심판)", digits: 2 },
   { key: "naturalness", label: "자연스러움", digits: 2 },
@@ -42,6 +44,7 @@ interface Props {
  *
  * @docid ui.eval-panel
  * @see docs/architecture.md#1-한눈에-보기
+ * @see docs/briefing.md#4-아키텍처와-코드-지도
  */
 export default function EvalPanel(props: Props) {
   const [tab, setTab] = useState<"manual" | "auto">("manual");

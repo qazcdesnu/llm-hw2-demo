@@ -1,4 +1,8 @@
-"""LLM 비교군이 쓰는 카탈로그 텍스트 검색 (BM25, 상품명 + 특징). 속성·IG 엔진과 무관하다."""
+"""카탈로그 텍스트 검색 (BM25). 속성·IG 엔진과 무관하다.
+
+평가의 LLM 비교군이 검색어로 후보를 찾을 때(상품명 + 특징 앞부분)와, 대화 상태의 동률 정렬에서
+텍스트 관련도를 잴 때(상품 설명 전체, relevance.py) 쓴다.
+"""
 
 import json
 import math
@@ -24,7 +28,8 @@ class SearchHit:
 
 
 class CatalogSearch:
-    """@docid eval.catalog-search
+    """@docid catalog.search
+    @see docs/architecture.md#1-한눈에-보기
     @see docs/evaluation.md#2-비교하는-시스템
     """
 

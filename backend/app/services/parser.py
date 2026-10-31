@@ -5,6 +5,8 @@
 - 속성 추출기(extractor.py): 속성 조건과 사용 맥락 → 대화 메모리
 
 출력 스키마와 프롬프트는 카테고리 정의(YAML)에서 만든다. 카테고리별 코드는 없다.
+
+@see docs/briefing.md#4-아키텍처와-코드-지도
 """
 
 import logging
@@ -15,7 +17,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, create_model
 
-from app.catalog.spec import CategorySpec
+from app.catalog.spec import CategorySpec, Lang
 from app.llm import LLMClient, LLMError
 from app.services.extractor import (
     KRW_PER_USD, ExtractContext, ParsedConstraint, extract_attributes, validate_constraints,
@@ -56,12 +58,17 @@ class ParseResult:
     rejected: list[str] = field(default_factory=list)
     # 속성 밖의 사용 맥락 (메모리에 남긴다)
     notes: list[str] = field(default_factory=list)
+    # 사용자 발화의 언어. 응답을 이 언어로 한다
+    language: str = "ko"
+    # 상품 설명 검색용 영어 키워드 (메모리에 남긴다)
+    keywords: list[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------- 요청 분류기
 
 class RouteOutput(BaseModel):
     request_type: RequestType
+    language: Lang = Field(description="사용자 발화의 언어: 한국어 ko, 영어 en (그 밖의 언어는 en)")
     exclude_ranks: list[int] = Field(description="현재 추천 목록에서 빼 달라는 상품 번호(1부터). 없으면 빈 목록")
     price_order: PriceOrder = Field(description="'더 싼 걸로'=cheaper, '더 비싸도 좋은 걸로'=pricier, 그 외 none")
 
@@ -82,13 +89,17 @@ def _instructions(name: str) -> str:
         "- unsafe: 무기·총기·마약·폭발물 등 위험하거나 불법적인 것을 구하거나 만드는 요청",
         f"  단, {name}을(를) 찾는 것이면 위험한 단어가 있어도 shopping이다 (예: 사격장에서 쓸 헤드폰)",
         "",
+        "## language",
+        "사용자 발화가 주로 한국어면 ko, 영어(그 밖의 언어 포함)면 en. 영어 단어가 섞인 한국어 문장은 ko.",
+        "",
         "## 추천 목록 조정 ('현재 추천'이 주어졌을 때만)",
         "- '더 싼 걸로', '저렴한 거'처럼 구체적 금액이 없는 상대 표현은 price_order=cheaper (pricier도 같음).",
         "- '1번 말고', '첫 번째는 빼고'는 exclude_ranks에 번호를 넣는다.",
         "- 현재 추천이 없으면 exclude_ranks=[], price_order=none.",
         "",
         "## 예시",
-        '- "무선이고 노이즈 캔슬링 되는 걸로" → shopping',
+        '- "무선이고 노이즈 캔슬링 되는 걸로" → shopping, ko',
+        '- "Looking for wireless earbuds for the gym" → shopping, en',
         '- "지하철로 출퇴근할 때 쓸 거야" → shopping',
         '- (직전 질문 "주로 어디서 들어?") "음 잘 모르겠는데" → shopping',
         '- "노트북 추천해줘" → other_product',
@@ -139,6 +150,7 @@ def parse_message(
     @docid chat.parse-message
     @see docs/architecture.md#1-한눈에-보기
     @see docs/architecture.md#3-대화-한-턴의-흐름
+    @see docs/briefing.md#대화-한-턴
     @see docs/llm-parser.md#2-파서
     @see docs/llm-parser.md#llm-파서와-멀티턴-대화
     """
@@ -152,7 +164,7 @@ def parse_message(
     ranks = sorted({r for r in route.exclude_ranks if ctx.current and 1 <= r <= len(ctx.current)})
     order = route.price_order if ctx.current else "none"
     result = ParseResult(route.request_type, extraction.constraints, ranks, order,
-                         extraction.rejected, extraction.notes)
+                         extraction.rejected, extraction.notes, route.language, extraction.keywords)
     logger.info("parsed %r -> %s %s notes=%s exclude=%s order=%s rejected=%s", message,
                 result.request_type,
                 [(c.attribute, c.value) for c in result.constraints],

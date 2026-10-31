@@ -12,6 +12,7 @@ const STOP_REASONS: Record<string, string> = {
  *
  * @docid ui.debug-panel
  * @see docs/architecture.md#1-한눈에-보기
+ * @see docs/briefing.md#4-아키텍처와-코드-지도
  */
 export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
   if (!debug) {
@@ -66,6 +67,14 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
                   ))}
                 </tbody>
               </table>
+            </dd>
+          </>
+        )}
+        {debug.tie_order && (
+          <>
+            <dt>Tie order</dt>
+            <dd>
+              <code>{debug.tie_order}</code>
             </dd>
           </>
         )}

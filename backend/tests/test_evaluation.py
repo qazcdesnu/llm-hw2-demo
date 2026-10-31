@@ -12,7 +12,7 @@ from app.evaluation import runner, scenarios as scenario_mod
 from app.evaluation.judge import JudgeScores
 from app.evaluation.runner import EvalContext, attribute_match, run_episode, summarize
 from app.evaluation.scenarios import Scenario
-from app.evaluation.search import CatalogSearch
+from app.catalog.search import CatalogSearch
 from app.evaluation.systems import Pick
 from app.main import create_app
 from app.services.chat import build_catalog
@@ -108,7 +108,7 @@ def test_summarize():
         {"system": "ig", "recommended": [], "error": "boom"},
     ]
     s = summarize(rows)["ig"]
-    assert (s["episodes"], s["errors"], s["hit1"], s["mrr"], s["median_rank"]) == (2, 1, 0.5, 0.625, 4)
+    assert (s["episodes"], s["errors"], s["hit1"], s["mrr"], s["median_rank"]) == (2, 1, 0.5, 0.625, 2.5)  # 순위 1, 4의 중앙값
     assert (s["fit"], s["questions"], s["seconds"]) == (3, 3, 15)
 
 
@@ -121,10 +121,11 @@ def api(tmp_path, monkeypatch):
     scenario = Scenario(**{**SCENARIO.__dict__, "target_id": "P1"})
     monkeypatch.setattr(scenario_mod, "SCENARIO_DIR", tmp_path)
     scenario_mod.save_scenarios("headphones", [scenario])
-    from app.api.sessions import get_parser, get_question_writer
+    from app.api.sessions import get_embedder, get_parser, get_question_writer
     app = create_app(db_path)
     app.dependency_overrides[get_parser] = lambda: None
     app.dependency_overrides[get_question_writer] = lambda: None
+    app.dependency_overrides[get_embedder] = lambda: None
     with TestClient(app) as client:
         yield client, db_path
 

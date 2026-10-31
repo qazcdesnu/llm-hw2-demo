@@ -37,15 +37,16 @@ class FakeClient:
         return self.route if schema is RouteOutput else self.extraction
 
 
-def route(request_type="shopping", exclude=(), order="none"):
-    return RouteOutput(request_type=request_type, exclude_ranks=list(exclude), price_order=order)
+def route(request_type="shopping", exclude=(), order="none", language="ko"):
+    return RouteOutput(request_type=request_type, language=language, exclude_ranks=list(exclude),
+                       price_order=order)
 
 
 def test_parse_message_merges_router_and_extractor_calls():
     extraction = Extraction(constraints=[
         Constraint(attribute="anc", value="yes", quote=" 지하철 "),
         Constraint(attribute="connection", value="bluetooth", quote="x"),
-    ], notes=["지하철 출퇴근", " "])
+    ], notes=["지하철 출퇴근", " "], keywords=["commute", " "])
     # 두 호출이 동시에 나가지 않으면 barrier에서 시간 초과(BrokenBarrierError)
     client = FakeClient(route(exclude=[1, 9], order="cheaper"), extraction,
                         barrier=threading.Barrier(2, timeout=5))
@@ -56,7 +57,7 @@ def test_parse_message_merges_router_and_extractor_calls():
     assert result.request_type == "shopping"
     assert [(c.attribute, c.value, c.quote) for c in result.constraints] == [("anc", "yes", "지하철")]
     assert result.rejected == ["connection=bluetooth"]
-    assert result.notes == ["지하철 출퇴근"]
+    assert result.notes == ["지하철 출퇴근"] and result.keywords == ["commute"]
     assert result.exclude_ranks == [1] and result.price_order == "cheaper"
     assert {c[0] for c in client.calls} == {RouteOutput, Extraction}
     extract_prompt = next(c[1] for c in client.calls if c[0] is Extraction)
@@ -64,13 +65,13 @@ def test_parse_message_merges_router_and_extractor_calls():
 
 
 def test_adjustments_are_ignored_without_current_recommendations():
-    client = FakeClient(route(exclude=[1], order="cheaper"), Extraction(constraints=[], notes=[]))
+    client = FakeClient(route(exclude=[1], order="cheaper"), Extraction(constraints=[], notes=[], keywords=[]))
     result = parse_message(client, SPEC, "더 싼 걸로")
     assert result.exclude_ranks == [] and result.price_order == "none"
 
 
 def test_llm_parser_returns_none_on_failure():
-    client = FakeClient(route(), Extraction(constraints=[], notes=[]), fail=True)
+    client = FakeClient(route(), Extraction(constraints=[], notes=[], keywords=[]), fail=True)
     assert LLMParser(client)(SPEC, "무선", ParseContext()) is None
 
 
@@ -91,6 +92,14 @@ def test_question_input_has_flags_history_and_learned():
     assert "상황: 다시 묻기, 방금 한 말에서 알아들은 것 없음" in text
     assert "친구: 무선\n나: 어디서 써?\n방금 알게 된 것: 가격대: $20 미만" in text
     assert text.endswith("친구가 방금 한 말: 음 글쎄")
+    assert "직접 묻기" not in text
+
+
+def test_question_input_marks_direct_attribute():
+    """ask_directly 속성(가격대)은 돌려 묻지 않고, 금액을 원화로 말하게 한다."""
+    text = question_input(SPEC, QuestionRequest(attribute="price_band"))
+    assert "상황: 직접 묻기" in text
+    assert "원화로 말한다" in text
 
 
 @pytest.mark.parametrize("raw, expected", [

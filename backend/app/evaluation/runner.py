@@ -1,6 +1,8 @@
 """평가 실행: 시나리오 × 시스템마다 가상 사용자와 대화시키고, 정답 적중과 LLM 심판 점수를 남긴다.
 
 결과는 SQLite(eval_runs, eval_episodes)에 저장해 Developer Panel의 평가 모드에서 본다.
+
+@see docs/briefing.md#4-아키텍처와-코드-지도
 """
 
 import json
@@ -13,21 +15,22 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
-from statistics import mean
+from statistics import mean, median
 
 from app.catalog.repository import load_category, load_products
+from app.catalog.search import CatalogSearch
 from app.catalog.spec import CategorySpec
+from app.config import settings
 from app.db import connect
 from app.evaluation.agents import simulated_user
 from app.evaluation.judge import judge_episode
 from app.evaluation.scenarios import Scenario, load_scenarios
-from app.evaluation.search import CatalogSearch
 from app.evaluation.systems import SYSTEMS, make_system
 from app.llm import LLMClient, get_llm_client
 from app.services.chat import Catalog, Parser, QuestionWriter, build_catalog
 from app.services.parser import LLMParser
 from app.services.questioner import LLMQuestionWriter
-from app.config import settings
+from app.services.relevance import embedder_for, load_text_index
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +56,9 @@ def load_context(conn: sqlite3.Connection, category_id: str) -> EvalContext:
     client = get_llm_client()
     writer_client = get_llm_client(settings.openai_question_model,
                                    settings.openai_question_reasoning_effort or "")
-    return EvalContext(spec, build_catalog(spec, load_products(conn, category_id)),
+    catalog = build_catalog(spec, load_products(conn, category_id), text=load_text_index(conn, category_id),
+                            embed=embedder_for(client))
+    return EvalContext(spec, catalog,
                        CatalogSearch.from_db(conn, category_id), client,
                        LLMParser(client), LLMQuestionWriter(writer_client))
 
@@ -88,6 +93,8 @@ def summarize(results: list[dict]) -> dict[str, dict]:
             return round(mean(values), 3) if values else None
 
         ranks = [r["target_rank"] for r in rs if r.get("target_rank")]
+        no_text = [r["extra"]["target_rank_no_text"] for r in rs
+                   if (r.get("extra") or {}).get("target_rank_no_text")]
         out[system] = {
             "episodes": len(rs),
             "errors": sum(1 for r in results if r["system"] == system and r.get("error")),
@@ -95,7 +102,10 @@ def summarize(results: list[dict]) -> dict[str, dict]:
             "hit1": avg([float(r["hit1"]) for r in rs]),
             "hit3": avg([float(r["hit3"]) for r in rs]),
             "mrr": avg([1 / r for r in ranks]) if ranks else None,
-            "median_rank": sorted(ranks)[len(ranks) // 2] if ranks else None,
+            "median_rank": median(ranks) if ranks else None,
+            # 동률 정렬에서 텍스트 관련도를 뺐을 때 (주 용도 → 평점만)
+            "median_rank_no_text": median(no_text) if no_text else None,
+            "hit3_no_text": avg([float(v <= 3) for v in no_text]) if no_text else None,
             "attribute_match": avg([r["attribute_match"] for r in rs]),
             "questions": avg([r["questions"] for r in rs]),
             "fit": avg([r["judge"]["fit"] for r in rs if r.get("judge")]),
@@ -119,7 +129,7 @@ def run_episode(ctx: EvalContext, scenario: Scenario, system_name: str) -> dict:
     seed = int(scenario.id.rsplit("-", 1)[-1]) if scenario.id.rsplit("-", 1)[-1].isdigit() else 0
     system = make_system(system_name, ctx.catalog, parser=ctx.parser, writer=ctx.writer,
                          client=ctx.client, search=ctx.search, seed=seed)
-    user = simulated_user(ctx.client, scenario, ctx.spec.name)
+    user = simulated_user(ctx.client, scenario, ctx.spec.name_for("en"))
     transcript: list[dict[str, str]] = []
     recommended: list[str] = []
     extra: dict = {}
@@ -137,6 +147,8 @@ def run_episode(ctx: EvalContext, scenario: Scenario, system_name: str) -> dict:
         message = user.reply(turn.reply)
 
     rank = system.target_rank(scenario.target_id) if hasattr(system, "target_rank") else None
+    if hasattr(system, "target_rank"):
+        extra["target_rank_no_text"] = system.target_rank(scenario.target_id, use_text=False)
     if system_name == "llm":
         extra["target_in_candidates"] = scenario.target_id in extra.get("candidate_ids", [])
         extra.pop("candidate_ids", None)
