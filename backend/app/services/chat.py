@@ -163,6 +163,7 @@ def tie_order(catalog: Catalog, state: ChatState, use_text: bool = True) -> tupl
     use_text=False면 3을 뺀다 (평가에서 텍스트 관련도의 효과를 따로 잴 때).
 
     @docid chat.tie-order
+    @see backend/README.md#구조
     @see docs/architecture.md#1-한눈에-보기
     @see docs/briefing.md#ig-엔진-ig-enginemd
     @see docs/ig-engine.md#4-추천과-한계-표시

@@ -42,7 +42,7 @@
 {
   "explicit": {"connection": "wireless", "anc": "yes"},
   "dont_care": ["brand"],
-  "asked": ["connection", "use_case"],
+  "asked": ["connection", "price_band"],
   "excluded": []
 }
 ```
@@ -62,6 +62,7 @@
 
 **질문 후보** ([`candidate_questions`](../backend/app/core/question_selector.py "sym:py:app.core.question_selector#candidate_questions"))
 - `askable`이고, 아직 답하지 않았고, 아직 묻지 않은 속성이다.
+- 조건이 아닌 속성(`constraint: false`, 헤드폰은 주 용도)은 엔진에 아예 넣지 않는다([`from_catalog`](../backend/app/core/adapters.py "docid:core.from-catalog")). 그래서 묻지도, 확률 계산에 쓰지도 않는다(2026-10-31, [4절](#4-추천과-한계-표시)).
 
 **정책** (평가에서 이것만 바꿔 비교한다)
 
@@ -140,6 +141,7 @@ uv run python scripts/ig_demo.py headphones --target B0BHR5VQC9 --policy random 
 ## 6. 예비 확인 결과 (2026-10-26)
 
 > **150개 카탈로그 기준 결과다.** 카탈로그를 4,628개로 넓힌 뒤에는 처음 엔트로피가 12.18 bits이고, 첫 질문의 IG 순위는 같다(use_case 1.32 > price_band 1.22 > form_factor 1.16 > …). 정식 측정은 Phase 4에서 4,628개로 다시 한다.
+> **주 용도(use_case)가 있던 때의 결과다.** 2026-10-31부터 주 용도는 묻지 않으므로 지금은 가격대가 첫 질문이 된다. 대화 평가(실제 구매 기록 시나리오, LLM 가상 사용자)는 [evaluation.md](evaluation.md)에 있다.
 
 헤드폰 카탈로그 150개의 각 상품을 목표로, 목표의 속성대로 답하는 사용자와 대화했다. 목표 속성이 unknown이면 "상관없음"으로 답했다.
 엔진 동작 확인용이다. 정식 평가(지표 정의, 노이즈, 반복)는 [roadmap Phase 4](roadmap.md#phase-4-정량-평가)에서 한다.

@@ -123,6 +123,7 @@ def run_episode(ctx: EvalContext, scenario: Scenario, system_name: str) -> dict:
 
     @docid eval.run-episode
     @see docs/architecture.md#1-한눈에-보기
+    @see docs/architecture.md#7-평가-구조-
     @see docs/evaluation.md#3-에피소드와-지표
     """
     start = time.perf_counter()

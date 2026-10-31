@@ -49,11 +49,11 @@ uv run python scripts/build_scenarios.py headphones --limit 10
 
 | 이름 | 질문 고르기 | 추천 |
 |---|---|---|
-| `ig` (우리 시스템) | IG 엔진: 기대 정보량 최대 | IG 엔진 Top-3 |
-| `random` (비교군) | 같은 시스템에서 다음 질문 속성만 무작위 (`RandomPolicy`, 시나리오별 seed) | IG 엔진 Top-3 |
+| `ig` (우리 시스템) | IG 엔진: 기대 정보량 최대 | IG 엔진 Top-3 (동률은 주 용도 → 텍스트 관련도 → 평점) |
+| `random` (비교군) | 같은 시스템에서 다음 질문 속성만 무작위 (`RandomPolicy`, 시나리오별 seed) | `ig`와 같음 |
 | `llm` (비교군) | LLM이 자유롭게 대화. 질문 수·순서 제약 없음(최대 5회) | 검색어 → 카탈로그 BM25 상위 30개 → LLM이 3개 선택 ([`LLMSystem`](../backend/app/evaluation/systems.py "docid:eval.llm-baseline")) |
 
-- `ig`와 `random`은 파서, 메모리, 질문 작성기(친구 말투), 추천기가 같고 **질문 선택 정책만** 다르다. IG의 효과만 떼어 본다.
+- `ig`와 `random`은 파서, 메모리, 질문 작성기(친구 말투), 추천기, 동률 정렬이 같고 **질문 선택 정책만** 다르다. IG의 효과만 떼어 본다.
 - `llm`은 IG·속성 엔진을 전혀 쓰지 않는 "그냥 대화하다 추천" 방식이다. 정답 순위를 매기려면 카탈로그 안에서 골라야 해서, 추천할 때 검색어를 쓰고 BM25 검색 결과([`CatalogSearch`](../backend/app/catalog/search.py "docid:catalog.search")) 안에서만 고르게 했다.
 
 ## 3. 에피소드와 지표
@@ -87,7 +87,7 @@ cd backend
 uv run python scripts/run_eval.py headphones --limit 10                 # ig, random, llm
 uv run python scripts/run_eval.py headphones --limit 3 --systems ig llm
 ```
-결과는 SQLite(`eval_runs`, `eval_episodes`, 매뉴얼은 `eval_manual`)에 남고 평가 모드에서도 보인다.
+결과는 SQLite(`eval_runs`, `eval_episodes`, 매뉴얼은 `eval_manual`)에 남고 평가 모드에서도 보인다. 10 × 3 한 번에 약 12분(대화 하나 ig·random 약 65초, llm 약 33초, 4개 동시).
 
 **API** ([evaluation.py](../backend/app/api/evaluation.py))
 

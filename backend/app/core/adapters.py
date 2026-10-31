@@ -34,7 +34,9 @@ def popularity_scores(products: Sequence[Product]) -> list[float]:
 def from_catalog(
     spec: CategorySpec, products: Sequence[Product]
 ) -> tuple[dict[str, AttributeDef], list[Item]]:
-    """@docid core.from-catalog"""
+    """@docid core.from-catalog
+    @see docs/ig-engine.md#3-질문-선택
+    """
     attributes = {}
     for a in spec.attributes:
         if not a.constraint:  # 조건이 아닌 속성은 엔진에 넣지 않는다 (동률 정렬은 chat.py)

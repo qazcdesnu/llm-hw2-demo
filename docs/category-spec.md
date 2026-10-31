@@ -91,6 +91,7 @@ attributes:
 - `categories`: 카테고리 정의 JSON 스냅샷. 런타임은 이 스냅샷을 읽어 DB의 상품 속성과 정의 버전이 항상 일치
 - `products`: 카테고리와 무관한 공통 필드 (제목, 가격, 평점, 이미지, 원문 features/description/details)
 - `product_attributes`: `(product_id, attribute) → value, source, evidence`. 행이 없으면 unknown. 추천 근거로 `evidence`(원문 일부)를 보여줄 수 있음
+- `product_embeddings`: 상품 글(상품명·특징·세부 정보) 임베딩. `build_embeddings.py`로 미리 만든다. 카탈로그를 다시 로드해도 지워지지 않고, 글이 바뀐 상품만 다시 만든다
 
 ## 현재 제약
-- 속성은 상품당 값 하나 (단일값). `use_case`처럼 여러 값이 가능한 속성은 우선순위가 높은 값 하나만 저장한다.
+- 속성은 상품당 값 하나 (단일값). `use_case`처럼 여러 값이 가능한 속성은 우선순위가 높은 값 하나만 저장한다. 그래서 헤드폰의 `use_case`는 조건으로 쓰지 않고(`constraint: false`) 동률 정렬에만 쓴다.
