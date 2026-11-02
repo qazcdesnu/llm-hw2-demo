@@ -1,11 +1,36 @@
 import { useEffect, useState } from "react";
-import { ApiError, createSession, getSession, sendMessage } from "./api";
+import { ApiError, createSession, getSession, listModels, sendMessage } from "./api";
 import ChatView from "./components/ChatView";
 import DebugPanel from "./components/DebugPanel";
 import EvalPanel from "./components/EvalPanel";
-import type { Answer, ChatResponse, Message, Question, Recommendation, Scenario } from "./types";
+import type {
+  Answer,
+  ChatResponse,
+  Message,
+  ModelChoice,
+  Question,
+  Recommendation,
+  Scenario,
+} from "./types";
 
 const SESSION_KEY = "sessionId";
+const MODEL_KEY = "model";
+
+function loadStoredModel(): string | null {
+  try {
+    return localStorage.getItem(MODEL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function storeModel(id: string) {
+  try {
+    localStorage.setItem(MODEL_KEY, id);
+  } catch {
+    // 저장 실패 시 새로고침하면 기본 모델로 돌아간다.
+  }
+}
 
 function loadStoredSession(): string | null {
   try {
@@ -45,6 +70,24 @@ export default function App() {
   const [panel, setPanel] = useState<"debug" | "eval">("debug");
   // 매뉴얼 평가에서 연기 중인 시나리오 (새 대화를 시작하면 해제)
   const [scenario, setScenario] = useState<Scenario | null>(null);
+  // 입력창의 모델 선택 (기본값은 서버 설정의 모델)
+  const [models, setModels] = useState<ModelChoice[]>([]);
+  const [model, setModel] = useState<string | null>(null);
+
+  useEffect(() => {
+    listModels()
+      .then(({ default: fallback, options }) => {
+        setModels(options);
+        const stored = loadStoredModel();
+        setModel(stored && options.some((o) => o.id === stored) ? stored : fallback);
+      })
+      .catch(() => setModels([])); // 목록을 못 받으면 선택 없이 서버 기본 모델을 쓴다
+  }, []);
+
+  function handleModelChange(id: string) {
+    setModel(id);
+    storeModel(id);
+  }
 
   useEffect(() => {
     // StrictMode의 이중 실행에서 먼저 끝난 쪽이 상태를 덮어쓰지 않도록 한다.
@@ -84,7 +127,7 @@ export default function App() {
     setPending(true);
     setError(null);
     try {
-      const res = await sendMessage(sessionId, text, answer);
+      const res = await sendMessage(sessionId, text, answer, model ?? undefined);
       setMessages((m) => [...m, { role: "assistant", content: res.reply }]);
       setQuestion(res.question);
       setFinished(res.finished);
@@ -129,6 +172,9 @@ export default function App() {
           pending={pending}
           disabled={!sessionId}
           error={error}
+          models={models}
+          model={model}
+          onModelChange={handleModelChange}
           onSend={handleSend}
           onReset={() => handleReset()}
         />

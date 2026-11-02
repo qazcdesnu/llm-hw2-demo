@@ -242,6 +242,18 @@ button.primary {
   background: var(--surface);
 }
 
+.composer .model-select {
+  flex: 0 0 auto;
+  max-width: 40%;
+  padding: 0.6rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9em;
+}
+
 .composer input {
   flex: 1;
   padding: 0.6rem 0.8rem;

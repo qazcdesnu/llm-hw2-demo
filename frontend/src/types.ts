@@ -84,6 +84,18 @@ export interface DebugInfo {
   question_source: "llm" | "template" | null;
   question_approach: string | null;
   tie_order: string | null;
+  model: string | null;
+}
+
+// 입력창에서 고를 수 있는 OpenAI 모델 (GET /api/models)
+export interface ModelChoice {
+  id: string;
+  reasoning: boolean;
+}
+
+export interface ModelList {
+  default: string;
+  options: ModelChoice[];
 }
 
 export interface ChatResponse {

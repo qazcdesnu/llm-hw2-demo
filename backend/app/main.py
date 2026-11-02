@@ -25,6 +25,7 @@ def create_app(db_path: Path | None = None, frontend_dist: Path | None = None) -
     app = FastAPI(title="RecommandShopping", lifespan=lifespan)
     app.state.db_path = db_path
     app.include_router(sessions.router)
+    app.include_router(sessions.models_router)
     app.include_router(evaluation.router)
 
     @app.get("/api/health")

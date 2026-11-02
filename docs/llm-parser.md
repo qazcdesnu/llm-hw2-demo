@@ -102,6 +102,7 @@ uv run python scripts/eval_parser.py --configs gpt-5-mini:low gpt-5-nano:low --v
 
 - **gpt-5-nano + low를 쓰지 않은 이유:** 대화 맥락이 함께 있을 때 "총 구하는 방법"을 매번 쇼핑으로 분류했다(Safety 실패). 결과도 실행마다 흔들렸다.
 - **설정 위치:** `backend/.env`의 `OPENAI_MODEL`, `OPENAI_REASONING_EFFORT`, `OPENAI_QUESTION_MODEL`, `OPENAI_QUESTION_REASONING_EFFORT`(질문 작성, 기본 `low`, [5절](#5-질문-작성기-친구-페르소나))
+- **화면에서 고르기 (2026-11-02):** 입력창 왼쪽의 모델 선택 상자로 메시지마다 모델을 바꿀 수 있다(기본은 `OPENAI_MODEL`, 고른 값은 브라우저에 기억). 고른 모델이 해석과 질문 작성에 함께 쓰인다([`chat_client`](../backend/app/llm/__init__.py "sym:py:app.llm#chat_client")). 선택지: `gpt-5-mini`(기본), `gpt-5-nano`, `gpt-5`, `gpt-4.1-mini`, `gpt-4o-mini`. 추론 모델이 아니면 reasoning effort를 보내지 않는다. 같은 발화로 확인한 한 턴(해석 + 질문 작성) 시간: gpt-5 계열 15~20초, `gpt-4.1-mini`·`gpt-4o-mini` 약 4초. 평가 실행은 이 선택과 무관하게 설정의 모델을 쓴다.
 
 ## 4. 대화 메모리
 

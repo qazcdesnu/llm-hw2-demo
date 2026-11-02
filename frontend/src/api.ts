@@ -3,6 +3,7 @@ import type {
   ChatResponse,
   EvalRun,
   ManualResult,
+  ModelList,
   Scenario,
   SessionDetail,
 } from "./types";
@@ -54,11 +55,17 @@ export function sendMessage(
   sessionId: string,
   message: string,
   answer?: Answer,
+  model?: string,
 ): Promise<ChatResponse> {
   return request<ChatResponse>(`/api/sessions/${sessionId}/messages`, {
     method: "POST",
-    body: JSON.stringify(answer ? { message, answer } : { message }),
+    body: JSON.stringify({ message, ...(answer && { answer }), ...(model && { model }) }),
   });
+}
+
+// 입력창의 모델 선택지와 기본 모델
+export function listModels(): Promise<ModelList> {
+  return request<ModelList>("/api/models");
 }
 
 // ---------------------------------------------------------------- 평가

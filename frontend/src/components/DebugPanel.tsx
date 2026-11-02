@@ -78,6 +78,14 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
             </dd>
           </>
         )}
+        {debug.model && (
+          <>
+            <dt>Model</dt>
+            <dd>
+              <code>{debug.model}</code>
+            </dd>
+          </>
+        )}
         {debug.question_source && (
           <>
             <dt>Question</dt>

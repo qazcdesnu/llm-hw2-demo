@@ -46,7 +46,7 @@ flowchart LR
 
 | 구성 요소 | 위치 | 역할 | 상태 |
 |---|---|---|---|
-| 채팅 UI | [`App`](../frontend/src/App.tsx "sym:ts:src/App#App"), [`DebugPanel`](../frontend/src/components/DebugPanel.tsx "docid:ui.debug-panel"), [`sendMessage`](../frontend/src/api.ts "docid:ui.send-message") | 대화, 보기 버튼, Top-3 추천 표시, Developer Panel(선택 속성·기대 IG·후보 확률·메모리·질문 접근) | ✅ |
+| 채팅 UI | [`App`](../frontend/src/App.tsx "sym:ts:src/App#App"), [`DebugPanel`](../frontend/src/components/DebugPanel.tsx "docid:ui.debug-panel"), [`sendMessage`](../frontend/src/api.ts "docid:ui.send-message") | 대화, 보기 버튼, Top-3 추천 표시, 입력창의 LLM 모델 선택, Developer Panel(선택 속성·기대 IG·후보 확률·메모리·질문 접근·사용 모델) | ✅ |
 | 세션 API | [`post_message`](../backend/app/api/sessions.py "sym:py:app.api.sessions#post_message") ([sessions.py](../backend/app/api/sessions.py)) | 세션 생성, 대화 기록, 메시지 처리 | ✅ |
 | 대화 관리자 | [`handle_message`](../backend/app/services/chat.py "docid:chat.handle-turn") | 한 턴을 해석 → 상태 갱신 → 결정 → 표현으로 처리 ([3절](#3-대화-한-턴의-흐름)) | ✅ |
 | 대화 상태 | [`ChatState`](../backend/app/services/state.py "sym:py:app.services.state#ChatState") | 메모리, 질문 기록, 추천 조정을 저장. 엔진 입력은 저장하지 않고 매 턴 만듦 | ✅ |

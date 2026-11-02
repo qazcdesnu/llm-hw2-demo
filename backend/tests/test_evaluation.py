@@ -123,8 +123,8 @@ def api(tmp_path, monkeypatch):
     scenario_mod.save_scenarios("headphones", [scenario])
     from app.api.sessions import get_embedder, get_parser, get_question_writer
     app = create_app(db_path)
-    app.dependency_overrides[get_parser] = lambda: None
-    app.dependency_overrides[get_question_writer] = lambda: None
+    app.dependency_overrides[get_parser] = lambda: lambda model: None
+    app.dependency_overrides[get_question_writer] = lambda: lambda model: None
     app.dependency_overrides[get_embedder] = lambda: None
     with TestClient(app) as client:
         yield client, db_path

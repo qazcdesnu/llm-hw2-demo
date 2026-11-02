@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { DONT_CARE, type Answer, type Message, type Question, type Recommendation } from "../types";
+import {
+  DONT_CARE,
+  type Answer,
+  type Message,
+  type ModelChoice,
+  type Question,
+  type Recommendation,
+} from "../types";
 
 interface Props {
   messages: Message[];
@@ -9,6 +16,10 @@ interface Props {
   pending: boolean;
   disabled: boolean;
   error: string | null;
+  // 해석·질문 작성에 쓸 OpenAI 모델 (목록이 비면 선택 상자를 숨기고 서버 기본 모델을 쓴다)
+  models: ModelChoice[];
+  model: string | null;
+  onModelChange: (id: string) => void;
   onSend: (text: string, answer?: Answer) => void;
   onReset: () => void;
 }
@@ -29,6 +40,9 @@ export default function ChatView({
   pending,
   disabled,
   error,
+  models,
+  model,
+  onModelChange,
   onSend,
   onReset,
 }: Props) {
@@ -130,6 +144,23 @@ export default function ChatView({
         <div ref={bottomRef} />
       </div>
       <form className="composer" onSubmit={handleSubmit}>
+        {models.length > 0 && model && (
+          <select
+            className="model-select"
+            value={model}
+            onChange={(e) => onModelChange(e.target.value)}
+            disabled={pending}
+            aria-label="LLM 모델"
+            title="해석과 질문 작성에 쓸 OpenAI 모델"
+          >
+            {models.map((m, i) => (
+              <option key={m.id} value={m.id}>
+                {m.id}
+                {i === 0 ? " (기본)" : ""}
+              </option>
+            ))}
+          </select>
+        )}
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

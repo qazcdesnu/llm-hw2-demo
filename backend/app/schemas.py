@@ -44,6 +44,8 @@ class ChatRequest(BaseModel):
     # 대화 기록에 남는 사용자 발화. 버튼을 누른 경우 보기의 label.
     message: str = Field(min_length=1, max_length=2000)
     answer: Answer | None = None
+    # 해석·질문 작성에 쓸 OpenAI 모델 (GET /api/models의 id). 없으면 설정의 기본 모델
+    model: str | None = None
 
 
 class Recommendation(BaseModel):
@@ -85,6 +87,8 @@ class DebugInfo(BaseModel):
     question_approach: str | None = None
     # 추천 때 조건이 같은 상품 사이의 정렬 기준 (cheaper / pricier / relevance / rating)
     tie_order: str | None = None
+    # 이번 턴의 해석·질문 작성에 쓴 모델
+    model: str | None = None
 
 
 class ChatResponse(BaseModel):
@@ -93,3 +97,13 @@ class ChatResponse(BaseModel):
     recommendations: list[Recommendation]
     debug: DebugInfo
     finished: bool = False
+
+
+class ModelChoice(BaseModel):
+    id: str
+    reasoning: bool
+
+
+class ModelList(BaseModel):
+    default: str
+    options: list[ModelChoice]

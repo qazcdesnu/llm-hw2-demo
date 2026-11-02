@@ -71,8 +71,8 @@ class FakeWriter:
 def make_client(db_path, parser=None, writer=None):
     app = create_app(db_path)
     # 테스트에서는 실제 LLM을 부르지 않는다 (.env에 키가 있어도).
-    app.dependency_overrides[get_parser] = lambda: parser
-    app.dependency_overrides[get_question_writer] = lambda: writer
+    app.dependency_overrides[get_parser] = lambda: lambda model: parser
+    app.dependency_overrides[get_question_writer] = lambda: lambda model: writer
     app.dependency_overrides[get_embedder] = lambda: None
     return TestClient(app)
 
@@ -535,3 +535,35 @@ def test_no_frontend_mount_without_build(tmp_path):
     with TestClient(create_app(tmp_path / "t.db", frontend_dist=tmp_path / "missing")) as c:
         assert c.get("/").status_code == 404
         assert c.get("/api/health").status_code == 200
+
+
+def test_model_list_starts_with_the_default(client):
+    from app.config import settings
+
+    body = client.get("/api/models").json()
+    assert body["default"] == settings.openai_model
+    ids = [o["id"] for o in body["options"]]
+    assert ids[0] == settings.openai_model and len(ids) == len(set(ids)) >= 2
+
+
+def test_chosen_model_reaches_parser_and_writer(tmp_path):
+    """입력창에서 고른 모델로 해석·질문 작성을 만든다. 고르지 않으면 기본 모델(None)."""
+    from app.config import settings
+
+    db_path = tmp_path / "test.db"
+    seed_catalog(db_path)
+    asked = []
+    app = create_app(db_path)
+    app.dependency_overrides[get_parser] = lambda: lambda model: asked.append(("parse", model))
+    app.dependency_overrides[get_question_writer] = lambda: lambda model: asked.append(("write", model))
+    app.dependency_overrides[get_embedder] = lambda: None
+    with TestClient(app) as c:
+        sid = new_session(c)
+        other = [o["id"] for o in c.get("/api/models").json()["options"]][1]
+        res = c.post(f"/api/sessions/{sid}/messages", json={"message": "무선", "model": other})
+        assert res.status_code == 200 and res.json()["debug"]["model"] == other
+        res = c.post(f"/api/sessions/{sid}/messages", json={"message": "유선"})
+        assert res.json()["debug"]["model"] == settings.openai_model
+        assert c.post(f"/api/sessions/{sid}/messages",
+                      json={"message": "x", "model": "no-such-model"}).status_code == 422
+    assert asked == [("parse", other), ("write", other), ("parse", None), ("write", None)]
