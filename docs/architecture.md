@@ -103,6 +103,7 @@ flowchart LR
 
 - 보기 버튼을 누르면 `answer`를 그대로 쓴다(메모리에도 남긴다). 해석에는 LLM을 부르지 않는다.
 - 질문에 답하지 않은 말(잡담, 다른 이야기, 모호한 말)은 혼내지 않는다. 다른 정보가 있으면 반영하고, 같은 속성은 한 번 더 더 직접적으로 묻거나 넘어간다([LLM 파서 6절](llm-parser.md#6-질문에-답하지-않은-말)).
+- **추천 전 확인 (2026-11-03):** 엔진이 추천하기로 하면 바로 추천하지 않고, 메모리의 조건을 정리해 "정리해 볼게: …. 이대로 찾아볼까, 아니면 바뀐 게 있어?"라고 묻는다([`_ask_confirmation`](../backend/app/services/chat.py "docid:chat.confirm-before-recommend")). 바뀐 게 없으면(동의, 조건 없는 답, "이대로 추천해 줘" 버튼) 추천하고, 조건을 바꾸면 반영해서 다시 확인한다(새 IG 질문은 하지 않음). 최대 3번이고, 세 번째 확인 뒤에는 바뀌어도 반영해서 추천한다. 바뀌었는지는 LLM 파서가 뽑은 변화로만 판단한다. 마지막 턴의 짐작이 바로잡힐 기회를 주려는 것이다. 메모리가 비어 있으면 확인 없이 추천한다.
 - 추천을 보여준 뒤에도 대화가 이어진다. 조건 추가·변경, "1번 말고", "더 싼 걸로"로 추천을 조정한다([LLM 파서 9절](llm-parser.md#9-멀티턴-추천-조정)).
 
 ```mermaid
@@ -175,6 +176,7 @@ sequenceDiagram
 | `questions` | 속성별 질문 기록 `{text, turn, attempts, status: pending\|answered\|unanswered\|skipped}` |
 | `finished`, `last_recommended`, `excluded`, `price_order` | 추천을 보여줬는지, 보여준 추천, 제외한 상품, 가격 정렬 |
 | `language` | 사용자에게 보이는 말의 언어(`ko` / `en`). 요청 분류기가 매 턴 발화의 언어로 정한다 |
+| `confirming`, `confirms` | 추천 전 확인 질문의 답을 기다리는 중인지, 지금까지 물은 횟수(최대 3) |
 
 - 최근 대화는 상태에 두지 않고 `messages` 테이블에서 읽어 질문 작성기에 넘긴다.
 - 엔진 입력 만들기: `explicit`/`dont_care`는 속성별 마지막 사실(조건이 아닌 속성 제외), `asked`(다시 묻지 않음 + 예산)는 `unanswered`가 아닌 질문.

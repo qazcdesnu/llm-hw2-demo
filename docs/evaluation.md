@@ -72,6 +72,7 @@ uv run python scripts/build_scenarios.py headphones --limit 10
 - `llm`은 검색 후보 안에 정답이 있었는지(`target_in_candidates`)도 남긴다(검색 단계의 한계를 분리해 보려고).
 - 가상 사용자·심판·`llm` 비교군은 `OPENAI_MODEL`(기본 `gpt-5-mini` + `low`)을 쓴다.
 - **가상 사용자 규칙:** 물은 것만 1~2문장으로 답한다. 챗봇이 자기에 대해 틀린 짐작("so you want noise cancelling")을 말하면 답하면서 짧게 바로잡는다(2026-11-03, 실제 사용자처럼). 페르소나에 없는 것을 물으면 그 사람의 상황에서 가장 그럴듯하게 답하고, 정말 알 수 없을 때만 "잘 모르겠어"라고 한다(run 3~5에서 "잘 모르겠어"로 질문을 낭비했다). 페르소나에 없는 강한 요구는 지어내지 않는다.
+- **추천 전 확인:** 확인 질문(최대 3번)은 질문 수와 따로 `confirms`로 센다. 대화 최대 길이는 시스템 응답 11번이다.
 - **텍스트 정렬 효과:** `ig`·`random`은 동률 정렬에서 텍스트 관련도를 뺀 정답 순위 백분율도 함께 남긴다(`extra.rank_pct_no_text`, 요약의 `rank_pct_mean_no_text`·`rank_pct_median_no_text`). 같은 대화에서 정렬만 다른 비교다([IG 엔진 4절](ig-engine.md#4-추천과-한계-표시)).
 
 ## 4. 실행

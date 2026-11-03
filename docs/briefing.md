@@ -48,6 +48,10 @@
 - **추천:** 확률순. 말한 조건을 어기는 상품은 빼고, 모자랄 때만 채우며 알린다.
 - **동률 정렬:** 조건이 똑같이 맞는 상품이 수십~수백 개 남는다. 그 안의 순서는 가격 요청 → 텍스트 관련도 → 평점이다([`tie_order`](../backend/app/services/chat.py "docid:chat.tie-order")). 텍스트 관련도는 대화(근거 발화·맥락·영어 키워드)와 상품 글(상품명·특징·세부 정보)의 BM25 순위와 임베딩 순위를 RRF로 합친다([`relevance_scores`](../backend/app/services/relevance.py "docid:chat.text-relevance")). 상품 임베딩은 미리 만들어 SQLite에 저장하고, 실행 중에는 질의 하나만 임베딩한다.
 
+### 추천 전 확인 (2026-11-03)
+
+추천하기 직전 지금까지의 조건을 정리해 "이대로 찾아볼까, 아니면 바뀐 게 있어?"라고 묻는다. 바뀐 게 없으면 추천, 바꾸면 반영해서 다시 확인하고 최대 3번까지 묻는다. 마지막 턴의 짐작도 바로잡을 기회가 생긴다([llm-parser 5-1절](llm-parser.md#5-1-추천-전-확인-질문)).
+
 ### 질문 작성기 (친구 페르소나, [llm-parser 5절](llm-parser.md#5-질문-작성기-친구-페르소나))
 
 - 엔진이 고른 속성을 직접 묻지 않고, 그 값에 따라 달라지는 생활 장면 속의 **바람·불편**을 묻는다. 예: "Do you want to still hear cars and people around you, or mostly just your music?"

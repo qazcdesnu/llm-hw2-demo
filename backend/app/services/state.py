@@ -18,6 +18,8 @@ from app.services.memory import RANGE, ConversationMemory
 
 # 같은 속성을 몇 번까지 물을지. 답이 안 나오면 한 번 더(더 직접적으로) 묻고, 그래도 안 되면 넘어간다.
 MAX_ASKS = 2
+# 추천 직전 확인 질문("정리하면 …, 이대로 찾아볼까?")의 최대 횟수
+MAX_CONFIRMS = 3
 
 
 @dataclass
@@ -58,6 +60,9 @@ class ChatState:
     price_order: str | None = None
     # 사용자에게 보이는 말의 언어 (ko / en). 요청 분류기가 매 턴 사용자 발화의 언어로 정한다.
     language: str = "ko"
+    # 추천 직전 확인: 확인 질문에 대한 답을 기다리는 중인가, 지금까지 물은 횟수
+    confirming: bool = False
+    confirms: int = 0
 
     # ------------------------------------------------------------ 질문
 
@@ -123,6 +128,8 @@ class ChatState:
             "excluded": list(self.excluded),
             "price_order": self.price_order,
             "language": self.language,
+            "confirming": self.confirming,
+            "confirms": self.confirms,
         }
 
     @classmethod
@@ -137,4 +144,6 @@ class ChatState:
             excluded=list(data.get("excluded", [])),
             price_order=data.get("price_order"),
             language=data.get("language", "ko"),
+            confirming=data.get("confirming", False),
+            confirms=data.get("confirms", 0),
         )

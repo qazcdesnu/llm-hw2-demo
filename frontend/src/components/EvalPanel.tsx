@@ -19,6 +19,7 @@ const METRICS: { key: keyof SystemSummary; label: string; digits: number }[] = [
   { key: "naturalness", label: "자연스러움", digits: 2 },
   { key: "efficiency", label: "효율", digits: 2 },
   { key: "questions", label: "질문 수", digits: 1 },
+  { key: "confirms", label: "확인 질문 수", digits: 1 },
   { key: "seconds", label: "초/대화", digits: 0 },
 ];
 

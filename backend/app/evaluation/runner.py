@@ -34,7 +34,8 @@ from app.services.relevance import embedder_for, load_text_index
 
 logger = logging.getLogger(__name__)
 
-MAX_TURNS = 8  # 시스템 응답 수 상한. 그 안에 추천하지 않으면 추천 없음으로 끝난다
+# 시스템 응답 수 상한 (질문 4개 + 추천 전 확인 최대 3번 + 추천, 여유 포함). 그 안에 추천하지 않으면 추천 없음으로 끝난다
+MAX_TURNS = 11
 WORKERS = 4
 _db_lock = threading.Lock()
 
@@ -110,6 +111,7 @@ def summarize(results: list[dict]) -> dict[str, dict]:
             "rank_pct_median_no_text": med(no_text),
             "attribute_match": avg([r["attribute_match"] for r in rs]),
             "questions": avg([r["questions"] for r in rs]),
+            "confirms": avg([r.get("confirms") for r in rs]),
             "fit": avg([r["judge"]["fit"] for r in rs if r.get("judge")]),
             "naturalness": avg([r["judge"]["naturalness"] for r in rs if r.get("judge")]),
             "efficiency": avg([r["judge"]["efficiency"] for r in rs if r.get("judge")]),
@@ -136,17 +138,20 @@ def run_episode(ctx: EvalContext, scenario: Scenario, system_name: str) -> dict:
     transcript: list[dict[str, str]] = []
     recommended: list[str] = []
     extra: dict = {}
-    questions = 0
+    questions = confirms = 0
     message = scenario.opening
     for _ in range(MAX_TURNS):
         transcript.append({"role": "user", "content": message})
         turn = system.respond(message)
         transcript.append({"role": "assistant", "content": turn.reply})
-        extra = {**extra, **{k: v for k, v in turn.extra.items() if k != "asked"}}
+        extra = {**extra, **{k: v for k, v in turn.extra.items() if k not in ("asked", "confirm")}}
         if turn.recommended:
             recommended = turn.recommended
             break
-        questions += 1
+        if turn.extra.get("confirm"):  # 추천 전 확인 질문은 질문 수와 따로 센다
+            confirms += 1
+        else:
+            questions += 1
         message = user.reply(turn.reply)
 
     position = system.target_position(scenario.target_id) if hasattr(system, "target_position") else None
@@ -160,7 +165,7 @@ def run_episode(ctx: EvalContext, scenario: Scenario, system_name: str) -> dict:
     return {
         "scenario_id": scenario.id, "system": system_name, "target_id": scenario.target_id,
         "recommended": recommended, "rank_pct": rank_percent(position),
-        "target_rank": position[0] if position else None, "questions": questions,
+        "target_rank": position[0] if position else None, "questions": questions, "confirms": confirms,
         **episode_metrics(scenario, recommended, ctx.catalog),
         "judge": judge.model_dump(), "seconds": round(time.perf_counter() - start, 1),
         "transcript": transcript, "extra": extra,

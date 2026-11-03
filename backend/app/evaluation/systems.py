@@ -51,7 +51,8 @@ class EngineSystem:
         self.history += [{"role": "user", "content": message},
                          {"role": "assistant", "content": result.reply}]
         recs = [r.product_id for r in result.recommendations] or None
-        return SystemTurn(result.reply, recs, {"asked": result.debug.selected_attribute})
+        return SystemTurn(result.reply, recs, {"asked": result.debug.selected_attribute,
+                                               "confirm": result.debug.confirm_round})
 
     def target_position(self, target_id: str, use_text: bool = True) -> tuple[int, int] | None:
         return target_position(self.catalog, self.state, target_id, use_text)

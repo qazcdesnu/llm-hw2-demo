@@ -271,3 +271,21 @@ cases:
     request: shopping
     expect: {mic: "yes"}
     forbid: [anc, form_factor]
+
+  # --- 추천 전 확인 질문에 대한 답 (2026-11-03): 그대로면 조건 없음, 바꾸면 그 조건만
+  - message: "Yep, that's right — go ahead."
+    question: "Quick recap: Connection: Wireless, Mic: Needed, Price: $20-60. Should I go with this, or has anything changed?"
+    known: {connection: wireless, mic: "yes", price_band: mid}
+    request: shopping
+    expect: {}
+  - message: "Mostly yes, but I don't need a mic at all."
+    question: "Quick recap: Connection: Wireless, Mic: Needed, Price: $60+. Should I go with this, or has anything changed?"
+    known: {connection: wireless, mic: "yes", price_band: high}
+    request: shopping
+    expect: {mic: "no"}
+  - message: "응 그대로 해 줘. 아 근데 예산은 4만 원 안쪽으로"
+    question: "정리해 볼게: 연결 방식 무선, 가격대 $20~60. 이대로 찾아볼까, 아니면 바뀐 게 있어?"
+    known: {connection: wireless, price_band: mid}
+    request: shopping
+    expect: {}
+    range: {price_band: [null, 28.6]}

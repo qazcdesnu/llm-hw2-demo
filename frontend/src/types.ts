@@ -89,6 +89,7 @@ export interface DebugInfo {
   question_approach: string | null;
   tie_order: string | null;
   model: string | null;
+  confirm_round?: number | null; // 추천 전 확인 질문이면 몇 번째인지
 }
 
 // 입력창에서 고를 수 있는 OpenAI 모델 (GET /api/models)
@@ -153,6 +154,7 @@ export interface SystemSummary {
   rank_pct_median_no_text: number | null;
   attribute_match: number | null;
   questions: number | null;
+  confirms: number | null; // 추천 전 확인 질문 수
   fit: number | null;
   naturalness: number | null;
   efficiency: number | null;

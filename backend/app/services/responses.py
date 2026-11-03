@@ -49,6 +49,11 @@ TEXT = {
         "relaxed": "조건을 모두 만족하는 상품이 부족해서, 일부 조건이 다른 것도 같이 보여 줄게.",
         "reason.unknown": "{label}: 상품 정보에 없어 확인 못 함",
         "reason.violated": "{label}: {value} (말한 조건과 다름)",
+        "confirm": "정리해 볼게: {items}. 이대로 찾아볼까, 아니면 바뀐 게 있어?",
+        "confirm_last": "마지막으로 정리할게: {items}. 이대로 찾아볼까?",
+        "confirm_label": "확인",
+        "confirm_yes": "이대로 추천해 줘",
+        "stop.confirmed": "좋아, 이 조건으로 골라 봤어.",
         "range.both": "${low:g}~{high:g}",
         "range.max": "${high:g} 이하",
         "range.min": "${low:g} 이상",
@@ -83,6 +88,11 @@ TEXT = {
         "relaxed": "Not enough products meet every condition, so I'm also showing some that differ a bit.",
         "reason.unknown": "{label}: not listed, couldn't check",
         "reason.violated": "{label}: {value} (differs from what you asked)",
+        "confirm": "Quick recap: {items}. Should I go with this, or has anything changed?",
+        "confirm_last": "Last check: {items}. Shall I go with this?",
+        "confirm_label": "Confirm",
+        "confirm_yes": "Looks good, show me",
+        "stop.confirmed": "Great, here's what I picked with those conditions.",
         "range.both": "${low:g}–{high:g}",
         "range.max": "up to ${high:g}",
         "range.min": "${low:g}+",
@@ -141,6 +151,20 @@ def non_shopping_reply(spec: CategorySpec, request_type: str, lang: str = "ko") 
 def acknowledgement(learned: list[str], lang: str = "ko") -> str:
     """고정 문구일 때 이번 턴에 새로 알게 된 것 알림."""
     return t(lang, "ack", items=", ".join(learned)) + "\n" if learned else ""
+
+
+# 추천 전 확인 질문의 보기 버튼 ("이대로 추천해 줘")에 쓰는 가짜 속성 이름
+CONFIRM_ATTRIBUTE = "_confirm"
+
+
+def confirmation(items: list[str], lang: str = "ko", last: bool = False) -> str:
+    """추천 직전 확인 질문: 지금까지의 조건을 정리하고 이대로 찾을지 묻는다."""
+    return t(lang, "confirm_last" if last else "confirm", items=", ".join(items))
+
+
+def confirm_question(lang: str = "ko") -> Question:
+    return Question(attribute=CONFIRM_ATTRIBUTE, label=t(lang, "confirm_label"), text=t(lang, "confirm_yes"),
+                    options=[Option(value="yes", label=t(lang, "confirm_yes"))])
 
 
 def guess_note(guesses: list[str], lang: str = "ko") -> str:

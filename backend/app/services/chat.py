@@ -27,7 +27,7 @@ from app.services.memory import RANGE, Fact
 from app.services.parser import ParseContext, ParseResult
 from app.services.questioner import QuestionRequest, WrittenQuestion
 from app.services.relevance import Embedder, TextIndex, relevance_scores
-from app.services.state import ChatState
+from app.services.state import MAX_CONFIRMS, ChatState
 
 DEBUG_TOP_N = 5
 
@@ -212,8 +212,11 @@ def recommendation_context(catalog: Catalog, state: ChatState) -> list[str] | No
 
 # ---------------------------------------------------------------- 결정·표현
 
-def decide(catalog: Catalog, state: ChatState, pref: PreferenceState) -> tuple[Decision, str | None]:
+def decide(catalog: Catalog, state: ChatState, pref: PreferenceState,
+           rank: bool = True) -> tuple[Decision, str | None]:
     """엔진의 결정과, 추천이면 동률 정렬 기준(tie_order의 basis).
+
+    rank=False면 질문 단계의 추천 결정에 동률 정렬(질의 임베딩)을 계산하지 않는다(추천 전 확인을 할 때).
 
     @see docs/architecture.md#3-대화-한-턴의-흐름
     @see docs/ig-engine.md#4-추천과-한계-표시
@@ -222,7 +225,7 @@ def decide(catalog: Catalog, state: ChatState, pref: PreferenceState) -> tuple[D
         key, basis = tie_order(catalog, state)
         return catalog.engine.recommend_now(pref, tie_key=key), basis
     decision = catalog.engine.step(pref)
-    if isinstance(decision.action, Recommend):  # 추천할 때만 동률 정렬(텍스트 관련도)을 계산한다
+    if rank and isinstance(decision.action, Recommend):  # 추천할 때만 동률 정렬(텍스트 관련도)을 계산한다
         key, basis = tie_order(catalog, state)
         return catalog.engine.recommend_now(pref, decision.action.reason, key), basis
     return decision, None
@@ -307,15 +310,28 @@ def handle_message(
     if isinstance(understood, TurnResult):
         return understood
 
-    # 3. 결정
+    # 3. 결정 (추천 전에는 지금까지의 조건을 정리해 확인한다)
     pref = catalog.preference(state)
-    decision, basis = decide(catalog, state, pref)
+    lang = state.language
+    if state.confirming:  # 확인 질문에 대한 답
+        changed = bool(understood.changes or understood.guesses)
+        if changed and state.confirms < MAX_CONFIRMS:
+            return _ask_confirmation(catalog, state, pref, understood)
+        state.confirming = False
+        key, basis = tie_order(catalog, state)
+        decision = catalog.engine.recommend_now(pref, "confirmed", key)
+    else:
+        decision, basis = decide(catalog, state, pref, rank=False)
+        if isinstance(decision.action, Recommend) and not state.finished:
+            if _summary(spec, state, lang):
+                return _ask_confirmation(catalog, state, pref, understood)
+            key, basis = tie_order(catalog, state)  # 확인할 조건이 없으면 바로 추천
+            decision = catalog.engine.recommend_now(pref, decision.action.reason, key)
     debug = build_debug(catalog, decision, state, pref, understood.request_type)
     debug.tie_order = basis
     action = decision.action
 
     # 4. 표현 (사용자 발화의 언어로)
-    lang = state.language
     if isinstance(action, Ask):
         written = None
         if writer is not None:
@@ -352,6 +368,33 @@ def handle_message(
     )
 
 
+def _summary(spec: CategorySpec, state: ChatState, lang: str) -> list[str]:
+    """확인 질문에 보여 줄 지금까지의 조건 (메모리의 속성별 마지막 사실)."""
+    return [say.change_label(spec, f.attribute, f.value, lang, f.low, f.high)
+            for f in state.memory.latest().values() if spec.has_attribute(f.attribute)]
+
+
+def _ask_confirmation(catalog: Catalog, state: ChatState, pref: PreferenceState,
+                      understood: "_Understanding") -> TurnResult:
+    """추천 직전 확인: 지금까지의 조건을 정리해 보여 주고 이대로 찾을지 묻는다.
+
+    바뀐 게 없다고 하면 추천하고, 바꾸면 반영해서 다시 묻는다(최대 MAX_CONFIRMS번, 그 뒤에는 추천).
+    바뀌었는지는 LLM 파서가 뽑은 변화로만 판단한다.
+
+    @docid chat.confirm-before-recommend
+    @see docs/architecture.md#3-대화-한-턴의-흐름
+    @see docs/llm-parser.md#5-1-추천-전-확인-질문
+    """
+    spec, lang = catalog.spec, state.language
+    state.confirming = True
+    state.confirms += 1
+    reply = (say.acknowledgement(understood.changes, lang) + say.guess_note(understood.guesses, lang)
+             + say.confirmation(_summary(spec, state, lang), lang, last=state.confirms >= MAX_CONFIRMS))
+    debug = build_debug(catalog, catalog.engine.step(pref), state, pref, understood.request_type)
+    debug.confirm_round = state.confirms
+    return TurnResult(reply, state, debug, say.confirm_question(lang))
+
+
 def _understand(
     state: ChatState, message: str, catalog: Catalog,
     answer: tuple[str, str] | None, parser: Parser | None, writer: QuestionWriter | None,
@@ -369,6 +412,8 @@ def _understand(
     spec = catalog.spec
     pending = state.pending
 
+    if answer is not None and answer[0] == say.CONFIRM_ATTRIBUTE:  # "이대로 추천해 줘" 버튼
+        return _Understanding()
     if answer is not None:
         validate_answer(spec, *answer)
         label = remember(state, spec, *answer, quote=message, source="button")
@@ -378,7 +423,10 @@ def _understand(
 
     parsed = None
     if parser is not None:
-        ctx = ParseContext(pending.attribute if pending else None, pending.text if pending else None,
+        question_text = pending.text if pending else None
+        if state.confirming:  # 확인 질문에 대한 답이면 그 정리 문장을 맥락으로 (메모리가 그대로라 다시 만든다)
+            question_text = say.confirmation(_summary(spec, state, state.language), state.language)
+        ctx = ParseContext(pending.attribute if pending else None, question_text,
                            state.memory.describe(spec), recommendation_context(catalog, state))
         parsed = parser(spec, message, ctx)
 

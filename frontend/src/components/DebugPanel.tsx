@@ -84,6 +84,14 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
             </dd>
           </>
         )}
+        {debug.confirm_round != null && (
+          <>
+            <dt>Confirm</dt>
+            <dd>
+              추천 전 확인 <code>{debug.confirm_round}</code> / 3
+            </dd>
+          </>
+        )}
         {debug.model && (
           <>
             <dt>Model</dt>
