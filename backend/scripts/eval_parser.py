@@ -67,7 +67,8 @@ def grade(case: dict, result) -> CaseResult:
     errors = []
     if result.request_type != case["request"]:
         errors.append(f"request {result.request_type} != {case['request']}")
-    produced = {c.attribute: c.value for c in result.constraints}
+    # 여러 값(OR) 조건은 정렬해 "a|b"로 비교한다 (케이스의 기대값도 같은 형식)
+    produced = {c.attribute: "|".join(sorted(c.values)) if c.values else c.value for c in result.constraints}
     for k, want_basis in (case.get("basis") or {}).items():
         got = next((("guessed" if c.guessed else "stated") for c in result.constraints if c.attribute == k), None)
         if got is not None and got != want_basis:
@@ -81,7 +82,7 @@ def grade(case: dict, result) -> CaseResult:
     for k, got in produced_ranges.items():
         if k not in want_ranges:
             errors.append(f"extra range {k}={got}")
-    want = {k: str(v) for k, v in (case.get("expect") or {}).items()}
+    want = {k: "|".join(sorted(str(v).split("|"))) for k, v in (case.get("expect") or {}).items()}
     optional = {k: str(v) for k, v in (case.get("optional") or {}).items()}
     allow = {k: [str(x) for x in v] for k, v in (case.get("allow") or {}).items()}
     for k, v in want.items():

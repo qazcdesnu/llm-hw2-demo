@@ -32,6 +32,7 @@
 - **unknown 상품:** 어떤 답에도 똑같이 반응한다. 그래서 그 속성의 답으로는 확률이 오르지도 내리지도 않는다. 속성 정보가 없는 상품을 함부로 탈락시키지 않는다.
 - **"상관없음":** 상품과 무관한 답이라 belief를 바꾸지 않는다. 그 속성은 다시 묻지 않는다.
 - **숫자 범위 조건 (2026-11-03):** 사용자가 금액을 말하면("$10~25", "$30 미만") 구간(`price_band`) 대신 범위로 받는다. 가능도([`range_likelihood`](../backend/app/core/belief_tracker.py "docid:core.range-likelihood"))는 같은 꼴이되 구간 대신 상품의 실제 숫자(가격)로 판정한다: 범위 안 c, 밖 (1 − c) / (k − 1), 가격 없음 1 / k (k는 그 속성의 구간 수). 구간 경계에 걸친 예산($15~25)을 구간 하나로 뭉개면 정답이 걸러지기 때문이다(평가 run 8에서 ig 하위 4개 대화 모두). 범위가 있으면 그 속성은 다시 묻지 않고, 추천 근거에는 말한 범위를 그대로 보여 준다. 구간 답(보기 버튼, "제일 싼 쪽")은 지금처럼 구간으로 쓴다. 범위를 받는 속성은 카테고리 정의에서 `band` 규칙으로 만든 속성이다(실제 숫자는 상품의 그 필드, [`from_catalog`](../backend/app/core/adapters.py "docid:core.from-catalog")).
+- **여러 값 중 하나 (OR, NOT) (2026-11-03):** "온이어나 오버이어면 돼"는 값의 집합 `{on_ear, over_ear}`, "인이어만 아니면 돼"는 나머지 값의 집합으로 받는다([`set_likelihood`](../backend/app/core/belief_tracker.py "docid:core.set-likelihood")). 집합 안이면 c, 밖이면 (1 − c) / (k − 1), unknown이면 1 / k로 한 값 답과 같은 꼴이다(집합이 한 값이면 똑같다). 추천 근거에는 그 상품의 실제 값을 보여 준다. 속성 사이의 OR("노캔이 있거나 3만 원 이하")는 다루지 않는다(쇼핑 대화에서 드물고 판정·설명이 복잡해짐).
 - **belief 계산:** belief = 사전분포 × Π 가능도를 정규화한 값이다([`compute_belief`](../backend/app/core/belief_tracker.py "docid:core.compute-belief")). 관측 순서와 무관하다.
 
 ## 2. 대화 상태
@@ -45,7 +46,8 @@
   "dont_care": ["brand"],
   "asked": ["connection", "price_band"],
   "excluded": [],
-  "ranges": {"price_band": [15, 25]}
+  "ranges": {"price_band": [15, 25]},
+  "any_of": {"form_factor": ["on_ear", "over_ear"]}
 }
 ```
 

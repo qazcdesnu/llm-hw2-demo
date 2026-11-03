@@ -29,6 +29,7 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
   const dontCare = debug.preferences.dont_care ?? [];
   const excluded = debug.preferences.excluded ?? [];
   const ranges = Object.entries(debug.preferences.ranges ?? {});
+  const anyOf = Object.entries(debug.preferences.any_of ?? {});
   const facts = debug.memory?.facts ?? [];
   const notes = debug.memory?.notes ?? [];
   const questions = debug.memory?.questions ?? [];
@@ -118,7 +119,13 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
               {facts.map((f, i) => (
                 <li key={i}>
                   <span className="muted">t{f.turn}</span> {f.attribute}=
-                  <b>{f.value === "range" ? formatRange(f.low ?? null, f.high ?? null) : f.value}</b>{" "}
+                  <b>
+                    {f.value === "range"
+                      ? formatRange(f.low ?? null, f.high ?? null)
+                      : f.value === "any_of"
+                        ? (f.values ?? []).join(" | ")
+                        : f.value}
+                  </b>{" "}
                   <span className="muted">
                     ← {f.source === "button" ? "버튼" : ""} "{f.quote}"
                   </span>
@@ -148,13 +155,18 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
         )}
         <dt>Preferences</dt>
         <dd>
-          {explicit.length + dontCare.length + excluded.length + ranges.length === 0 ? (
+          {explicit.length + dontCare.length + excluded.length + ranges.length + anyOf.length === 0 ? (
             "-"
           ) : (
             <ul className="prefs">
               {explicit.map(([k, v]) => (
                 <li key={k}>
                   {k}=<b>{v}</b>
+                </li>
+              ))}
+              {anyOf.map(([k, vs]) => (
+                <li key={k}>
+                  {k}=<b>{vs.join(" | ")}</b>
                 </li>
               ))}
               {ranges.map(([k, [lo, hi]]) => (

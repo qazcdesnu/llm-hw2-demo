@@ -429,7 +429,8 @@ def test_memory_keeps_facts_with_quotes_and_notes(chat):
     memory = res["debug"]["memory"]
     facts = {f["attribute"]: f for f in memory["facts"]}
     assert facts == {"connection": {"attribute": "connection", "value": "wireless", "quote": "무선으로",
-                                    "turn": 1, "source": "said", "low": None, "high": None}}
+                                    "turn": 1, "source": "said", "low": None, "high": None,
+                                    "values": None}}
     assert memory["notes"] == ["지하철 출퇴근"]
     # 엔진 입력은 메모리에서 만든다
     assert res["debug"]["preferences"]["explicit"] == {"connection": "wireless"}
@@ -658,3 +659,15 @@ def test_confirmation_is_asked_at_most_three_times(parser_client):
     assert rounds == [1, 2, 3, None]  # 세 번째 확인 뒤에는 바뀌어도 반영해서 추천한다
     assert "마지막으로 정리할게" not in res["reply"] and res["finished"]
     assert res["debug"]["preferences"]["explicit"] == {"connection": "wireless"}
+
+
+def test_either_of_two_values_is_kept_as_a_set(parser_client):
+    """"온이어나 오버이어면 돼"는 두 값을 모두 조건으로 남기고 그렇게 알린다."""
+    client, parser = parser_client
+    parser.table["온이어나 오버이어면 돼"] = ParseResult(
+        "shopping", [ParsedConstraint("form_factor", "on_ear", "온이어나 오버이어", values=("on_ear", "over_ear"))])
+    res = send(client, new_session(client), "온이어나 오버이어면 돼").json()
+    assert "착용 방식 온이어 헤드폰 또는 오버이어 헤드폰" in res["reply"]
+    assert res["debug"]["preferences"]["any_of"] == {"form_factor": ["on_ear", "over_ear"]}
+    fact = res["debug"]["memory"]["facts"][0]
+    assert (fact["value"], fact["values"]) == ("any_of", ["on_ear", "over_ear"])

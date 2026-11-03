@@ -31,6 +31,8 @@ class ParsedConstraint:
     # True면 직접 말한 값이 아니라 말한 상황·바람에서 짐작한 값. 조건으로는 똑같이 쓰고,
     # 도우미가 짐작을 말로 드러내 사용자가 아니면 바로잡게 한다
     guessed: bool = False
+    # 여러 값이 모두 괜찮을 때 그 값들 (2개 이상). 비어 있으면 value 하나가 조건이다
+    values: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -74,7 +76,8 @@ def _schema_for(spec_json: str) -> type[BaseModel]:
     constraint = create_model(
         f"{spec.id}_constraint",
         attribute=(Literal[keys], ...),  # type: ignore[valid-type]
-        value=(str, Field(description="속성의 값 이름(영문) 또는 dont_care")),
+        value=(str, Field(description="속성의 값 이름(영문) 또는 dont_care. values가 있으면 그중 첫 값")),
+        values=(list[str], Field(description="여러 값이 모두 괜찮을 때만 그 값 이름들(2개 이상). 아니면 빈 목록")),
         basis=(Literal["stated", "guessed"], Field(description="직접 말함 stated, 상황·바람에서 짐작 guessed")),
         quote=(str, Field(description="근거가 된 사용자 발화 부분을 그대로 인용. 설명을 덧붙이지 않는다")),
     )
@@ -134,7 +137,11 @@ def build_instructions(spec: CategorySpec) -> str:
         "   '학생이라 돈이 없어' → 가장 낮은 가격대, '통화할 때도 쓸 거야' → mic=yes).",
         "   값이 여럿으로 갈릴 만하면(장소만 말함 '지하철에서 들어', '책상에 오래 앉아 있어') 넣지 않고 notes에 적는다.",
         "   마이크의 소음 제거('통화할 때 내 목소리만 잘 들리게', 'noise rejection on calls')는 mic이고 anc가 아니다.",
-        "3. value=dont_care는 사용자가 그 속성은 어느 쪽이든 괜찮다는 뜻을 밝혔을 때 쓴다. 특정 단어가 아니라 뜻으로 판단한다",
+        "3. 여러 값 중 아무거나 괜찮다고 하면 values에 그 값들을 모두 넣는다('온이어나 오버이어면 돼' →",
+        "   values [on_ear, over_ear], '인이어든 오픈형이든' → [in_ear, open_ear]). 'A만 아니면 돼', 'A는 싫어'처럼",
+        "   한 값을 빼면 나머지 값들을 모두 넣는다('인이어만 아니면 돼' → [on_ear, over_ear, open_ear]).",
+        "   값을 하나만 말했으면 values는 빈 목록이다. 모든 값이 괜찮다는 뜻이면 dont_care다.",
+        "   value=dont_care는 사용자가 그 속성은 어느 쪽이든 괜찮다는 뜻을 밝혔을 때 쓴다. 특정 단어가 아니라 뜻으로 판단한다",
         "   ('둘 다 괜찮아', '그건 신경 안 써', '별로 안 중요해'). '모르겠다'는 상관없다는 뜻이 아니다.",
         "4. 구체적 금액을 말하면 constraints의 구간 값 대신 ranges에 숫자 범위로 넣는다(가격은 USD).",
         f"   원화는 1달러={KRW_PER_USD}원으로 환산한다. 'N 미만·이하·안쪽' → max N, 'N 이상' → min N,",
@@ -176,6 +183,9 @@ def build_instructions(spec: CategorySpec) -> str:
         '[water_resistant=dont_care stated, mic=yes stated]',
         '- "노캔은 필요 없어" → [anc=no]',
         '- "가격은 상관없어" → [price_band=dont_care]',
+        '- "온이어나 오버이어면 돼" → [form_factor values [on_ear, over_ear] stated]',
+        '- "I\'m open to open-ear or bone conduction too" (인이어를 원하던 사람) → [form_factor values [in_ear, open_ear] stated]',
+        '- "인이어만 아니면 돼" → [form_factor values [on_ear, over_ear, open_ear] stated]',
         '- "5만 원 안쪽이면 좋겠어" → [], ranges [price_band max 35.7]',
         '- "around $15-25, definitely under $30" → [], ranges [price_band min 15, max 25]',
         '- (직전 질문이 가격대 질문) "제일 싼 쪽으로" → [price_band=low]',
@@ -216,7 +226,17 @@ def validate_constraints(spec: CategorySpec, raw: list) -> tuple[list[ParsedCons
     rejected = []
     for c in raw:
         attr = spec.attribute(c.attribute)
-        value = c.value.strip()
+        allowed = {v.value for v in attr.values}
+        many = [] if attr.is_open else list(dict.fromkeys(v.strip() for v in getattr(c, "values", []) or []
+                                                           if v.strip() in allowed))
+        if len(many) >= 2:  # 여러 값이 괜찮다 (모든 값이면 상관없음)
+            guessed = getattr(c, "basis", "stated") == "guessed"
+            if set(many) == allowed:
+                kept[c.attribute] = ParsedConstraint(c.attribute, DONT_CARE, c.quote.strip(), guessed)
+            else:
+                kept[c.attribute] = ParsedConstraint(c.attribute, many[0], c.quote.strip(), guessed, tuple(many))
+            continue
+        value = many[0] if many else c.value.strip()
         if attr.is_open:
             value = value.casefold()
         elif value != DONT_CARE and value not in {v.value for v in attr.values}:

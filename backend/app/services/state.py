@@ -14,7 +14,7 @@ from collections.abc import Collection
 from dataclasses import asdict, dataclass, field
 
 from app.core.model import PreferenceState
-from app.services.memory import RANGE, ConversationMemory
+from app.services.memory import ANY_OF, RANGE, ConversationMemory
 
 # 같은 속성을 몇 번까지 물을지. 답이 안 나오면 한 번 더(더 직접적으로) 묻고, 그래도 안 되면 넘어간다.
 MAX_ASKS = 2
@@ -110,6 +110,8 @@ class ChatState:
                 continue
             if fact.value == RANGE:
                 pref.answer_range(fact.attribute, fact.low, fact.high)
+            elif fact.value == ANY_OF:
+                pref.answer_any_of(fact.attribute, fact.values or [])
             else:
                 pref.answer(fact.attribute, fact.value)
         pref.asked = [q.attribute for q in self.questions.values() if q.status != "unanswered"]

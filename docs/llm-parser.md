@@ -46,7 +46,7 @@
 | 요청 분류 | `language` | 발화의 언어 `ko` / `en`(그 밖의 언어는 `en`). 응답 언어가 된다(대화 상태 `language`) |
 | 요청 분류 | `exclude_ranks[]` | "1번 말고" → 현재 추천에서 뺄 순위. 현재 추천이 없으면 버린다 |
 | 요청 분류 | `price_order` | "더 싼 걸로" → `cheaper`, "더 비싸도 좋은 걸로" → `pricier`, 그 외 `none` |
-| 속성 추출 | `constraints[]` | `{attribute(enum), value, quote}`. 이번 발화에서 새로 말하거나 바뀐 것만. `quote`는 근거 발화를 그대로 인용 |
+| 속성 추출 | `constraints[]` | `{attribute(enum), value, values, basis, quote}`. `values`는 여러 값이 모두 괜찮을 때만("온이어나 오버이어" → `[on_ear, over_ear]`, "인이어만 아니면" → 나머지 값들). 하나로 줄면 한 값, 모든 값이면 `dont_care`로 바꾼다([`validate_constraints`](../backend/app/services/extractor.py "sym:py:app.services.extractor#validate_constraints")). `basis`는 stated/guessed. 이번 발화에서 새로 말하거나 바뀐 것만. `quote`는 근거 발화를 그대로 인용 |
 | 속성 추출 | `notes[]` | 속성으로 표현되지 않는 사용 맥락("지하철 출퇴근", "안경 착용"). 사용자가 쓴 언어로 |
 | 속성 추출 | `ranges[]` | `{attribute, min, max, quote}`. 금액을 말했을 때의 숫자 범위(USD, 원화는 1,400원/달러). 있으면 같은 속성의 구간 값은 내지 않는다. `band` 규칙으로 만든 속성(가격대)만 |
 | 속성 추출 | `keywords[]` | 상품 설명 검색용 영어 키워드("하루 종일 껴도 편했으면" → `comfortable`, `all day wear`). 동률 정렬의 BM25 질의([IG 엔진 4절](ig-engine.md#4-추천과-한계-표시)) |

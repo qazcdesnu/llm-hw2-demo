@@ -2,9 +2,11 @@ import math
 
 import pytest
 
-from app.core.belief_tracker import compute_belief, entropy, likelihood, range_likelihood
+from app.core.belief_tracker import compute_belief, entropy, likelihood, range_likelihood, set_likelihood
 from app.core.engine import Ask, EngineConfig, IGEngine, Recommend
-from app.core.model import DONT_CARE, AttributeDef, Item, Observation, PreferenceState, RangeObservation
+from app.core.model import (
+    DONT_CARE, AttributeDef, Item, Observation, PreferenceState, RangeObservation, SetObservation,
+)
 from app.core.question_selector import (
     FixedOrderPolicy, InformationGainPolicy, RandomPolicy, expected_information_gain,
 )
@@ -231,3 +233,35 @@ def test_recommend_filters_by_range_and_marks_unknown_price():
     assert ranked[0].item.id == "edge" and ranked[0].matched == ["price_band"]
     by_id = {r.item.id: r for r in ranked}
     assert by_id["noprice"].unknown == ["price_band"] and by_id["cheap"].violated == ["price_band"]
+
+
+# ---------------------------------------------------------------- 여러 값 중 하나 (OR, NOT)
+
+FIT = AttributeDef("form_factor", ("in_ear", "on_ear", "over_ear", "open_ear"))
+
+
+def test_set_likelihood_accepts_any_listed_value():
+    obs = SetObservation("form_factor", ("on_ear", "over_ear"), 0.95)
+    assert set_likelihood(Item("a", {"form_factor": "on_ear"}), obs, FIT) == 0.95
+    assert set_likelihood(Item("b", {"form_factor": "over_ear"}), obs, FIT) == 0.95
+    assert set_likelihood(Item("c", {"form_factor": "in_ear"}), obs, FIT) == pytest.approx(0.05 / 3)
+    assert set_likelihood(Item("d", {}), obs, FIT) == 0.25
+    single = SetObservation("form_factor", ("in_ear",), 0.95)  # 한 값이면 보통 답과 같다
+    assert set_likelihood(Item("c", {"form_factor": "in_ear"}), single, FIT) == likelihood(
+        Item("c", {"form_factor": "in_ear"}), Observation("form_factor", "in_ear", 0.95), FIT)
+
+
+def test_any_of_replaces_other_answers_and_filters_recommendations():
+    pref = PreferenceState()
+    pref.answer("form_factor", "in_ear")
+    pref.answer_any_of("form_factor", ["on_ear", "over_ear"])
+    assert pref.explicit == {} and pref.any_of == {"form_factor": ["on_ear", "over_ear"]}
+    assert "form_factor" in pref.resolved()
+    items = [Item("in", {"form_factor": "in_ear"}), Item("on", {"form_factor": "on_ear"}),
+             Item("over", {"form_factor": "over_ear"}), Item("none", {})]
+    belief = compute_belief(items, {"form_factor": FIT}, pref.observations(0.05))
+    by_id = {r.item.id: r for r in recommend(items, belief, pref, k=4)}
+    assert by_id["on"].matched == by_id["over"].matched == ["form_factor"]
+    assert by_id["in"].violated == ["form_factor"] and by_id["none"].unknown == ["form_factor"]
+    pref.answer("form_factor", "in_ear")  # 정정하면 한 값 답으로
+    assert pref.any_of == {} and PreferenceState.from_dict(pref.to_dict()).explicit == {"form_factor": "in_ear"}

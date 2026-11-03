@@ -16,7 +16,7 @@ from app.core.engine import Limitation
 from app.core.model import DONT_CARE, PreferenceState
 from app.core.recommender import RankedItem
 from app.schemas import Option, Question, Recommendation
-from app.services.memory import RANGE
+from app.services.memory import ANY_OF, RANGE
 
 TEXT = {
     "ko": {
@@ -54,6 +54,7 @@ TEXT = {
         "confirm_label": "확인",
         "confirm_yes": "이대로 추천해 줘",
         "stop.confirmed": "좋아, 이 조건으로 골라 봤어.",
+        "or": " 또는 ",
         "range.both": "${low:g}~{high:g}",
         "range.max": "${high:g} 이하",
         "range.min": "${low:g} 이상",
@@ -93,6 +94,7 @@ TEXT = {
         "confirm_label": "Confirm",
         "confirm_yes": "Looks good, show me",
         "stop.confirmed": "Great, here's what I picked with those conditions.",
+        "or": " or ",
         "range.both": "${low:g}–{high:g}",
         "range.max": "up to ${high:g}",
         "range.min": "${low:g}+",
@@ -121,11 +123,19 @@ def range_label(low: float | None, high: float | None, lang: str = "ko") -> str:
 
 
 def change_label(spec: CategorySpec, attribute: str, value: str, lang: str = "ko",
-                 low: float | None = None, high: float | None = None) -> str:
-    """새로 알게 된 것을 사용자에게 알릴 때의 문구 ('마이크 필요', 'Mic: Needed', '가격대 $10~25')."""
+                 low: float | None = None, high: float | None = None, values: list[str] | None = None) -> str:
+    """새로 알게 된 것을 사용자에게 알릴 때의 문구.
+
+    예: '마이크 필요', 'Mic: Needed', '가격대 $10~25', '착용 방식 온이어 헤드폰 또는 오버이어 헤드폰'
+    """
     attr = spec.attribute(attribute)
     sep = ": " if lang == "en" else " "
-    shown = range_label(low, high, lang) if value == RANGE else value_label(attr, value, lang)
+    if value == RANGE:
+        shown = range_label(low, high, lang)
+    elif value == ANY_OF:
+        shown = t(lang, "or").join(value_label(attr, v, lang) for v in values or [])
+    else:
+        shown = value_label(attr, value, lang)
     return f"{attr.label_for(lang)}{sep}{shown}"
 
 
@@ -178,8 +188,10 @@ def reasons_for(spec: CategorySpec, ranked: RankedItem, state: PreferenceState, 
     reasons = []
     for key in ranked.matched:
         attr = spec.attribute(key)
-        if key in state.ranges:  # 숫자 범위 조건: 실제 값을 보여 준다
+        if key in state.ranges:  # 숫자 범위 조건: 말한 범위를 보여 준다
             reasons.append(f"{attr.label_for(lang)}: {range_label(*state.ranges[key], lang)}")
+        elif key in state.any_of:  # 여러 값 조건: 이 상품의 실제 값을 보여 준다
+            reasons.append(f"{attr.label_for(lang)}: {value_label(attr, ranked.item.attributes[key], lang)}")
         else:
             reasons.append(f"{attr.label_for(lang)}: {value_label(attr, state.explicit[key], lang)}")
     for key in ranked.unknown:

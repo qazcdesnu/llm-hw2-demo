@@ -50,6 +50,8 @@ export interface Preferences {
   excluded?: string[];
   // 구간 속성의 숫자 범위 (예: price_band → [10, 25]). null은 그쪽 한계 없음
   ranges?: Record<string, [number | null, number | null]>;
+  // 여러 값 중 아무거나 괜찮다는 조건 (예: form_factor → ["on_ear", "over_ear"])
+  any_of?: Record<string, string[]>;
 }
 
 export interface MemoryFact {
@@ -60,6 +62,7 @@ export interface MemoryFact {
   source: "said" | "button";
   low?: number | null; // value가 "range"일 때 숫자 범위
   high?: number | null;
+  values?: string[] | null; // value가 "any_of"일 때 괜찮은 값들
 }
 
 export interface QuestionRecord {

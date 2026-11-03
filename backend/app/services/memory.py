@@ -16,6 +16,8 @@ MAX_KEYWORDS = 40
 
 # 구간 속성에 숫자 범위로 답한 사실의 value ("$10~25"). 범위는 low·high에 둔다.
 RANGE = "range"
+# 여러 값이 모두 괜찮다는 사실의 value ("온이어나 오버이어", "인이어만 아니면"). 값들은 values에 둔다.
+ANY_OF = "any_of"
 
 
 @dataclass
@@ -29,9 +31,11 @@ class Fact:
     source: str = "said"  # said(말로 함, 속성 추출기) / button(보기 버튼)
     low: float | None = None  # value가 RANGE일 때 범위 (None은 그쪽 한계 없음)
     high: float | None = None
+    values: list[str] | None = None  # value가 ANY_OF일 때 괜찮은 값들
 
     def same_as(self, other: "Fact") -> bool:
-        return (self.value, self.low, self.high) == (other.value, other.low, other.high)
+        return ((self.value, self.low, self.high, sorted(self.values or []))
+                == (other.value, other.low, other.high, sorted(other.values or [])))
 
 
 @dataclass
@@ -86,7 +90,7 @@ class ConversationMemory:
 
     def describe(self, spec: CategorySpec) -> list[str]:
         """LLM 프롬프트에 넣을 '지금까지 알게 된 것' (사람이 읽는 문장)."""
-        lines = [f"{label_of(spec, f.attribute, f.value, f.low, f.high)} (근거: \"{f.quote}\")"
+        lines = [f"{label_of(spec, f.attribute, f.value, f.low, f.high, f.values)} (근거: \"{f.quote}\")"
                  for f in self.latest().values() if spec.has_attribute(f.attribute)]
         return lines + [f"맥락: {n}" for n in self.notes]
 
@@ -110,13 +114,15 @@ def range_text(low: float | None, high: float | None) -> str:
 
 
 def label_of(spec: CategorySpec, attribute: str, value: str,
-             low: float | None = None, high: float | None = None) -> str:
+             low: float | None = None, high: float | None = None, values: list[str] | None = None) -> str:
     """'노이즈 캔슬링(ANC): 필요'처럼 사람이 읽는 속성=값."""
     attr = spec.attribute(attribute)
     if value == DONT_CARE:
         shown = "상관없음"
     elif value == RANGE:
         shown = range_text(low, high)
+    elif value == ANY_OF:
+        shown = " 또는 ".join(next((v.label for v in attr.values if v.value == x), x) for x in values or [])
     else:
         shown = next((v.label for v in attr.values if v.value == value), value)
     return f"{attr.label}: {shown}"
