@@ -2,6 +2,7 @@
 
 결과는 SQLite(eval_runs, eval_episodes)에 저장해 Developer Panel의 평가 모드에서 본다.
 
+@see README.md#평가-지표
 @see docs/briefing.md#4-아키텍처와-코드-지도
 """
 
@@ -106,7 +107,7 @@ def summarize(results: list[dict]) -> dict[str, dict]:
             # 정답 순위 백분율(상위 %, 작을수록 좋다). 절대 순위·Hit@k는 쓰지 않는다
             "rank_pct_mean": avg(pcts),
             "rank_pct_median": med(pcts),
-            # 동률 정렬에서 텍스트 관련도를 뺐을 때 (주 용도 → 평점만)
+            # 동률 정렬에서 텍스트 관련도를 뺐을 때 (가격 요청 → 평점만)
             "rank_pct_mean_no_text": avg(no_text),
             "rank_pct_median_no_text": med(no_text),
             "attribute_match": avg([r["attribute_match"] for r in rs]),

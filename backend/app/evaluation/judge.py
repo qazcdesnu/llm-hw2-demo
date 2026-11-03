@@ -2,6 +2,8 @@
 
 정답 상품 적중(Hit@k)은 코드가 결정적으로 계산하고, 심판은 정답 하나로 잴 수 없는 것을 본다.
 4,628개 중 정확히 그 상품을 맞히기는 어려워서, "요구에 맞는 상품을 추천했는가"를 함께 봐야 하기 때문이다.
+
+@see README.md#4-llm-심판-점수-fit-naturalness-efficiency
 """
 
 from pydantic import BaseModel, Field
