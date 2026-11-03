@@ -9,12 +9,11 @@ const SYSTEMS: { key: string; label: string }[] = [
 ];
 
 const METRICS: { key: keyof SystemSummary; label: string; digits: number }[] = [
-  { key: "hit3", label: "Hit@3", digits: 2 },
-  { key: "hit1", label: "Hit@1", digits: 2 },
-  { key: "mrr", label: "MRR", digits: 3 },
-  { key: "median_rank", label: "정답 순위(중앙)", digits: 0 },
-  { key: "median_rank_no_text", label: "순위(텍스트 정렬 없이)", digits: 0 },
-  { key: "hit3_no_text", label: "Hit@3(텍스트 정렬 없이)", digits: 2 },
+  // 정답 순위 백분율: 순위 ÷ 후보 수 × 100 (상위 %, 작을수록 좋다)
+  { key: "rank_pct_mean", label: "순위 % 평균", digits: 1 },
+  { key: "rank_pct_median", label: "순위 % 중앙값", digits: 1 },
+  { key: "rank_pct_mean_no_text", label: "순위 % 평균(텍스트 정렬 없이)", digits: 1 },
+  { key: "rank_pct_median_no_text", label: "순위 % 중앙값(텍스트 정렬 없이)", digits: 1 },
   { key: "attribute_match", label: "속성 일치", digits: 2 },
   { key: "fit", label: "적합(심판)", digits: 2 },
   { key: "naturalness", label: "자연스러움", digits: 2 },
@@ -22,6 +21,12 @@ const METRICS: { key: keyof SystemSummary; label: string; digits: number }[] = [
   { key: "questions", label: "질문 수", digits: 1 },
   { key: "seconds", label: "초/대화", digits: 0 },
 ];
+
+// 순위 백분율 (작은 값도 보이게 1% 미만은 소수 둘째 자리까지)
+function fmtPct(value: number | null | undefined): string {
+  if (value == null) return "-";
+  return `${value.toFixed(value < 1 ? 2 : 1)}%`;
+}
 
 function fmt(value: unknown, digits = 2): string {
   if (value == null) return "-";
@@ -165,8 +170,7 @@ function ManualEval({ sessionId, finished, scenario, pending, onStartScenario, o
             <thead>
               <tr>
                 <th>시나리오</th>
-                <th>Hit@3</th>
-                <th>정답 순위</th>
+                <th>순위 %</th>
                 <th>자연</th>
                 <th>만족</th>
               </tr>
@@ -175,8 +179,7 @@ function ManualEval({ sessionId, finished, scenario, pending, onStartScenario, o
               {history.map((h, i) => (
                 <tr key={i}>
                   <td>{h.scenario_id}</td>
-                  <td>{fmt(h.hit3)}</td>
-                  <td>{fmt(h.target_rank, 0)}</td>
+                  <td>{fmtPct(h.rank_pct)}</td>
                   <td>{h.naturalness}</td>
                   <td>{h.satisfaction}</td>
                 </tr>
@@ -223,7 +226,7 @@ function ManualResultCard({ result }: { result: ManualResult }) {
   return (
     <div className="card">
       <b>
-        정답 순위: {fmt(result.target_rank, 0)}위 · Hit@3 {fmt(result.hit3)} · 1위 속성 일치{" "}
+        정답 순위: 상위 {fmtPct(result.rank_pct)} · 1위 속성 일치{" "}
         {fmt(result.attribute_match)}
       </b>
       <div className="target">
@@ -338,8 +341,7 @@ function AutoEval() {
               <tr>
                 <th>시나리오</th>
                 <th>시스템</th>
-                <th>Hit@3</th>
-                <th>순위</th>
+                <th>순위 %</th>
                 <th>적합</th>
                 <th>자연</th>
                 <th>질문</th>
@@ -350,8 +352,7 @@ function AutoEval() {
                 <tr key={i} onClick={() => setOpenEpisode(e)} className="clickable">
                   <td>{e.scenario_id}</td>
                   <td>{e.system}</td>
-                  <td>{e.error ? "오류" : fmt(e.hit3)}</td>
-                  <td>{fmt(e.target_rank, 0)}</td>
+                  <td>{e.error ? "오류" : fmtPct(e.rank_pct)}</td>
                   <td>{fmt(e.judge?.fit, 0)}</td>
                   <td>{fmt(e.judge?.naturalness, 0)}</td>
                   <td>{fmt(e.questions, 0)}</td>

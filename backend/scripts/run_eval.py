@@ -18,8 +18,9 @@ from app.evaluation.runner import create_run, execute_run  # noqa: E402
 from app.evaluation.scenarios import load_scenarios  # noqa: E402
 from app.evaluation.systems import SYSTEMS  # noqa: E402
 
-COLUMNS = ["episodes", "errors", "hit1", "hit3", "mrr", "median_rank", "attribute_match", "questions",
-           "fit", "naturalness", "efficiency", "seconds"]
+COLUMNS = ["episodes", "errors", "rank_pct_mean", "rank_pct_median", "rank_pct_mean_no_text",
+           "rank_pct_median_no_text", "attribute_match", "questions", "fit", "naturalness", "efficiency",
+           "seconds"]
 
 
 def main() -> None:

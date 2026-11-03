@@ -130,9 +130,7 @@ export interface ManualResult {
   session_id: string;
   target: { id: string; title: string | null; price: number | null; image_url: string | null; description: string | null };
   recommended: { id: string; title: string }[];
-  target_rank: number | null;
-  hit1: boolean;
-  hit3: boolean;
+  rank_pct: number | null; // 정답 순위 백분율 (상위 %, 작을수록 좋다)
   attribute_match: number | null;
   naturalness: number;
   satisfaction: number;
@@ -145,12 +143,10 @@ export interface SystemSummary {
   episodes: number;
   errors: number;
   recommended: number;
-  hit1: number | null;
-  hit3: number | null;
-  mrr: number | null;
-  median_rank: number | null;
-  median_rank_no_text: number | null;
-  hit3_no_text: number | null;
+  rank_pct_mean: number | null;
+  rank_pct_median: number | null;
+  rank_pct_mean_no_text: number | null;
+  rank_pct_median_no_text: number | null;
   attribute_match: number | null;
   questions: number | null;
   fit: number | null;
@@ -164,10 +160,8 @@ export interface Episode {
   system: string;
   target_id: string;
   recommended: string[];
-  target_rank?: number | null;
+  rank_pct?: number | null;
   questions?: number;
-  hit1?: boolean;
-  hit3?: boolean;
   attribute_match?: number | null;
   judge?: { fit: number; naturalness: number; efficiency: number; comment: string };
   seconds?: number;

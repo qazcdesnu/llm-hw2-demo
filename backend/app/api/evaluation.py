@@ -15,7 +15,7 @@ from app.db import get_db
 from app.evaluation.judge import describe_product
 from app.evaluation.runner import episode_metrics, start_run
 from app.evaluation.scenarios import load_scenarios
-from app.evaluation.systems import SYSTEMS, target_rank
+from app.evaluation.systems import SYSTEMS, rank_percent, target_position
 from app.llm import LLMNotConfiguredError
 
 router = APIRouter(prefix="/api/eval", tags=["evaluation"])
@@ -62,7 +62,7 @@ def score_manual(body: ManualScore, db: sqlite3.Connection = Depends(get_db)) ->
                    "description": describe_product(catalog.spec, target) if target else None},
         "recommended": [{"id": i, "title": catalog.products[i].title} for i in recommended
                         if i in catalog.products],
-        "target_rank": target_rank(catalog, state, scenario.target_id),
+        "rank_pct": rank_percent(target_position(catalog, state, scenario.target_id)),
         **episode_metrics(scenario, recommended, catalog),
         "naturalness": body.naturalness, "satisfaction": body.satisfaction, "comment": body.comment,
         "turns": state.turn,

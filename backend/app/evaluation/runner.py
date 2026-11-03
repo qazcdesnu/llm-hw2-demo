@@ -25,7 +25,7 @@ from app.db import connect
 from app.evaluation.agents import simulated_user
 from app.evaluation.judge import judge_episode
 from app.evaluation.scenarios import Scenario, load_scenarios
-from app.evaluation.systems import SYSTEMS, make_system
+from app.evaluation.systems import SYSTEMS, make_system, rank_percent
 from app.llm import LLMClient, get_llm_client
 from app.services.chat import Catalog, Parser, QuestionWriter, build_catalog
 from app.services.parser import LLMParser
@@ -75,11 +75,7 @@ def attribute_match(scenario: Scenario, product_attrs: dict[str, str]) -> float 
 
 def episode_metrics(scenario: Scenario, recommended: list[str], catalog: Catalog) -> dict:
     top1 = catalog.products.get(recommended[0]) if recommended else None
-    return {
-        "hit1": scenario.target_id in recommended[:1],
-        "hit3": scenario.target_id in recommended[:3],
-        "attribute_match": attribute_match(scenario, top1.attributes) if top1 else None,
-    }
+    return {"attribute_match": attribute_match(scenario, top1.attributes) if top1 else None}
 
 
 def summarize(results: list[dict]) -> dict[str, dict]:
@@ -92,20 +88,22 @@ def summarize(results: list[dict]) -> dict[str, dict]:
             values = [v for v in values if v is not None]
             return round(mean(values), 3) if values else None
 
-        ranks = [r["target_rank"] for r in rs if r.get("target_rank")]
-        no_text = [r["extra"]["target_rank_no_text"] for r in rs
-                   if (r.get("extra") or {}).get("target_rank_no_text")]
+        pcts = [r["rank_pct"] for r in rs if r.get("rank_pct") is not None]
+        no_text = [r["extra"]["rank_pct_no_text"] for r in rs
+                   if (r.get("extra") or {}).get("rank_pct_no_text") is not None]
+
+        def med(values):
+            return round(median(values), 3) if values else None
         out[system] = {
             "episodes": len(rs),
             "errors": sum(1 for r in results if r["system"] == system and r.get("error")),
             "recommended": sum(1 for r in rs if r["recommended"]),
-            "hit1": avg([float(r["hit1"]) for r in rs]),
-            "hit3": avg([float(r["hit3"]) for r in rs]),
-            "mrr": avg([1 / r for r in ranks]) if ranks else None,
-            "median_rank": median(ranks) if ranks else None,
+            # 정답 순위 백분율(상위 %, 작을수록 좋다). 절대 순위·Hit@k는 쓰지 않는다
+            "rank_pct_mean": avg(pcts),
+            "rank_pct_median": med(pcts),
             # 동률 정렬에서 텍스트 관련도를 뺐을 때 (주 용도 → 평점만)
-            "median_rank_no_text": median(no_text) if no_text else None,
-            "hit3_no_text": avg([float(v <= 3) for v in no_text]) if no_text else None,
+            "rank_pct_mean_no_text": avg(no_text),
+            "rank_pct_median_no_text": med(no_text),
             "attribute_match": avg([r["attribute_match"] for r in rs]),
             "questions": avg([r["questions"] for r in rs]),
             "fit": avg([r["judge"]["fit"] for r in rs if r.get("judge")]),
@@ -147,9 +145,9 @@ def run_episode(ctx: EvalContext, scenario: Scenario, system_name: str) -> dict:
         questions += 1
         message = user.reply(turn.reply)
 
-    rank = system.target_rank(scenario.target_id) if hasattr(system, "target_rank") else None
-    if hasattr(system, "target_rank"):
-        extra["target_rank_no_text"] = system.target_rank(scenario.target_id, use_text=False)
+    position = system.target_position(scenario.target_id) if hasattr(system, "target_position") else None
+    if hasattr(system, "target_position"):
+        extra["rank_pct_no_text"] = rank_percent(system.target_position(scenario.target_id, use_text=False))
     if system_name == "llm":
         extra["target_in_candidates"] = scenario.target_id in extra.get("candidate_ids", [])
         extra.pop("candidate_ids", None)
@@ -157,7 +155,8 @@ def run_episode(ctx: EvalContext, scenario: Scenario, system_name: str) -> dict:
     judge = judge_episode(ctx.client, ctx.spec, scenario, transcript, products)
     return {
         "scenario_id": scenario.id, "system": system_name, "target_id": scenario.target_id,
-        "recommended": recommended, "target_rank": rank, "questions": questions,
+        "recommended": recommended, "rank_pct": rank_percent(position),
+        "target_rank": position[0] if position else None, "questions": questions,
         **episode_metrics(scenario, recommended, ctx.catalog),
         "judge": judge.model_dump(), "seconds": round(time.perf_counter() - start, 1),
         "transcript": transcript, "extra": extra,

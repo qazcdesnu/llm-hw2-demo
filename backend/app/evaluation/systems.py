@@ -53,12 +53,13 @@ class EngineSystem:
         recs = [r.product_id for r in result.recommendations] or None
         return SystemTurn(result.reply, recs, {"asked": result.debug.selected_attribute})
 
-    def target_rank(self, target_id: str, use_text: bool = True) -> int | None:
-        return target_rank(self.catalog, self.state, target_id, use_text)
+    def target_position(self, target_id: str, use_text: bool = True) -> tuple[int, int] | None:
+        return target_position(self.catalog, self.state, target_id, use_text)
 
 
-def target_rank(catalog: Catalog, state: ChatState, target_id: str, use_text: bool = True) -> int | None:
-    """지금 상태에서 정답 상품의 순위 (전체 카탈로그 기준, 1부터). 사용자에게 보이는 정렬과 같다.
+def target_position(catalog: Catalog, state: ChatState, target_id: str,
+                    use_text: bool = True) -> tuple[int, int] | None:
+    """지금 상태에서 정답 상품의 (순위, 후보 수). 순위는 1부터, 사용자에게 보이는 정렬과 같다.
 
     use_text=False: 동률 정렬에서 텍스트 관련도를 뺀 순위 (효과 비교용)
     """
@@ -67,7 +68,21 @@ def target_rank(catalog: Catalog, state: ChatState, target_id: str, use_text: bo
                        tie_key=tie_order(catalog, state, use_text)[0])
     excluded = set(pref.excluded)
     ids = [r.item.id for r in ranked if r.item.id not in excluded]
-    return ids.index(target_id) + 1 if target_id in ids else None
+    return (ids.index(target_id) + 1, len(ids)) if target_id in ids else None
+
+
+def rank_percent(position: tuple[int, int] | None) -> float | None:
+    """정답 순위 백분율: 순위 ÷ 후보 수 × 100 ("상위 몇 %", 작을수록 좋다).
+
+    카탈로그 크기와 무관하게 비교하려고 절대 순위 대신 쓴다.
+
+    @docid eval.rank-percent
+    @see docs/evaluation.md#3-에피소드와-지표
+    """
+    if position is None:
+        return None
+    rank, total = position
+    return round(100 * rank / total, 3)
 
 
 class Pick(BaseModel):

@@ -13,7 +13,7 @@ from app.evaluation.judge import JudgeScores
 from app.evaluation.runner import EvalContext, attribute_match, run_episode, summarize
 from app.evaluation.scenarios import Scenario
 from app.catalog.search import CatalogSearch
-from app.evaluation.systems import Pick
+from app.evaluation.systems import Pick, rank_percent
 from app.main import create_app
 from app.services.chat import build_catalog
 from app.services.parser import ParsedConstraint, ParseResult
@@ -84,31 +84,34 @@ def test_engine_episode(system):
     result = run_episode(context(), SCENARIO, system)
     assert result["system"] == system and result["recommended"]
     assert result["transcript"][0] == {"role": "user", "content": "이어폰 찾고 있어"}
-    assert result["target_rank"] is not None  # 전체 카탈로그에서 정답 순위
+    assert 0 < result["rank_pct"] <= 100  # 정답 순위 백분율 (순위 ÷ 후보 수 × 100)
+    assert 0 < result["extra"]["rank_pct_no_text"] <= 100
     assert result["judge"]["fit"] == 5 and result["judge"]["efficiency"] == 1
-    assert result["hit3"] == ("A" in result["recommended"][:3])
+    assert "hit1" not in result and "hit3" not in result
 
 
 def test_llm_baseline_episode():
     result = run_episode(context(), SCENARIO, "llm")
     assert result["questions"] == 1
     assert result["recommended"] == ["A"]  # 검색 후보 안에서만 고른다
-    assert result["hit1"] and result["extra"]["target_in_candidates"]
-    assert result["target_rank"] is None
+    assert result["extra"]["target_in_candidates"]
+    assert result["rank_pct"] is None  # 엔진 순위가 없다
 
 
 def test_summarize():
     rows = [
-        {"system": "ig", "recommended": ["A"], "hit1": True, "hit3": True, "target_rank": 1,
+        {"system": "ig", "recommended": ["A"], "rank_pct": 1.0, "extra": {"rank_pct_no_text": 2.0},
          "attribute_match": 1.0, "questions": 2, "judge": {"fit": 5, "naturalness": 4, "efficiency": 3},
          "seconds": 10},
-        {"system": "ig", "recommended": ["B"], "hit1": False, "hit3": False, "target_rank": 4,
+        {"system": "ig", "recommended": ["B"], "rank_pct": 40.0, "extra": {"rank_pct_no_text": 10.0},
          "attribute_match": 0.0, "questions": 4, "judge": {"fit": 1, "naturalness": 2, "efficiency": 3},
          "seconds": 20},
         {"system": "ig", "recommended": [], "error": "boom"},
     ]
     s = summarize(rows)["ig"]
-    assert (s["episodes"], s["errors"], s["hit1"], s["mrr"], s["median_rank"]) == (2, 1, 0.5, 0.625, 2.5)  # 순위 1, 4의 중앙값
+    assert (s["episodes"], s["errors"], s["rank_pct_mean"], s["rank_pct_median"]) == (2, 1, 20.5, 20.5)
+    assert (s["rank_pct_mean_no_text"], s["rank_pct_median_no_text"]) == (6.0, 6.0)
+    assert not {"hit1", "hit3", "mrr", "median_rank"} & set(s)
     assert (s["fit"], s["questions"], s["seconds"]) == (3, 3, 15)
 
 
@@ -147,7 +150,7 @@ def test_manual_scoring(api):
         res = client.post(f"/api/sessions/{sid}/messages",
                           json={"message": "x", "answer": {"attribute": q["attribute"], "value": "dont_care"}}).json()
     result = client.post("/api/eval/manual", json=body).json()
-    assert result["target"]["id"] == "P1" and result["target_rank"] >= 1
+    assert result["target"]["id"] == "P1" and 0 < result["rank_pct"] <= 100
     assert result["recommended"] and result["naturalness"] == 4
     assert client.get("/api/eval/manual").json()[0]["scenario_id"] == "c4-7"
     assert client.post("/api/eval/manual", json={**body, "scenario_id": "nope"}).status_code == 404
@@ -182,3 +185,9 @@ def test_c4_candidates_filter_rating_and_review_length(tmp_path):
     assert [r["qid"] for r in rows] == ["1"]
     assert "<br" not in scenario_mod.review_text(rows[0])
     assert len(scenario_mod.c4_candidates({"A"}, path, min_rating=0, min_review_chars=0)) == 3
+
+
+def test_rank_percent():
+    assert rank_percent((1, 4628)) == 0.022
+    assert rank_percent((4628, 4628)) == 100.0
+    assert rank_percent(None) is None

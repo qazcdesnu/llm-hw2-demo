@@ -296,7 +296,7 @@ erDiagram
 
 - **대화 평가:** Amazon-C4의 실제 구매 기록으로 만든 시나리오(정답 = 실제로 산 상품)를 영어 가상 사용자가 연기하고, LLM 심판이 채점한다. 실행기([`run_episode`](../backend/app/evaluation/runner.py "docid:eval.run-episode"))는 대화 관리자를 그대로 부른다.
 - **비교:** `ig`와 `random`은 질문 선택 정책만 다르고 나머지(파서, 메모리, 질문 작성기, 추천기, 동률 정렬)는 같다. `llm`은 엔진 없이 LLM이 대화하다 검색해서 추천한다.
-- **지표:** Hit@1/3, MRR, 정답 순위(4,628개 중), 1위 상품의 속성 일치, 질문 수, 심판의 적합·자연스러움·효율. 결과는 SQLite(`eval_runs`, `eval_episodes`, `eval_manual`)에 남고 평가 모드 화면에서 본다.
+- **지표:** 정답 순위 백분율(순위 ÷ 후보 수 × 100)의 평균·중앙값, 1위 상품의 속성 일치, 질문 수, 심판의 적합·자연스러움·효율. Hit@k·MRR·절대 순위는 쓰지 않는다. 결과는 SQLite(`eval_runs`, `eval_episodes`, `eval_manual`)에 남고 평가 모드 화면에서 본다.
 - **엔진만의 예비 확인:** IG 엔진(`core`)을 직접 import해 웹·LLM 없이 Random / Fixed / IG를 비교했다([예비 확인 결과](ig-engine.md#6-예비-확인-결과-2026-10-26)).
 - **파서 평가:** 발화 63개에 대한 요청 분류·속성 추출 채점([LLM 파서 3절](llm-parser.md#3-평가)).
 - 아직 정하지 않은 것: 최종 보고 지표와 규모(Turn-AUC, 반복 횟수, [I-4](issue.md#i-4)).
