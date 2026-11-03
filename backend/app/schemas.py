@@ -101,7 +101,8 @@ class ChatResponse(BaseModel):
 
 class ModelChoice(BaseModel):
     id: str
-    reasoning: bool
+    input_price: float | None = None  # 1M 토큰당 달러
+    output_price: float | None = None
 
 
 class ModelList(BaseModel):

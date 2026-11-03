@@ -90,7 +90,8 @@ export interface DebugInfo {
 // 입력창에서 고를 수 있는 OpenAI 모델 (GET /api/models)
 export interface ModelChoice {
   id: string;
-  reasoning: boolean;
+  input_price: number | null; // 1M 토큰당 달러
+  output_price: number | null;
 }
 
 export interface ModelList {

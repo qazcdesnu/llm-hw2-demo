@@ -102,7 +102,10 @@ uv run python scripts/eval_parser.py --configs gpt-5-mini:low gpt-5-nano:low --v
 
 - **gpt-5-nano + low를 쓰지 않은 이유:** 대화 맥락이 함께 있을 때 "총 구하는 방법"을 매번 쇼핑으로 분류했다(Safety 실패). 결과도 실행마다 흔들렸다.
 - **설정 위치:** `backend/.env`의 `OPENAI_MODEL`, `OPENAI_REASONING_EFFORT`, `OPENAI_QUESTION_MODEL`, `OPENAI_QUESTION_REASONING_EFFORT`(질문 작성, 기본 `low`, [5절](#5-질문-작성기-친구-페르소나))
-- **화면에서 고르기 (2026-11-02):** 입력창 왼쪽의 모델 선택 상자로 메시지마다 모델을 바꿀 수 있다(기본은 `OPENAI_MODEL`, 고른 값은 브라우저에 기억). 고른 모델이 해석과 질문 작성에 함께 쓰인다([`chat_client`](../backend/app/llm/__init__.py "sym:py:app.llm#chat_client")). 선택지: `gpt-5-mini`(기본), `gpt-5-nano`, `gpt-5`, `gpt-4.1-mini`, `gpt-4o-mini`. 추론 모델이 아니면 reasoning effort를 보내지 않는다. 같은 발화로 확인한 한 턴(해석 + 질문 작성) 시간: gpt-5 계열 15~20초, `gpt-4.1-mini`·`gpt-4o-mini` 약 4초. 평가 실행은 이 선택과 무관하게 설정의 모델을 쓴다.
+- **화면에서 고르기 (2026-11-02):** 입력창 왼쪽의 모델 선택 상자로 메시지마다 모델을 바꿀 수 있다(기본은 `OPENAI_MODEL`, 고른 값은 브라우저에 기억). 고른 모델이 해석과 질문 작성에 함께 쓰인다([`chat_client`](../backend/app/llm/__init__.py "sym:py:app.llm#chat_client")). 선택지는 [OpenAI API 가격 페이지](https://developers.openai.com/api/docs/pricing)(2026-11-02)의 텍스트 모델 38개 중, 이 키로 Responses API 구조화 출력 호출이 되고 reasoning effort `low`를 받는 **19개**다(`CHAT_MODELS`, 화면에 입력/출력 1M 토큰당 가격 표시). gpt-6·6.1, gpt-5.6, gpt-5.5, gpt-5.4(mini·nano 포함), gpt-5.2, gpt-5.1, gpt-5(mini·nano 포함), o3, o3-pro. 해석·질문 작성은 모두 effort `low`로 쓴다.
+  - low를 받지 않아 뺀 9개: gpt-5.5-pro·5.4-pro·5.2-pro·5-pro(medium 이상), chat-latest(medium만), gpt-4.1·4.1-mini·4o·4o-mini(추론 모델 아님).
+  - 호출이 안 돼(404: 폐기 또는 접근 불가) 뺀 10개: o1, o1-pro, o3-mini, o4-mini, gpt-4.1-nano, gpt-4o-2024-05-13, gpt-4-turbo-2024-04-09, gpt-4-0613, gpt-3.5-turbo, gpt-3.5-turbo-0125.
+  - 같은 발화로 확인한 한 턴(해석 + 질문 작성) 시간: gpt-5 계열 15~20초. 평가 실행은 이 선택과 무관하게 설정의 모델을 쓴다.
 
 ## 4. 대화 메모리
 

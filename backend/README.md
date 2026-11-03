@@ -49,13 +49,13 @@ uv run python scripts/run_eval.py headphones --limit 10          # 대화 평가
 | POST | `/api/sessions` | 새 세션 → `{session_id}` |
 | GET | `/api/sessions/{id}` | 대화 기록, 대기 중인 질문(`question`), `finished` |
 | POST | `/api/sessions/{id}/messages` | `{message, answer?, model?}` → `{reply, question, recommendations, debug, finished}` |
-| GET | `/api/models` | 입력창의 모델 선택지 `{default, options: [{id, reasoning}]}`. 기본값은 `OPENAI_MODEL` |
+| GET | `/api/models` | 입력창의 모델 선택지 `{default, options: [{id, input_price, output_price}]}`. 기본값은 `OPENAI_MODEL` |
 | GET | `/api/health` | 상태 확인 |
 | GET·POST | `/api/eval/...` | 평가 (시나리오, 매뉴얼 채점, 자동 평가 실행·결과). [evaluation.md 4절](../docs/evaluation.md#4-실행) |
 
 - `answer`: 보기 버튼으로 고른 답 `{attribute, value}`. 없으면 `message`를 LLM 파서로 해석한다(키가 없거나 실패하면 보기 문자열 매칭).
 - 응답(`reply`, 보기 이름, 추천 근거)은 사용자 발화의 언어(한국어·영어)로 나온다.
-- `model`: 이번 메시지의 해석(요청 분류·속성 추출)과 질문 작성에 쓸 모델(`/api/models`의 id). 없으면 설정의 기본 모델이고, 목록에 없으면 422다. 추론 모델이 아니면 reasoning effort를 보내지 않는다. 임베딩 모델은 바뀌지 않는다(미리 만든 상품 임베딩과 같아야 해서). 쓴 모델은 `debug.model`에 나온다.
+- `model`: 이번 메시지의 해석(요청 분류·속성 추출)과 질문 작성에 쓸 모델(`/api/models`의 id). 없으면 설정의 기본 모델이고, 목록에 없으면 422다. 선택지는 모두 reasoning effort `low`를 받는 모델이고, 기본 모델과 같은 effort로 부른다. 임베딩 모델은 바뀌지 않는다(미리 만든 상품 임베딩과 같아야 해서). 쓴 모델은 `debug.model`에 나온다.
 - 추천 후(`finished: true`)에도 메시지를 보낼 수 있고, 추천 목록 조정으로 처리한다.
 - `question`: 다음 질문과 보기(`options`). 마지막 보기는 항상 `dont_care`(상관없음)다. 추천으로 끝나면 `null`.
 - 카탈로그가 DB에 없으면 503이다(`scripts/load_catalog.py <id>` 먼저 실행). 정의에 없는 답이면 422다.

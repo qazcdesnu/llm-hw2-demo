@@ -160,4 +160,5 @@ models_router = APIRouter(prefix="/api/models", tags=["models"])
 def list_models() -> ModelList:
     """입력창의 모델 선택지. 기본값은 설정의 OPENAI_MODEL."""
     return ModelList(default=settings.openai_model,
-                     options=[ModelChoice(id=m.id, reasoning=m.reasoning) for m in chat_models()])
+                     options=[ModelChoice(id=m.id, input_price=m.input_price, output_price=m.output_price)
+                              for m in chat_models()])

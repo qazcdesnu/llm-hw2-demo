@@ -89,8 +89,8 @@ def test_missing_key_raises(monkeypatch):
     get_llm_client.cache_clear()
 
 
-def test_chat_client_uses_chosen_model_and_skips_effort_for_non_reasoning(monkeypatch):
-    """입력창에서 고른 모델: 추론 모델이면 설정의 effort, 아니면 effort를 보내지 않는다."""
+def test_chat_client_uses_chosen_model_with_the_same_effort(monkeypatch):
+    """입력창에서 고른 모델에도 기본 모델과 같은 reasoning effort를 보낸다. 선택지 밖 모델은 거부."""
     from pydantic import SecretStr
 
     monkeypatch.setattr("app.llm.settings.openai_api_key", SecretStr("key"))
@@ -98,11 +98,10 @@ def test_chat_client_uses_chosen_model_and_skips_effort_for_non_reasoning(monkey
     monkeypatch.setattr("app.llm.settings.openai_reasoning_effort", "low")
     get_llm_client.cache_clear()
     assert [m.id for m in chat_models()][0] == "gpt-5-mini"
-    reasoning = chat_client("gpt-5-nano", "parse")
-    assert (reasoning.model, reasoning.reasoning_effort) == ("gpt-5-nano", "low")
-    plain = chat_client("gpt-4o-mini", "question")
-    assert (plain.model, plain.reasoning_effort) == ("gpt-4o-mini", None)
+    chosen = chat_client("gpt-5-nano", "parse")
+    assert (chosen.model, chosen.reasoning_effort) == ("gpt-5-nano", "low")
     assert chat_client(None, "parse").model == "gpt-5-mini"
-    with pytest.raises(ValueError):
-        chat_client("no-such-model", "parse")
+    for model in ("no-such-model", "gpt-5-pro", "gpt-4o-mini"):  # low를 받지 않는 모델은 선택지에 없다
+        with pytest.raises(ValueError):
+            chat_client(model, "parse")
     get_llm_client.cache_clear()

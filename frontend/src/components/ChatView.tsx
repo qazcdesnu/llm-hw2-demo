@@ -151,11 +151,14 @@ export default function ChatView({
             onChange={(e) => onModelChange(e.target.value)}
             disabled={pending}
             aria-label="LLM 모델"
-            title="해석과 질문 작성에 쓸 OpenAI 모델"
+            title="해석과 질문 작성에 쓸 OpenAI 모델 (가격: 입력/출력 1M 토큰당 달러)"
           >
             {models.map((m, i) => (
               <option key={m.id} value={m.id}>
                 {m.id}
+                {m.input_price != null && m.output_price != null
+                  ? ` · $${m.input_price}/$${m.output_price}`
+                  : ""}
                 {i === 0 ? " (기본)" : ""}
               </option>
             ))}
