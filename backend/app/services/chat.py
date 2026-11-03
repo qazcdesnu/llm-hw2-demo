@@ -23,11 +23,11 @@ from app.core.question_selector import QuestionPolicy
 from app.core.recommender import TieKey
 from app.schemas import DebugInfo, Question, QuestionScore, Recommendation
 from app.services import responses as say
-from app.services.memory import Fact
+from app.services.memory import RANGE, Fact
 from app.services.parser import ParseContext, ParseResult
 from app.services.questioner import QuestionRequest, WrittenQuestion
 from app.services.relevance import Embedder, TextIndex, relevance_scores
-from app.services.state import ChatState
+from app.services.state import MAX_CONFIRMS, ChatState
 
 DEBUG_TOP_N = 5
 
@@ -118,27 +118,35 @@ def validate_answer(spec: CategorySpec, attribute: str, value: str) -> None:
 # ---------------------------------------------------------------- 상태 갱신
 
 def remember(state: ChatState, spec: CategorySpec, attribute: str, value: str, quote: str,
-             source: str = "said") -> str | None:
-    """사실을 메모리에 남긴다. 새로 알게 된 것이면 사용자에게 알릴 문구, 이미 알던 값이면 None."""
-    if state.memory.remember(Fact(attribute, value, quote, state.turn, source)):
-        return say.change_label(spec, attribute, value, state.language)
+             source: str = "said", low: float | None = None, high: float | None = None) -> str | None:
+    """사실을 메모리에 남긴다. 새로 알게 된 것이면 사용자에게 알릴 문구, 이미 알던 값이면 None.
+
+    value가 RANGE면 low·high가 숫자 범위다("$10~25").
+    """
+    if state.memory.remember(Fact(attribute, value, quote, state.turn, source, low, high)):
+        return say.change_label(spec, attribute, value, state.language, low, high)
     return None
 
 
-def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> list[str]:
+def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> tuple[list[str], list[str]]:
     """해석 결과를 메모리와 추천 조정 상태에 반영하고, 새로 바뀐 것을 사람이 읽을 문구로 돌려준다.
 
-    속성 추출 결과는 그대로 믿는다(확신도 없음). 틀렸으면 사용자가 대화로 정정한다.
+    (말한 것, 짐작한 것) 두 목록을 돌려준다. 짐작한 값도 조건으로 똑같이 쓰지만(확신도 없음),
+    도우미가 짐작을 말로 드러내 사용자가 아니면 바로잡게 한다. 바로잡으면 메모리의 마지막 값이 이긴다.
 
     @docid chat.apply-parsed
     @see docs/architecture.md#3-대화-한-턴의-흐름
     @see docs/llm-parser.md#7-해석-결과를-대화-상태에-반영
     """
-    changes = []
+    changes, guesses = [], []
     state.memory.add_notes(parsed.notes)
     state.memory.add_keywords(parsed.keywords)
     for c in parsed.constraints:
-        if (label := remember(state, spec, c.attribute, c.value, c.quote)) is not None:
+        source = "guess" if c.guessed else "said"
+        if (label := remember(state, spec, c.attribute, c.value, c.quote, source)) is not None:
+            (guesses if c.guessed else changes).append(label)
+    for r in parsed.ranges:
+        if (label := remember(state, spec, r.attribute, RANGE, r.quote, low=r.low, high=r.high)) is not None:
             changes.append(label)
     for rank in parsed.exclude_ranks:
         if rank <= len(state.last_recommended):
@@ -149,7 +157,7 @@ def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> l
     if parsed.price_order in ("cheaper", "pricier"):
         state.price_order = parsed.price_order
         changes.append(say.t(state.language, f"order.{parsed.price_order}"))
-    return changes
+    return changes, guesses
 
 
 def tie_order(catalog: Catalog, state: ChatState, use_text: bool = True) -> tuple[TieKey, str]:
@@ -204,8 +212,11 @@ def recommendation_context(catalog: Catalog, state: ChatState) -> list[str] | No
 
 # ---------------------------------------------------------------- 결정·표현
 
-def decide(catalog: Catalog, state: ChatState, pref: PreferenceState) -> tuple[Decision, str | None]:
+def decide(catalog: Catalog, state: ChatState, pref: PreferenceState,
+           rank: bool = True) -> tuple[Decision, str | None]:
     """엔진의 결정과, 추천이면 동률 정렬 기준(tie_order의 basis).
+
+    rank=False면 질문 단계의 추천 결정에 동률 정렬(질의 임베딩)을 계산하지 않는다(추천 전 확인을 할 때).
 
     @see docs/architecture.md#3-대화-한-턴의-흐름
     @see docs/ig-engine.md#4-추천과-한계-표시
@@ -214,7 +225,7 @@ def decide(catalog: Catalog, state: ChatState, pref: PreferenceState) -> tuple[D
         key, basis = tie_order(catalog, state)
         return catalog.engine.recommend_now(pref, tie_key=key), basis
     decision = catalog.engine.step(pref)
-    if isinstance(decision.action, Recommend):  # 추천할 때만 동률 정렬(텍스트 관련도)을 계산한다
+    if rank and isinstance(decision.action, Recommend):  # 추천할 때만 동률 정렬(텍스트 관련도)을 계산한다
         key, basis = tie_order(catalog, state)
         return catalog.engine.recommend_now(pref, decision.action.reason, key), basis
     return decision, None
@@ -269,6 +280,7 @@ class _Understanding:
 
     request_type: str | None = None
     changes: list[str] = field(default_factory=list)  # 이번 턴에 새로 바뀐 것 (사람이 읽는 문구)
+    guesses: list[str] = field(default_factory=list)  # 이번 턴에 짐작한 것 (도우미가 짐작이라고 말해 준다)
     unclear: bool = False  # 해석은 했지만 알아들은 것이 없음 → 다음 질문을 다르게 묻는다
 
 
@@ -298,22 +310,35 @@ def handle_message(
     if isinstance(understood, TurnResult):
         return understood
 
-    # 3. 결정
+    # 3. 결정 (추천 전에는 지금까지의 조건을 정리해 확인한다)
     pref = catalog.preference(state)
-    decision, basis = decide(catalog, state, pref)
+    lang = state.language
+    if state.confirming:  # 확인 질문에 대한 답
+        changed = bool(understood.changes or understood.guesses)
+        if changed and state.confirms < MAX_CONFIRMS:
+            return _ask_confirmation(catalog, state, pref, understood)
+        state.confirming = False
+        key, basis = tie_order(catalog, state)
+        decision = catalog.engine.recommend_now(pref, "confirmed", key)
+    else:
+        decision, basis = decide(catalog, state, pref, rank=False)
+        if isinstance(decision.action, Recommend) and not state.finished:
+            if _summary(spec, state, lang):
+                return _ask_confirmation(catalog, state, pref, understood)
+            key, basis = tie_order(catalog, state)  # 확인할 조건이 없으면 바로 추천
+            decision = catalog.engine.recommend_now(pref, decision.action.reason, key)
     debug = build_debug(catalog, decision, state, pref, understood.request_type)
     debug.tie_order = basis
     action = decision.action
 
     # 4. 표현 (사용자 발화의 언어로)
-    lang = state.language
     if isinstance(action, Ask):
         written = None
         if writer is not None:
             written = writer(spec, QuestionRequest(
                 attribute=action.attribute, message=message, first_turn=first_turn,
                 retry=action.attribute in state.questions, unclear=understood.unclear,
-                learned=understood.changes, known=state.memory.describe(spec),
+                learned=understood.changes, guessed=understood.guesses, known=state.memory.describe(spec),
                 history=list(history or []), language=lang,
             ))
         if written is not None:
@@ -323,9 +348,10 @@ def handle_message(
         else:
             question = say.build_question(spec, action.attribute, lang=lang)
             prefix = f"{say.intro(spec, lang)}\n\n" if first_turn else ""
-            if understood.unclear and not understood.changes:
+            if understood.unclear and not (understood.changes or understood.guesses):
                 prefix += f"{say.t(lang, 'unclear_prefix')}\n"
-            reply = prefix + say.acknowledgement(understood.changes, lang) + question.text
+            reply = (prefix + say.acknowledgement(understood.changes, lang)
+                     + say.guess_note(understood.guesses, lang) + question.text)
             debug.question_source = "template"
         state.ask(action.attribute, question.text)
         return TurnResult(reply, state, debug, question)
@@ -335,11 +361,38 @@ def handle_message(
     state.last_recommended = [r.item.id for r in action.items]
     return TurnResult(
         say.recommendation_reply(spec, action.reason, action.limitations, basis,
-                                 understood.changes, lang),
+                                 understood.changes, lang, understood.guesses),
         state, debug,
         recommendations=[say.to_recommendation(spec, catalog.products[r.item.id], r, pref, lang)
                          for r in action.items],
     )
+
+
+def _summary(spec: CategorySpec, state: ChatState, lang: str) -> list[str]:
+    """확인 질문에 보여 줄 지금까지의 조건 (메모리의 속성별 마지막 사실)."""
+    return [say.change_label(spec, f.attribute, f.value, lang, f.low, f.high)
+            for f in state.memory.latest().values() if spec.has_attribute(f.attribute)]
+
+
+def _ask_confirmation(catalog: Catalog, state: ChatState, pref: PreferenceState,
+                      understood: "_Understanding") -> TurnResult:
+    """추천 직전 확인: 지금까지의 조건을 정리해 보여 주고 이대로 찾을지 묻는다.
+
+    바뀐 게 없다고 하면 추천하고, 바꾸면 반영해서 다시 묻는다(최대 MAX_CONFIRMS번, 그 뒤에는 추천).
+    바뀌었는지는 LLM 파서가 뽑은 변화로만 판단한다.
+
+    @docid chat.confirm-before-recommend
+    @see docs/architecture.md#3-대화-한-턴의-흐름
+    @see docs/llm-parser.md#5-1-추천-전-확인-질문
+    """
+    spec, lang = catalog.spec, state.language
+    state.confirming = True
+    state.confirms += 1
+    reply = (say.acknowledgement(understood.changes, lang) + say.guess_note(understood.guesses, lang)
+             + say.confirmation(_summary(spec, state, lang), lang, last=state.confirms >= MAX_CONFIRMS))
+    debug = build_debug(catalog, catalog.engine.step(pref), state, pref, understood.request_type)
+    debug.confirm_round = state.confirms
+    return TurnResult(reply, state, debug, say.confirm_question(lang))
 
 
 def _understand(
@@ -359,6 +412,8 @@ def _understand(
     spec = catalog.spec
     pending = state.pending
 
+    if answer is not None and answer[0] == say.CONFIRM_ATTRIBUTE:  # "이대로 추천해 줘" 버튼
+        return _Understanding()
     if answer is not None:
         validate_answer(spec, *answer)
         label = remember(state, spec, *answer, quote=message, source="button")
@@ -368,7 +423,10 @@ def _understand(
 
     parsed = None
     if parser is not None:
-        ctx = ParseContext(pending.attribute if pending else None, pending.text if pending else None,
+        question_text = pending.text if pending else None
+        if state.confirming:  # 확인 질문에 대한 답이면 그 정리 문장을 맥락으로 (메모리가 그대로라 다시 만든다)
+            question_text = say.confirmation(_summary(spec, state, state.language), state.language)
+        ctx = ParseContext(pending.attribute if pending else None, question_text,
                            state.memory.describe(spec), recommendation_context(catalog, state))
         parsed = parser(spec, message, ctx)
 
@@ -394,10 +452,10 @@ def _understand(
         state.close_pending(answered=False)
         return _Understanding(request_type, unclear=True)
 
-    changes = apply_parsed(state, parsed, spec)
-    said = {c.attribute for c in parsed.constraints}
-    if state.finished and not (said or changes):
+    changes, guesses = apply_parsed(state, parsed, spec)
+    said = {c.attribute for c in parsed.constraints} | {r.attribute for r in parsed.ranges}
+    if state.finished and not (said or changes or guesses):
         return _same_question(catalog, state, say.t(state.language, "refine_unclear"), request_type)
     if pending is not None:
         state.close_pending(answered=pending.attribute in said)
-    return _Understanding(request_type, changes, unclear=not (said or changes))
+    return _Understanding(request_type, changes, guesses, unclear=not (said or changes or guesses))

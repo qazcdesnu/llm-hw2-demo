@@ -14,15 +14,24 @@ MAX_NOTES = 10
 MAX_KEYWORDS = 40
 
 
+# 구간 속성에 숫자 범위로 답한 사실의 value ("$10~25"). 범위는 low·high에 둔다.
+RANGE = "range"
+
+
 @dataclass
 class Fact:
-    """'목표 상품의 attribute는 value다'라는 사실 하나. value가 DONT_CARE면 상관없음."""
+    """'목표 상품의 attribute는 value다'라는 사실 하나. value가 DONT_CARE면 상관없음, RANGE면 숫자 범위."""
 
     attribute: str
     value: str
     quote: str  # 근거가 된 사용자 발화 (버튼이면 보기 이름)
     turn: int
     source: str = "said"  # said(말로 함, 속성 추출기) / button(보기 버튼)
+    low: float | None = None  # value가 RANGE일 때 범위 (None은 그쪽 한계 없음)
+    high: float | None = None
+
+    def same_as(self, other: "Fact") -> bool:
+        return (self.value, self.low, self.high) == (other.value, other.low, other.high)
 
 
 @dataclass
@@ -39,7 +48,7 @@ class ConversationMemory:
     def remember(self, fact: Fact) -> bool:
         """사실을 남긴다. 같은 속성의 마지막 값과 같으면 남기지 않고 False."""
         last = self.latest().get(fact.attribute)
-        if last is not None and last.value == fact.value:
+        if last is not None and last.same_as(fact):
             return False
         self.facts.append(fact)
         del self.facts[:-MAX_FACTS]
@@ -77,7 +86,7 @@ class ConversationMemory:
 
     def describe(self, spec: CategorySpec) -> list[str]:
         """LLM 프롬프트에 넣을 '지금까지 알게 된 것' (사람이 읽는 문장)."""
-        lines = [f"{label_of(spec, f.attribute, f.value)} (근거: \"{f.quote}\")"
+        lines = [f"{label_of(spec, f.attribute, f.value, f.low, f.high)} (근거: \"{f.quote}\")"
                  for f in self.latest().values() if spec.has_attribute(f.attribute)]
         return lines + [f"맥락: {n}" for n in self.notes]
 
@@ -91,11 +100,23 @@ class ConversationMemory:
                    keywords=list(data.get("keywords", [])))
 
 
-def label_of(spec: CategorySpec, attribute: str, value: str) -> str:
+def range_text(low: float | None, high: float | None) -> str:
+    """'$10~25', '$30 이하', '$60 이상' (LLM 프롬프트·한국어 표시용)."""
+    if low is not None and high is not None:
+        return f"${low:g}~{high:g}"
+    if high is not None:
+        return f"${high:g} 이하"
+    return f"${low:g} 이상" if low is not None else "제한 없음"
+
+
+def label_of(spec: CategorySpec, attribute: str, value: str,
+             low: float | None = None, high: float | None = None) -> str:
     """'노이즈 캔슬링(ANC): 필요'처럼 사람이 읽는 속성=값."""
     attr = spec.attribute(attribute)
     if value == DONT_CARE:
         shown = "상관없음"
+    elif value == RANGE:
+        shown = range_text(low, high)
     else:
         shown = next((v.label for v in attr.values if v.value == value), value)
     return f"{attr.label}: {shown}"

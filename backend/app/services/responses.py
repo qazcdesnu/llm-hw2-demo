@@ -16,6 +16,7 @@ from app.core.engine import Limitation
 from app.core.model import DONT_CARE, PreferenceState
 from app.core.recommender import RankedItem
 from app.schemas import Option, Question, Recommendation
+from app.services.memory import RANGE
 
 TEXT = {
     "ko": {
@@ -35,6 +36,7 @@ TEXT = {
         "other_product": "지금은 {name}만 추천할 수 있어.",
         "off_topic": "나는 {name} 고르는 걸 도와주고 있어.",
         "ack": "좋아, {items}까지 챙길게.",
+        "guess": "{items} 쪽이 맞을 것 같아서 그렇게 볼게. 아니면 말해 줘.",
         "excluded": "{rank}번 상품 제외",
         "order.cheaper": "더 저렴한 순",
         "order.pricier": "더 비싼 순",
@@ -47,6 +49,14 @@ TEXT = {
         "relaxed": "조건을 모두 만족하는 상품이 부족해서, 일부 조건이 다른 것도 같이 보여 줄게.",
         "reason.unknown": "{label}: 상품 정보에 없어 확인 못 함",
         "reason.violated": "{label}: {value} (말한 조건과 다름)",
+        "confirm": "정리해 볼게: {items}. 이대로 찾아볼까, 아니면 바뀐 게 있어?",
+        "confirm_last": "마지막으로 정리할게: {items}. 이대로 찾아볼까?",
+        "confirm_label": "확인",
+        "confirm_yes": "이대로 추천해 줘",
+        "stop.confirmed": "좋아, 이 조건으로 골라 봤어.",
+        "range.both": "${low:g}~{high:g}",
+        "range.max": "${high:g} 이하",
+        "range.min": "${low:g} 이상",
     },
     "en": {
         "dont_care": "Doesn't matter",
@@ -65,6 +75,7 @@ TEXT = {
         "other_product": "Right now I can only recommend {name}.",
         "off_topic": "I'm here to help you pick {name}.",
         "ack": "Got it, I'll keep {items} in mind.",
+        "guess": "Sounds like you'd want {items}, so I'll go with that. Tell me if not.",
         "excluded": "excluding #{rank}",
         "order.cheaper": "cheaper first",
         "order.pricier": "pricier first",
@@ -77,6 +88,14 @@ TEXT = {
         "relaxed": "Not enough products meet every condition, so I'm also showing some that differ a bit.",
         "reason.unknown": "{label}: not listed, couldn't check",
         "reason.violated": "{label}: {value} (differs from what you asked)",
+        "confirm": "Quick recap: {items}. Should I go with this, or has anything changed?",
+        "confirm_last": "Last check: {items}. Shall I go with this?",
+        "confirm_label": "Confirm",
+        "confirm_yes": "Looks good, show me",
+        "stop.confirmed": "Great, here's what I picked with those conditions.",
+        "range.both": "${low:g}–{high:g}",
+        "range.max": "up to ${high:g}",
+        "range.min": "${low:g}+",
     },
 }
 
@@ -92,11 +111,22 @@ def value_label(attr: AttributeSpec, value: str, lang: str = "ko") -> str:
     return next((v.label_for(lang) for v in attr.values if v.value == value), value)
 
 
-def change_label(spec: CategorySpec, attribute: str, value: str, lang: str = "ko") -> str:
-    """새로 알게 된 것을 사용자에게 알릴 때의 문구 ('마이크 필요', 'Mic: Needed')."""
+def range_label(low: float | None, high: float | None, lang: str = "ko") -> str:
+    """숫자 범위 ('$10~25', '$30 이하', '$60 이상')."""
+    if low is not None and high is not None:
+        return t(lang, "range.both", low=low, high=high)
+    if high is not None:
+        return t(lang, "range.max", high=high)
+    return t(lang, "range.min", low=low)
+
+
+def change_label(spec: CategorySpec, attribute: str, value: str, lang: str = "ko",
+                 low: float | None = None, high: float | None = None) -> str:
+    """새로 알게 된 것을 사용자에게 알릴 때의 문구 ('마이크 필요', 'Mic: Needed', '가격대 $10~25')."""
     attr = spec.attribute(attribute)
     sep = ": " if lang == "en" else " "
-    return f"{attr.label_for(lang)}{sep}{value_label(attr, value, lang)}"
+    shown = range_label(low, high, lang) if value == RANGE else value_label(attr, value, lang)
+    return f"{attr.label_for(lang)}{sep}{shown}"
 
 
 def build_question(spec: CategorySpec, attribute: str, text: str | None = None, lang: str = "ko") -> Question:
@@ -123,20 +153,42 @@ def acknowledgement(learned: list[str], lang: str = "ko") -> str:
     return t(lang, "ack", items=", ".join(learned)) + "\n" if learned else ""
 
 
+# 추천 전 확인 질문의 보기 버튼 ("이대로 추천해 줘")에 쓰는 가짜 속성 이름
+CONFIRM_ATTRIBUTE = "_confirm"
+
+
+def confirmation(items: list[str], lang: str = "ko", last: bool = False) -> str:
+    """추천 직전 확인 질문: 지금까지의 조건을 정리하고 이대로 찾을지 묻는다."""
+    return t(lang, "confirm_last" if last else "confirm", items=", ".join(items))
+
+
+def confirm_question(lang: str = "ko") -> Question:
+    return Question(attribute=CONFIRM_ATTRIBUTE, label=t(lang, "confirm_label"), text=t(lang, "confirm_yes"),
+                    options=[Option(value="yes", label=t(lang, "confirm_yes"))])
+
+
+def guess_note(guesses: list[str], lang: str = "ko") -> str:
+    """고정 문구일 때 이번 턴에 짐작한 것 알림 (아니면 바로잡게 한다)."""
+    return t(lang, "guess", items=", ".join(guesses)) + "\n" if guesses else ""
+
+
 # ---------------------------------------------------------------- 추천
 
 def reasons_for(spec: CategorySpec, ranked: RankedItem, state: PreferenceState, lang: str = "ko") -> list[str]:
     reasons = []
     for key in ranked.matched:
         attr = spec.attribute(key)
-        reasons.append(f"{attr.label_for(lang)}: {value_label(attr, state.explicit[key], lang)}")
+        if key in state.ranges:  # 숫자 범위 조건: 실제 값을 보여 준다
+            reasons.append(f"{attr.label_for(lang)}: {range_label(*state.ranges[key], lang)}")
+        else:
+            reasons.append(f"{attr.label_for(lang)}: {value_label(attr, state.explicit[key], lang)}")
     for key in ranked.unknown:
         reasons.append(t(lang, "reason.unknown", label=spec.attribute(key).label_for(lang)))
     for key in ranked.violated:
         attr = spec.attribute(key)
-        actual = ranked.item.attributes.get(key, "")
-        reasons.append(t(lang, "reason.violated", label=attr.label_for(lang),
-                         value=value_label(attr, actual, lang)))
+        number = ranked.item.numbers.get(key) if key in state.ranges else None
+        actual = f"${number:g}" if number is not None else value_label(attr, ranked.item.attributes.get(key, ""), lang)
+        reasons.append(t(lang, "reason.violated", label=attr.label_for(lang), value=actual))
     return reasons
 
 
@@ -164,9 +216,10 @@ def describe_limitation(spec: CategorySpec, lim: Limitation, tie_basis: str | No
 
 
 def recommendation_reply(spec: CategorySpec, reason: str, limitations: list[Limitation],
-                         tie_basis: str | None, learned: list[str], lang: str = "ko") -> str:
+                         tie_basis: str | None, learned: list[str], lang: str = "ko",
+                         guessed: list[str] | None = None) -> str:
     stop = f"stop.{reason}" if f"stop.{reason}" in TEXT["ko"] else "stop.default"
-    lines = [acknowledgement(learned, lang) + t(lang, stop)]
+    lines = [acknowledgement(learned, lang) + guess_note(guessed or [], lang) + t(lang, stop)]
     lines += [text for lim in limitations if (text := describe_limitation(spec, lim, tie_basis, lang))]
     lines.append(t(lang, "refine_hint"))
     return "\n".join(lines)

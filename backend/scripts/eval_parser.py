@@ -7,6 +7,7 @@
 설정 형식: <모델>:<reasoning effort> (비추론 모델은 effort를 비움)
 파서는 요청 분류와 속성 추출 두 호출을 동시에 보내므로, 비용은 두 호출의 합이다.
 채점: request_type 일치 + expect 조건 모두 포함 + expect·optional·allow 밖의 출력 없음 + forbid 없음
+      + range(숫자 범위, 끝값은 15%·$3 오차 허용) 일치, range 밖의 범위 출력 없음
 (추출 결과는 그대로 조건이 되므로 과잉 추출은 오답이다)
 
 @see docs/llm-parser.md#3-평가
@@ -67,6 +68,19 @@ def grade(case: dict, result) -> CaseResult:
     if result.request_type != case["request"]:
         errors.append(f"request {result.request_type} != {case['request']}")
     produced = {c.attribute: c.value for c in result.constraints}
+    for k, want_basis in (case.get("basis") or {}).items():
+        got = next((("guessed" if c.guessed else "stated") for c in result.constraints if c.attribute == k), None)
+        if got is not None and got != want_basis:
+            errors.append(f"basis {k}={got} (want {want_basis})")
+    produced_ranges = {r.attribute: (r.low, r.high) for r in result.ranges}
+    want_ranges = {k: tuple(v) for k, v in (case.get("range") or {}).items()}
+    for k, (lo, hi) in want_ranges.items():
+        got = produced_ranges.get(k)
+        if got is None or not (close(got[0], lo) and close(got[1], hi)):
+            errors.append(f"range {k}={lo}~{hi} (got {got})")
+    for k, got in produced_ranges.items():
+        if k not in want_ranges:
+            errors.append(f"extra range {k}={got}")
     want = {k: str(v) for k, v in (case.get("expect") or {}).items()}
     optional = {k: str(v) for k, v in (case.get("optional") or {}).items()}
     allow = {k: [str(x) for x in v] for k, v in (case.get("allow") or {}).items()}
@@ -85,6 +99,13 @@ def grade(case: dict, result) -> CaseResult:
         errors.append(f"exclude {result.exclude_ranks} != {case['exclude']}")
     hits = sum(1 for k, v in optional.items() if produced.get(k) == v)
     return CaseResult(case, not errors, errors, hits)
+
+
+def close(got: float | None, want: float | None) -> bool:
+    """범위 끝값 비교: 둘 다 없거나, 기대값의 15%(최소 $3) 안."""
+    if got is None or want is None:
+        return got is None and want is None
+    return abs(got - want) <= max(0.15 * want, 3.0)
 
 
 def case_context(spec, case: dict) -> ParseContext:

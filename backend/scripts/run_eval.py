@@ -19,7 +19,7 @@ from app.evaluation.scenarios import load_scenarios  # noqa: E402
 from app.evaluation.systems import SYSTEMS  # noqa: E402
 
 COLUMNS = ["episodes", "errors", "rank_pct_mean", "rank_pct_median", "rank_pct_mean_no_text",
-           "rank_pct_median_no_text", "attribute_match", "questions", "fit", "naturalness", "efficiency",
+           "rank_pct_median_no_text", "attribute_match", "questions", "confirms", "fit", "naturalness", "efficiency",
            "seconds"]
 
 

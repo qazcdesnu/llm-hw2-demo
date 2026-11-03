@@ -89,6 +89,8 @@ class DebugInfo(BaseModel):
     tie_order: str | None = None
     # 이번 턴의 해석·질문 작성에 쓴 모델
     model: str | None = None
+    # 추천 전 확인 질문이면 몇 번째인지 (최대 3)
+    confirm_round: int | None = None
 
 
 class ChatResponse(BaseModel):

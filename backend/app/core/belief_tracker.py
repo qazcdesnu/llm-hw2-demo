@@ -6,7 +6,7 @@
 import math
 from collections.abc import Iterable, Mapping, Sequence
 
-from app.core.model import AttributeDef, Item, Observation
+from app.core.model import AttributeDef, Item, Observation, RangeObservation
 
 
 def likelihood(item: Item, obs: Observation, attr: AttributeDef) -> float:
@@ -28,6 +28,23 @@ def likelihood(item: Item, obs: Observation, attr: AttributeDef) -> float:
     return c if value == obs.value else (1.0 - c) / (k - 1)
 
 
+def range_likelihood(item: Item, obs: RangeObservation, attr: AttributeDef) -> float:
+    """P(범위 관측 | 목표 상품 = item). 구간 속성의 실제 숫자(가격 등)로 판정한다.
+
+    구간 답과 같은 꼴: 범위 안이면 c, 밖이면 (1-c)/(k-1), 숫자가 없으면 1/k (k는 그 속성의 구간 수).
+    구간 경계에 걸친 예산("$15~25")을 구간 하나로 뭉개지 않으려고 쓴다.
+
+    @docid core.range-likelihood
+    @see docs/ig-engine.md#1-답변-가능도-모델
+    """
+    k = len(attr.values)
+    x = item.numbers.get(obs.attribute)
+    if x is None:
+        return 1.0 / k
+    c = max(obs.confidence, 1.0 / k)
+    return c if obs.contains(x) else (1.0 - c) / (k - 1)
+
+
 def uniform(n: int) -> list[float]:
     return [1.0 / n] * n
 
@@ -42,7 +59,7 @@ def normalize(weights: Sequence[float]) -> list[float]:
 def compute_belief(
     items: Sequence[Item],
     attributes: Mapping[str, AttributeDef],
-    observations: Iterable[Observation],
+    observations: Iterable[Observation | RangeObservation],
     prior: Sequence[float] | None = None,
 ) -> list[float]:
     """prior × Π 가능도를 정규화한 사후분포. 정의에 없는 속성의 관측은 무시한다.
@@ -55,7 +72,8 @@ def compute_belief(
         attr = attributes.get(obs.attribute)
         if attr is None:
             continue
-        weights = [w * likelihood(item, obs, attr) for w, item in zip(weights, items)]
+        lik = range_likelihood if isinstance(obs, RangeObservation) else likelihood
+        weights = [w * lik(item, obs, attr) for w, item in zip(weights, items)]
     return normalize(weights)
 
 

@@ -65,7 +65,7 @@ attributes:
 | [`details`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#DetailsRule") | `details[keys]` | 처음 존재하는 키의 값에 `map` 정규식 적용. `map`이 없으면 값 자체를 사용 (자유값 속성만) |
 | [`categories`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#CategoriesRule") | 카테고리 경로 | `" > "`로 이은 경로에 `map` 정규식 적용 |
 | [`keywords`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#KeywordsRule") | `fields`의 텍스트 | 기본 `title, features, description`. `details`도 지정 가능 |
-| [`band`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#BandRule") | 숫자 필드 | `bands`를 위에서부터 보고 `값 < max`인 첫 구간. 마지막은 `max` 생략 |
+| [`band`](../backend/app/catalog/spec.py "sym:py:app.catalog.spec#BandRule") | 숫자 필드 | `bands`를 위에서부터 보고 `값 < max`인 첫 구간. 마지막은 `max` 생략. 이 규칙으로 만든 속성은 사용자가 말한 숫자 범위("$10~25")도 받는다(실제 숫자로 판정) |
 
 - 규칙 적용 순서·`default`·`unknown_if` 처리: [`extract_attribute`](../backend/app/catalog/extract.py "sym:py:app.catalog.extract#extract_attribute")
 - `map`은 `값: 정규식`이고 위쪽 값이 우선한다. 정규식은 대소문자를 무시한다.

@@ -20,12 +20,12 @@ from pydantic import BaseModel, Field, create_model
 from app.catalog.spec import CategorySpec, Lang
 from app.llm import LLMClient, LLMError
 from app.services.extractor import (
-    KRW_PER_USD, ExtractContext, ParsedConstraint, extract_attributes, validate_constraints,
+    KRW_PER_USD, ExtractContext, ParsedConstraint, ParsedRange, extract_attributes, validate_constraints,
 )
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["KRW_PER_USD", "LLMParser", "ParseContext", "ParseResult", "ParsedConstraint",
+__all__ = ["KRW_PER_USD", "LLMParser", "ParseContext", "ParseResult", "ParsedConstraint", "ParsedRange",
            "parse_message", "validate_constraints"]
 
 RequestType = Literal["shopping", "other_product", "off_topic", "unsafe"]
@@ -62,6 +62,8 @@ class ParseResult:
     language: str = "ko"
     # 상품 설명 검색용 영어 키워드 (메모리에 남긴다)
     keywords: list[str] = field(default_factory=list)
+    # 구간 속성의 숫자 범위 (예: 가격 $10~25)
+    ranges: list[ParsedRange] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------- 요청 분류기
@@ -164,7 +166,8 @@ def parse_message(
     ranks = sorted({r for r in route.exclude_ranks if ctx.current and 1 <= r <= len(ctx.current)})
     order = route.price_order if ctx.current else "none"
     result = ParseResult(route.request_type, extraction.constraints, ranks, order,
-                         extraction.rejected, extraction.notes, route.language, extraction.keywords)
+                         extraction.rejected, extraction.notes, route.language, extraction.keywords,
+                         extraction.ranges)
     logger.info("parsed %r -> %s %s notes=%s exclude=%s order=%s rejected=%s", message,
                 result.request_type,
                 [(c.attribute, c.value) for c in result.constraints],

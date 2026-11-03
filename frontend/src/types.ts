@@ -48,6 +48,8 @@ export interface Preferences {
   dont_care?: string[];
   asked?: string[];
   excluded?: string[];
+  // 구간 속성의 숫자 범위 (예: price_band → [10, 25]). null은 그쪽 한계 없음
+  ranges?: Record<string, [number | null, number | null]>;
 }
 
 export interface MemoryFact {
@@ -56,6 +58,8 @@ export interface MemoryFact {
   quote: string;
   turn: number;
   source: "said" | "button";
+  low?: number | null; // value가 "range"일 때 숫자 범위
+  high?: number | null;
 }
 
 export interface QuestionRecord {
@@ -85,6 +89,7 @@ export interface DebugInfo {
   question_approach: string | null;
   tie_order: string | null;
   model: string | null;
+  confirm_round?: number | null; // 추천 전 확인 질문이면 몇 번째인지
 }
 
 // 입력창에서 고를 수 있는 OpenAI 모델 (GET /api/models)
@@ -149,6 +154,7 @@ export interface SystemSummary {
   rank_pct_median_no_text: number | null;
   attribute_match: number | null;
   questions: number | null;
+  confirms: number | null; // 추천 전 확인 질문 수
   fit: number | null;
   naturalness: number | null;
   efficiency: number | null;

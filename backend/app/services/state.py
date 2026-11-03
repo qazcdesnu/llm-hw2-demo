@@ -14,10 +14,12 @@ from collections.abc import Collection
 from dataclasses import asdict, dataclass, field
 
 from app.core.model import PreferenceState
-from app.services.memory import ConversationMemory
+from app.services.memory import RANGE, ConversationMemory
 
 # 같은 속성을 몇 번까지 물을지. 답이 안 나오면 한 번 더(더 직접적으로) 묻고, 그래도 안 되면 넘어간다.
 MAX_ASKS = 2
+# 추천 직전 확인 질문("정리하면 …, 이대로 찾아볼까?")의 최대 횟수
+MAX_CONFIRMS = 3
 
 
 @dataclass
@@ -58,6 +60,9 @@ class ChatState:
     price_order: str | None = None
     # 사용자에게 보이는 말의 언어 (ko / en). 요청 분류기가 매 턴 사용자 발화의 언어로 정한다.
     language: str = "ko"
+    # 추천 직전 확인: 확인 질문에 대한 답을 기다리는 중인가, 지금까지 물은 횟수
+    confirming: bool = False
+    confirms: int = 0
 
     # ------------------------------------------------------------ 질문
 
@@ -101,7 +106,11 @@ class ChatState:
         """
         pref = PreferenceState(excluded=list(self.excluded))
         for fact in self.memory.latest().values():
-            if attributes is None or fact.attribute in attributes:
+            if attributes is not None and fact.attribute not in attributes:
+                continue
+            if fact.value == RANGE:
+                pref.answer_range(fact.attribute, fact.low, fact.high)
+            else:
                 pref.answer(fact.attribute, fact.value)
         pref.asked = [q.attribute for q in self.questions.values() if q.status != "unanswered"]
         return pref
@@ -119,6 +128,8 @@ class ChatState:
             "excluded": list(self.excluded),
             "price_order": self.price_order,
             "language": self.language,
+            "confirming": self.confirming,
+            "confirms": self.confirms,
         }
 
     @classmethod
@@ -133,4 +144,6 @@ class ChatState:
             excluded=list(data.get("excluded", [])),
             price_order=data.get("price_order"),
             language=data.get("language", "ko"),
+            confirming=data.get("confirming", False),
+            confirms=data.get("confirms", 0),
         )

@@ -123,12 +123,16 @@ def test_button_answers_until_recommendation(client):
         q = res["question"]
         if q is None:
             break
-        value = target.get(q["attribute"], DONT_CARE)
+        if q["attribute"] == "_confirm":  # 추천 전 확인: "이대로 추천해 줘"
+            assert "정리해 볼게" in res["reply"] and res["debug"]["confirm_round"] == 1
+            value = "yes"
+        else:
+            value = target.get(q["attribute"], DONT_CARE)
         label = next(o["label"] for o in q["options"] if o["value"] == value)
         res = send(client, sid, label, (q["attribute"], value)).json()
 
     assert res["finished"] is True and res["question"] is None
-    assert res["debug"]["stop_reason"] in {"budget", "confident", "no_informative_question"}
+    assert res["debug"]["stop_reason"] == "confirmed"
     recs = res["recommendations"]
     # 상품이 8개뿐이라 몇 번 만에 확신 종료되고, 착용 방식만 다른 P1과 동률일 수 있다.
     p3 = next(r for r in recs if r["product_id"] == "P3")
@@ -425,7 +429,7 @@ def test_memory_keeps_facts_with_quotes_and_notes(chat):
     memory = res["debug"]["memory"]
     facts = {f["attribute"]: f for f in memory["facts"]}
     assert facts == {"connection": {"attribute": "connection", "value": "wireless", "quote": "무선으로",
-                                    "turn": 1, "source": "said"}}
+                                    "turn": 1, "source": "said", "low": None, "high": None}}
     assert memory["notes"] == ["지하철 출퇴근"]
     # 엔진 입력은 메모리에서 만든다
     assert res["debug"]["preferences"]["explicit"] == {"connection": "wireless"}
@@ -567,3 +571,90 @@ def test_chosen_model_reaches_parser_and_writer(tmp_path):
         assert c.post(f"/api/sessions/{sid}/messages",
                       json={"message": "x", "model": "no-such-model"}).status_code == 422
     assert asked == [("parse", other), ("write", other), ("parse", None), ("write", None)]
+
+
+def test_numeric_budget_is_kept_as_a_range(parser_client):
+    """"$25 안쪽"은 가격대 구간으로 뭉개지 않고 범위로 기록·표시한다. 가격대는 다시 묻지 않는다."""
+    from app.services.parser import ParsedRange
+
+    client, parser = parser_client
+    parser.table["25달러 안쪽"] = ParseResult(
+        "shopping", [], ranges=[ParsedRange("price_band", None, 25.0, "25달러 안쪽")])
+    sid = new_session(client)
+    res = send(client, sid, "25달러 안쪽").json()
+    assert "가격대 $25 이하" in res["reply"]
+    assert res["debug"]["preferences"]["ranges"] == {"price_band": [None, 25.0]}
+    fact = res["debug"]["memory"]["facts"][0]
+    assert (fact["value"], fact["low"], fact["high"]) == ("range", None, 25.0)
+    assert res["question"] is None or res["question"]["attribute"] != "price_band"
+
+
+def test_guess_is_voiced_kept_as_condition_and_overridden_by_rebuttal(chat):
+    """짐작한 값은 조건으로 쓰고 짐작이라고 말해 준다. 사용자가 반박하면 메모리의 마지막 값이 이긴다."""
+    client, parser, writer = chat
+    parser.table["시끄러운 데서 방해받지 않고 듣고 싶어"] = ParseResult(
+        "shopping", [ParsedConstraint("anc", "yes", "방해받지 않고", guessed=True)])
+    parser.table["노캔은 필요 없어"] = ParseResult("shopping", [explicit("anc", "no")])
+    sid = new_session(client)
+    res = send(client, sid, "시끄러운 데서 방해받지 않고 듣고 싶어").json()
+    req = writer.requests[-1]
+    assert req.guessed == ["노이즈 캔슬링(ANC) 필요"] and req.learned == []
+    fact = res["debug"]["memory"]["facts"][0]
+    assert (fact["attribute"], fact["value"], fact["source"]) == ("anc", "yes", "guess")
+    assert res["debug"]["preferences"]["explicit"]["anc"] == "yes"
+
+    res = send(client, sid, "노캔은 필요 없어").json()
+    assert res["debug"]["preferences"]["explicit"]["anc"] == "no"
+    assert writer.requests[-1].learned == ["노이즈 캔슬링(ANC) 불필요"]
+
+
+def test_template_reply_voices_guesses(parser_client):
+    """질문 작성기가 없을 때도 짐작은 '아니면 말해 줘'와 함께 알린다."""
+    client, parser = parser_client
+    parser.table["땀 엄청 흘리면서 뛰어"] = ParseResult(
+        "shopping", [ParsedConstraint("water_resistant", "yes", "땀", guessed=True)])
+    res = send(client, new_session(client), "땀 엄청 흘리면서 뛰어").json()
+    assert "방수·방진 필요 쪽이 맞을 것 같아서 그렇게 볼게. 아니면 말해 줘." in res["reply"]
+
+
+def _to_confirmation(client, parser, sid):
+    """버튼으로 질문을 넘겨(상관없음) 추천 전 확인 질문까지 간다."""
+    res = send(client, sid, "추천해 줘").json()
+    while res["question"] and res["question"]["attribute"] != "_confirm":
+        q = res["question"]
+        res = send(client, sid, "상관없음", (q["attribute"], DONT_CARE)).json()
+    return res
+
+
+def test_confirmation_before_recommendation(parser_client):
+    """추천 전에 조건을 정리해 확인한다. 바뀐 게 없으면 추천, 바꾸면 반영해서 다시 확인한다."""
+    client, parser = parser_client
+    parser.table["무선으로 바꿀래"] = ParseResult("shopping", [explicit("connection", "wireless")])
+    parser.table["응 그대로"] = ParseResult("shopping", [])
+    sid = new_session(client)
+    res = _to_confirmation(client, parser, sid)
+    assert res["question"]["attribute"] == "_confirm" and not res["finished"] and not res["recommendations"]
+    assert "정리해 볼게" in res["reply"] and "연결 방식 상관없음" in res["reply"]
+
+    res = send(client, sid, "무선으로 바꿀래").json()  # 바뀌면 반영하고 다시 확인
+    assert parser.calls[-1]["question_text"].startswith("정리해 볼게")  # 확인 문장을 맥락으로 받는다
+    assert res["debug"]["confirm_round"] == 2 and "연결 방식 무선" in res["reply"]
+    assert res["debug"]["preferences"]["explicit"] == {"connection": "wireless"}
+
+    res = send(client, sid, "응 그대로").json()  # 바뀐 게 없으면 추천
+    assert res["finished"] and res["recommendations"] and res["debug"]["stop_reason"] == "confirmed"
+
+
+def test_confirmation_is_asked_at_most_three_times(parser_client):
+    client, parser = parser_client
+    parser.table["무선"] = ParseResult("shopping", [explicit("connection", "wireless")])
+    parser.table["유선"] = ParseResult("shopping", [explicit("connection", "wired")])
+    sid = new_session(client)
+    res = _to_confirmation(client, parser, sid)
+    rounds = [res["debug"]["confirm_round"]]
+    for message in ["무선", "유선", "무선"]:
+        res = send(client, sid, message).json()
+        rounds.append(res["debug"].get("confirm_round"))
+    assert rounds == [1, 2, 3, None]  # 세 번째 확인 뒤에는 바뀌어도 반영해서 추천한다
+    assert "마지막으로 정리할게" not in res["reply"] and res["finished"]
+    assert res["debug"]["preferences"]["explicit"] == {"connection": "wireless"}

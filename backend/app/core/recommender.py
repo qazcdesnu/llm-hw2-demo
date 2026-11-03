@@ -30,6 +30,14 @@ def check_constraints(item: Item, state: PreferenceState) -> tuple[list[str], li
             matched.append(attribute)
         else:
             violated.append(attribute)
+    for attribute, (low, high) in state.ranges.items():
+        x = item.numbers.get(attribute)
+        if x is None:
+            unknown.append(attribute)
+        elif (low is None or x >= low) and (high is None or x <= high):
+            matched.append(attribute)
+        else:
+            violated.append(attribute)
     return matched, unknown, violated
 
 
