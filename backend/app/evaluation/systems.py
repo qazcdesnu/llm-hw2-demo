@@ -8,6 +8,7 @@
 
 ig와 random은 파서·질문 작성기·추천기가 같고 질문 선택 정책만 다르다.
 
+@see README.md#평가-지표
 @see docs/evaluation.md#2-비교하는-시스템
 """
 
