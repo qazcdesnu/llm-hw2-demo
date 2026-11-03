@@ -44,8 +44,8 @@ def route(request_type="shopping", exclude=(), order="none", language="ko"):
 
 def test_parse_message_merges_router_and_extractor_calls():
     extraction = Extraction(constraints=[
-        Constraint(attribute="anc", value="yes", basis="guessed", quote=" 지하철 "),
-        Constraint(attribute="connection", value="bluetooth", basis="stated", quote="x"),
+        Constraint(attribute="anc", value="yes", values=[], basis="guessed", quote=" 지하철 "),
+        Constraint(attribute="connection", value="bluetooth", values=[], basis="stated", quote="x"),
     ], notes=["지하철 출퇴근", " "], keywords=["commute", " "], ranges=[])
     # 두 호출이 동시에 나가지 않으면 barrier에서 시간 초과(BrokenBarrierError)
     client = FakeClient(route(exclude=[1, 9], order="cheaper"), extraction,
@@ -120,3 +120,18 @@ def test_persona_prompt_has_no_category_specific_questions():
     text = build_instructions(SPEC)
     for attr in SPEC.attributes:
         assert attr.label not in text
+
+
+def test_value_sets_are_normalized():
+    """여러 값(OR)은 집합으로, 하나로 줄면 한 값, 모든 값이면 상관없음, 정의에 없는 값은 버린다."""
+    from app.services.extractor import validate_constraints
+
+    def c(values, value="x"):
+        return Constraint(attribute="form_factor", value=value, values=values, basis="stated", quote="q")
+
+    (on_over,), _ = validate_constraints(SPEC, [c(["on_ear", "over_ear", "on_ear"])])
+    assert on_over.values == ("on_ear", "over_ear")
+    (single,), _ = validate_constraints(SPEC, [c(["in_ear", "earbuds"])])
+    assert (single.value, single.values) == ("in_ear", ())
+    (anything,), _ = validate_constraints(SPEC, [c(["in_ear", "on_ear", "over_ear", "open_ear"])])
+    assert (anything.value, anything.values) == ("dont_care", ())

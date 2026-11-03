@@ -6,7 +6,7 @@
 import math
 from collections.abc import Iterable, Mapping, Sequence
 
-from app.core.model import AttributeDef, Item, Observation, RangeObservation
+from app.core.model import AttributeDef, Item, Observation, RangeObservation, SetObservation
 
 
 def likelihood(item: Item, obs: Observation, attr: AttributeDef) -> float:
@@ -45,6 +45,22 @@ def range_likelihood(item: Item, obs: RangeObservation, attr: AttributeDef) -> f
     return c if obs.contains(x) else (1.0 - c) / (k - 1)
 
 
+def set_likelihood(item: Item, obs: SetObservation, attr: AttributeDef) -> float:
+    """P('values 중 하나' | 목표 상품 = item). 집합 안이면 c, 밖이면 (1-c)/(k-1), unknown이면 1/k.
+
+    한 값 답과 같은 꼴이라, 집합이 한 값이면 likelihood와 같다.
+
+    @docid core.set-likelihood
+    @see docs/ig-engine.md#1-답변-가능도-모델
+    """
+    k = len(attr.values)
+    value = item.attributes.get(obs.attribute)
+    if value is None or value not in attr.values:
+        return 1.0 / k
+    c = max(obs.confidence, 1.0 / k)
+    return c if value in obs.values else (1.0 - c) / (k - 1)
+
+
 def uniform(n: int) -> list[float]:
     return [1.0 / n] * n
 
@@ -59,7 +75,7 @@ def normalize(weights: Sequence[float]) -> list[float]:
 def compute_belief(
     items: Sequence[Item],
     attributes: Mapping[str, AttributeDef],
-    observations: Iterable[Observation | RangeObservation],
+    observations: Iterable[Observation | RangeObservation | SetObservation],
     prior: Sequence[float] | None = None,
 ) -> list[float]:
     """prior × Π 가능도를 정규화한 사후분포. 정의에 없는 속성의 관측은 무시한다.
@@ -72,7 +88,8 @@ def compute_belief(
         attr = attributes.get(obs.attribute)
         if attr is None:
             continue
-        lik = range_likelihood if isinstance(obs, RangeObservation) else likelihood
+        lik = (range_likelihood if isinstance(obs, RangeObservation)
+               else set_likelihood if isinstance(obs, SetObservation) else likelihood)
         weights = [w * lik(item, obs, attr) for w, item in zip(weights, items)]
     return normalize(weights)
 

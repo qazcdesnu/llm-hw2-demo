@@ -5,7 +5,7 @@
 #   pending: 현재 질문 속성 (없으면 생략)
 #   question: 직전 질문 문장 (없으면 pending 속성의 고정 질문). 친구 말투로 돌려 물은 질문 케이스에 쓴다
 #   request: 기대 request_type
-#   expect: 반드시 나와야 하는 {속성: 값}
+#   expect: 반드시 나와야 하는 {속성: 값}. 여러 값(OR) 조건은 "a|b"
 #   optional: 나오면 좋은 {속성: 값} (나와도 오답 아님, 맞힌 수만 참고)
 #   allow: 나와도 오답으로 치지 않는 {속성: [값...]} (해석이 갈리는 경우)
 #   forbid: 나오면 안 되는 속성
@@ -289,3 +289,13 @@ cases:
     request: shopping
     expect: {}
     range: {price_band: [null, 28.6]}
+
+  # --- 여러 값 중 아무거나 (OR), 한 값만 빼기 (NOT) (2026-11-03)
+  - {message: "온이어나 오버이어면 돼", request: shopping, expect: {form_factor: "on_ear|over_ear"}}
+  - {message: "인이어만 아니면 돼", request: shopping, expect: {form_factor: "on_ear|over_ear|open_ear"}}
+  - message: "That summary's spot on. One thing: I'm open to open-ear or bone-conduction styles too, as long as they're sweat-resistant."
+    question: "Quick recap: Fit: In-ear, Water/sweat resistance: Needed, Price: $60+. Should I go with this, or has anything changed?"
+    known: {form_factor: in_ear, water_resistant: "yes", price_band: high}
+    request: shopping
+    expect: {form_factor: "in_ear|open_ear"}
+  - {message: "I'd take wired or wireless, either works", request: shopping, expect: {connection: dont_care}}

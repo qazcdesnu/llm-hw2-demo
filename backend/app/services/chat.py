@@ -23,7 +23,7 @@ from app.core.question_selector import QuestionPolicy
 from app.core.recommender import TieKey
 from app.schemas import DebugInfo, Question, QuestionScore, Recommendation
 from app.services import responses as say
-from app.services.memory import RANGE, Fact
+from app.services.memory import ANY_OF, RANGE, Fact
 from app.services.parser import ParseContext, ParseResult
 from app.services.questioner import QuestionRequest, WrittenQuestion
 from app.services.relevance import Embedder, TextIndex, relevance_scores
@@ -118,13 +118,14 @@ def validate_answer(spec: CategorySpec, attribute: str, value: str) -> None:
 # ---------------------------------------------------------------- 상태 갱신
 
 def remember(state: ChatState, spec: CategorySpec, attribute: str, value: str, quote: str,
-             source: str = "said", low: float | None = None, high: float | None = None) -> str | None:
+             source: str = "said", low: float | None = None, high: float | None = None,
+             values: list[str] | None = None) -> str | None:
     """사실을 메모리에 남긴다. 새로 알게 된 것이면 사용자에게 알릴 문구, 이미 알던 값이면 None.
 
-    value가 RANGE면 low·high가 숫자 범위다("$10~25").
+    value가 RANGE면 low·high가 숫자 범위("$10~25"), ANY_OF면 values가 괜찮은 값들("온이어나 오버이어")이다.
     """
-    if state.memory.remember(Fact(attribute, value, quote, state.turn, source, low, high)):
-        return say.change_label(spec, attribute, value, state.language, low, high)
+    if state.memory.remember(Fact(attribute, value, quote, state.turn, source, low, high, values)):
+        return say.change_label(spec, attribute, value, state.language, low, high, values)
     return None
 
 
@@ -143,7 +144,8 @@ def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> t
     state.memory.add_keywords(parsed.keywords)
     for c in parsed.constraints:
         source = "guess" if c.guessed else "said"
-        if (label := remember(state, spec, c.attribute, c.value, c.quote, source)) is not None:
+        value, values = (ANY_OF, list(c.values)) if c.values else (c.value, None)
+        if (label := remember(state, spec, c.attribute, value, c.quote, source, values=values)) is not None:
             (guesses if c.guessed else changes).append(label)
     for r in parsed.ranges:
         if (label := remember(state, spec, r.attribute, RANGE, r.quote, low=r.low, high=r.high)) is not None:
@@ -370,7 +372,7 @@ def handle_message(
 
 def _summary(spec: CategorySpec, state: ChatState, lang: str) -> list[str]:
     """확인 질문에 보여 줄 지금까지의 조건 (메모리의 속성별 마지막 사실)."""
-    return [say.change_label(spec, f.attribute, f.value, lang, f.low, f.high)
+    return [say.change_label(spec, f.attribute, f.value, lang, f.low, f.high, f.values)
             for f in state.memory.latest().values() if spec.has_attribute(f.attribute)]
 
 
