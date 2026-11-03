@@ -583,3 +583,31 @@ def test_numeric_budget_is_kept_as_a_range(parser_client):
     fact = res["debug"]["memory"]["facts"][0]
     assert (fact["value"], fact["low"], fact["high"]) == ("range", None, 25.0)
     assert res["question"] is None or res["question"]["attribute"] != "price_band"
+
+
+def test_guess_is_voiced_kept_as_condition_and_overridden_by_rebuttal(chat):
+    """짐작한 값은 조건으로 쓰고 짐작이라고 말해 준다. 사용자가 반박하면 메모리의 마지막 값이 이긴다."""
+    client, parser, writer = chat
+    parser.table["시끄러운 데서 방해받지 않고 듣고 싶어"] = ParseResult(
+        "shopping", [ParsedConstraint("anc", "yes", "방해받지 않고", guessed=True)])
+    parser.table["노캔은 필요 없어"] = ParseResult("shopping", [explicit("anc", "no")])
+    sid = new_session(client)
+    res = send(client, sid, "시끄러운 데서 방해받지 않고 듣고 싶어").json()
+    req = writer.requests[-1]
+    assert req.guessed == ["노이즈 캔슬링(ANC) 필요"] and req.learned == []
+    fact = res["debug"]["memory"]["facts"][0]
+    assert (fact["attribute"], fact["value"], fact["source"]) == ("anc", "yes", "guess")
+    assert res["debug"]["preferences"]["explicit"]["anc"] == "yes"
+
+    res = send(client, sid, "노캔은 필요 없어").json()
+    assert res["debug"]["preferences"]["explicit"]["anc"] == "no"
+    assert writer.requests[-1].learned == ["노이즈 캔슬링(ANC) 불필요"]
+
+
+def test_template_reply_voices_guesses(parser_client):
+    """질문 작성기가 없을 때도 짐작은 '아니면 말해 줘'와 함께 알린다."""
+    client, parser = parser_client
+    parser.table["땀 엄청 흘리면서 뛰어"] = ParseResult(
+        "shopping", [ParsedConstraint("water_resistant", "yes", "땀", guessed=True)])
+    res = send(client, new_session(client), "땀 엄청 흘리면서 뛰어").json()
+    assert "방수·방진 필요 쪽이 맞을 것 같아서 그렇게 볼게. 아니면 말해 줘." in res["reply"]

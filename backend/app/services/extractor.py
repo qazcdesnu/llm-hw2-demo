@@ -28,6 +28,9 @@ class ParsedConstraint:
     attribute: str
     value: str  # 보기 값 또는 DONT_CARE (자유값 속성은 소문자 문자열)
     quote: str = ""  # 근거가 된 사용자 발화
+    # True면 직접 말한 값이 아니라 말한 상황·바람에서 짐작한 값. 조건으로는 똑같이 쓰고,
+    # 도우미가 짐작을 말로 드러내 사용자가 아니면 바로잡게 한다
+    guessed: bool = False
 
 
 @dataclass(frozen=True)
@@ -72,6 +75,7 @@ def _schema_for(spec_json: str) -> type[BaseModel]:
         f"{spec.id}_constraint",
         attribute=(Literal[keys], ...),  # type: ignore[valid-type]
         value=(str, Field(description="속성의 값 이름(영문) 또는 dont_care")),
+        basis=(Literal["stated", "guessed"], Field(description="직접 말함 stated, 상황·바람에서 짐작 guessed")),
         quote=(str, Field(description="근거가 된 사용자 발화 부분을 그대로 인용. 설명을 덧붙이지 않는다")),
     )
     fields = dict(
@@ -120,14 +124,16 @@ def build_instructions(spec: CategorySpec) -> str:
     lines += [
         "",
         "## constraints 규칙",
-        "넣은 값은 확인 없이 그대로 추천 조건이 된다. 그러니 값이 분명히 따라 나올 때만 넣는다.",
+        "넣은 값은 그대로 추천 조건이 된다. 짐작한 값(guessed)은 도우미가 '~를 원하는구나'처럼 말해 주고,",
+        "틀리면 사용자가 다음 말에서 바로잡는다.",
         "1. 이번 발화에 근거가 있는 속성만 넣는다. 언급되지 않은 속성은 절대 넣지 않는다.",
         "   '지금까지 알게 된 것'은 참고용이다. 이번 발화에서 새로 말하거나 바꾼 것만 넣는다.",
-        "2. 값을 직접 말한 경우(부정 포함)뿐 아니라, 말한 상황·형편·습관에서 그 값이 분명히 따라 나오면 넣는다",
-        "   (예: '학생이라 돈이 없어' → 가장 낮은 가격대, '통화할 때도 쓸 거야' → 마이크 필요). 이럴 수도 저럴 수도 있으면 넣지 않는다.",
-        "   장소·환경만으로 기능이 필요하다고 짐작하지 않는다. 같은 곳에서 써도 원하는 게 다를 수 있다",
-        "   ('지하철에서 들어' → 노이즈 캔슬링 필요 아님, '운동할 때 써' → 방수 필요 아님). 이런 상황은 notes에 적는다.",
-        "   그 기능을 바란다는 말(소리를 막고 싶다, 땀에 젖어 고장 난 적이 있다)이 있을 때만 넣는다.",
+        "2. 값을 직접 말하면(부정 포함, 기능·보기 이름을 말함) basis=stated.",
+        "   말한 상황·바람·형편·습관에서 한 값이 대부분의 사람에게 가장 그럴듯하면 basis=guessed로 넣는다",
+        "   (예: '시끄러운 데서 방해받지 않고 듣고 싶어' → anc=yes, '땀 엄청 흘리면서 뛰어' → water_resistant=yes,",
+        "   '학생이라 돈이 없어' → 가장 낮은 가격대, '통화할 때도 쓸 거야' → mic=yes).",
+        "   값이 여럿으로 갈릴 만하면(장소만 말함 '지하철에서 들어', '책상에 오래 앉아 있어') 넣지 않고 notes에 적는다.",
+        "   마이크의 소음 제거('통화할 때 내 목소리만 잘 들리게', 'noise rejection on calls')는 mic이고 anc가 아니다.",
         "3. value=dont_care는 사용자가 그 속성은 어느 쪽이든 괜찮다는 뜻을 밝혔을 때 쓴다. 특정 단어가 아니라 뜻으로 판단한다",
         "   ('둘 다 괜찮아', '그건 신경 안 써', '별로 안 중요해'). '모르겠다'는 상관없다는 뜻이 아니다.",
         "4. 구체적 금액을 말하면 constraints의 구간 값 대신 ranges에 숫자 범위로 넣는다(가격은 USD).",
@@ -137,12 +143,13 @@ def build_instructions(spec: CategorySpec) -> str:
         "   금액 없이 보기 구간만 고르거나('제일 싼 쪽', 보기 이름 그대로) 형편만 말하면 constraints에 구간 값을 넣는다.",
         "5. 직전 질문은 기능을 직접 묻지 않고 상황을 돌려 물었을 수 있다 (예: '주로 어디서 들어?').",
         "   짧은 답('응', '그거', '지하철')은 그 질문과 '질문 의도'의 속성에 비춰 해석한다.",
-        "6. 이전 조건을 바꾸는 말(정정)은 새 값을 넣는다.",
+        "6. 이전 조건을 바꾸는 말(정정)은 새 값을 basis=stated로 넣는다. 직전 도우미 말이 짐작을 말했는데",
+        "   ('노캔 있는 걸 원하는구나') 사용자가 아니라고 하면 반대 값, 어느 쪽이든 괜찮다고 하면 dont_care를 넣는다.",
         "7. '더 싼 걸로', '좀 더 저렴한 거'처럼 지금 추천과 비교하는 상대 표현은 price_band에도 ranges에도 넣지 않는다",
         "   (추천 순서를 바꾸는 요청이다). 가격대 질문에 '제일 싼 쪽'처럼 보기를 고른 답만 구간 값으로 넣는다.",
         "8. quote에는 근거가 된 사용자 발화 부분만 그대로 옮긴다(예: '지하철에서 주로 들어'). 설명·추론을 쓰지 않는다.",
         "9. 여러 값에 걸치는 일반 명칭('헤드폰', '헤드셋', '이어폰 하나')만으로는 값을 정하지 않는다.",
-        "   값의 뜻에 정확히 들어맞을 때만 넣는다.",
+        "   착용 방식을 가리키는 말은 그 값이다('over-the-head', '귀를 덮는' → over_ear, '귀에 꽂는' → in_ear).",
         "",
         "## notes 규칙",
         "속성 목록으로 표현되지 않지만 다음 질문이나 추천에 쓸 만한 사용 맥락을 짧은 구절로 적는다",
@@ -156,10 +163,15 @@ def build_instructions(spec: CategorySpec) -> str:
         " '달릴 때 안 빠지게' → ['secure fit', 'running', 'ear hooks']). 근거가 없으면 빈 목록.",
         "",
         "## 예시",
-        '- "무선이고 노이즈 캔슬링 되는 걸로" → [connection=wireless, anc=yes], notes []',
-        '- "지하철로 출퇴근할 때 쓸 거야" → [], notes ["지하철 출퇴근"] (노캔을 바란다는 말은 없음)',
-        '- "지하철에서 들을 때 시끄러워서 소리를 계속 키우게 돼" → [anc=yes], notes ["지하철 출퇴근"]',
-        '- "헬스장에서 쓸 이어폰" → [form_factor=in_ear], notes ["헬스장에서 사용"]',
+        '- "무선이고 노이즈 캔슬링 되는 걸로" → [connection=wireless stated, anc=yes stated], notes []',
+        '- "지하철로 출퇴근할 때 쓸 거야" → [], notes ["지하철 출퇴근"] (장소만 말함)',
+        '- "시끄러운 지하철에서도 방해받지 않고 음악 듣고 싶어" → [anc=yes guessed], notes ["지하철 출퇴근"]',
+        '- "헬스장에서 쓸 이어폰" → [form_factor=in_ear stated], notes ["헬스장에서 사용"]',
+        '- "Looking for over-the-head Bluetooth headphones" → [form_factor=over_ear stated, connection=wireless stated]',
+        '- (직전 도우미 "노이즈 캔슬링 있는 걸 원하는구나. 예산은?") "노캔은 됐고, 3만 원 안쪽" → '
+        '[anc=no stated], ranges [price_band max 21.4]',
+        '- (직전 도우미 "방수 되는 게 좋겠구나. 통화도 해?") "방수는 상관없어. 통화는 해" → '
+        '[water_resistant=dont_care stated, mic=yes stated]',
         '- "노캔은 필요 없어" → [anc=no]',
         '- "가격은 상관없어" → [price_band=dont_care]',
         '- "5만 원 안쪽이면 좋겠어" → [], ranges [price_band max 35.7]',
@@ -170,7 +182,7 @@ def build_instructions(spec: CategorySpec) -> str:
         '- (직전 질문 "주로 어디서 들어? 시끄러운 데서도 써?", 질문 의도 anc) "카페에서 공부할 때" → '
         '[], notes ["카페에서 공부"] (장소만 말함)',
         '- (직전 질문 "카페에서 공부할 때 주변 소리 싹 막히면 좋겠어, 좀 들리는 게 편해?", 질문 의도 anc) '
-        '"싹 막히면 좋겠어" → [anc=yes]',
+        '"싹 막히면 좋겠어" → [anc=yes stated]',
         '- (직전 질문 "주로 어디서 들어?", 질문 의도 anc) "집에서만 써" → [], notes ["집에서 사용"]',
         '- (직전 질문 "주로 어디서 들어?", 질문 의도 anc) "여기저기" → [] (값이 따라 나오지 않음)',
         '- (직전 질문 "선 있는 거 괜찮아?", 질문 의도 connection) "응 괜찮아" → [connection=dont_care]',
@@ -210,7 +222,8 @@ def validate_constraints(spec: CategorySpec, raw: list) -> tuple[list[ParsedCons
             continue
         if not value:
             continue
-        kept[c.attribute] = ParsedConstraint(c.attribute, value, c.quote.strip())
+        kept[c.attribute] = ParsedConstraint(c.attribute, value, c.quote.strip(),
+                                             getattr(c, "basis", "stated") == "guessed")
     return list(kept.values()), rejected
 
 

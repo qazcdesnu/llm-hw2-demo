@@ -44,8 +44,8 @@ def route(request_type="shopping", exclude=(), order="none", language="ko"):
 
 def test_parse_message_merges_router_and_extractor_calls():
     extraction = Extraction(constraints=[
-        Constraint(attribute="anc", value="yes", quote=" 지하철 "),
-        Constraint(attribute="connection", value="bluetooth", quote="x"),
+        Constraint(attribute="anc", value="yes", basis="guessed", quote=" 지하철 "),
+        Constraint(attribute="connection", value="bluetooth", basis="stated", quote="x"),
     ], notes=["지하철 출퇴근", " "], keywords=["commute", " "], ranges=[])
     # 두 호출이 동시에 나가지 않으면 barrier에서 시간 초과(BrokenBarrierError)
     client = FakeClient(route(exclude=[1, 9], order="cheaper"), extraction,
@@ -55,7 +55,8 @@ def test_parse_message_merges_router_and_extractor_calls():
     result = parse_message(client, SPEC, "지하철에서", ctx)
 
     assert result.request_type == "shopping"
-    assert [(c.attribute, c.value, c.quote) for c in result.constraints] == [("anc", "yes", "지하철")]
+    assert [(c.attribute, c.value, c.quote, c.guessed) for c in result.constraints] == [
+        ("anc", "yes", "지하철", True)]
     assert result.rejected == ["connection=bluetooth"]
     assert result.notes == ["지하철 출퇴근"] and result.keywords == ["commute"]
     assert result.exclude_ranks == [1] and result.price_order == "cheaper"

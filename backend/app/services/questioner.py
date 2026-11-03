@@ -32,6 +32,8 @@ class QuestionRequest:
     # 방금 한 말에서 알아들은 것이 없다 (잡담·모호한 말)
     unclear: bool = False
     learned: list[str] = field(default_factory=list)  # 방금 한 말로 새로 알게 된 것 ("노이즈 캔슬링(ANC): 필요")
+    # 방금 한 말의 상황·바람에서 짐작한 것. 짐작이라고 드러내 말해, 아니면 친구가 바로잡게 한다
+    guessed: list[str] = field(default_factory=list)
     known: list[str] = field(default_factory=list)  # 메모리 요약
     history: list[dict[str, str]] = field(default_factory=list)  # 최근 대화 (이번 발화 전까지)
     language: str = "ko"  # 사용자 발화의 언어 (ko / en). 이 언어로 쓴다
@@ -68,6 +70,10 @@ def build_instructions(spec: CategorySpec) -> str:
         "   틀렸으면 친구가 말해 준다. 방금 알게 된 것만 말하고, 거기서 다른 기능이 필요하겠다고 짐작해",
         "   덧붙이지 않는다('그럼 그것도 꼭 있어야겠다' 금지). '방금 알게 된 것'이 없으면 결론 없이 공감만 한다.",
         "   특히 '알아낼 것'의 답을 미리 짐작해 말하지 않는다. 그건 지금 물어서 알아낼 것이다.",
+        "   '방금 짐작한 것'이 있으면 친구 말에서 짐작한 것이다. 그 기능 이름을 분명히 넣어",
+        "   '~ 있는 걸 원하는구나', '~가 있으면 좋겠구나'처럼 짐작을 말한다(예: '액티브 노이즈 캔슬링 있는 걸 원하는구나').",
+        "   이름을 흐리지 않아야 친구가 아니면 바로 말할 수 있다. '맞지?'처럼 확인을 묻지는 않는다.",
+        "   '방금 알게 된 것'과 '방금 짐작한 것' 밖의 것은 결론으로도 짐작으로도 말하지 않는다.",
         "2. 질문: 이어서 '알아낼 것'을 돌려 묻는 질문 하나로 자연스럽게 넘어간다(예: '혹시 …?').",
         "",
         "## 돌려 묻는 방법 (approach에 한 줄로 짧게 정리하고 text를 쓴다)",
@@ -106,6 +112,8 @@ def build_instructions(spec: CategorySpec) -> str:
         "  text: \"카페 가면 보통 뭐 시켜? 아아파야, 라떼파야?\"",
         "- 커피 머신 · 방금 알게 된 것: 용량: 대용량 · 알아낼 것: 원두 분쇄 기능 →",
         "  text: \"식구가 넷이면 넉넉한 게 낫겠다. 혹시 원두는 갈아서 파는 거 사 와, 통원두 사 와?\"",
+        "- 커피 머신 · 방금 짐작한 것: 우유 스팀 기능 필요 · 알아낼 것: 예산(직접 묻기) →",
+        "  text: \"라떼를 좋아하면 우유 거품 내는 기능 있는 걸 원하는구나. 예산은 대충 얼마 생각해?\"",
         "- 커피 머신 · 알아낼 것: 소음 → (나쁜 예: \"주로 새벽에 마셔?\" — 새벽에 마셔도 소리를 신경 안 쓸 수 있다)",
         "  text: \"새벽에 내릴 때 식구들 깰까 봐 신경 쓰여, 아니면 다들 잠귀가 어두워?\"",
         "- 커피 머신 · 알아낼 것: 예산(직접 묻기) → text: \"예산은 대충 얼마 생각해? 10만 원 안쪽, 30만 원쯤, 그 이상?\"",
@@ -138,6 +146,8 @@ def build_input(spec: CategorySpec, req: QuestionRequest) -> str:
             f"{speaker.get(m['role'], m['role'])}: {m['content']}" for m in req.history))
     if req.learned:
         parts.append("방금 알게 된 것: " + ", ".join(req.learned))
+    if req.guessed:
+        parts.append("방금 짐작한 것: " + ", ".join(req.guessed))
     if req.message:
         parts.append(f"친구가 방금 한 말: {req.message}")
     return "\n".join(parts)

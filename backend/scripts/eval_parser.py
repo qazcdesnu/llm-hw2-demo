@@ -68,6 +68,10 @@ def grade(case: dict, result) -> CaseResult:
     if result.request_type != case["request"]:
         errors.append(f"request {result.request_type} != {case['request']}")
     produced = {c.attribute: c.value for c in result.constraints}
+    for k, want_basis in (case.get("basis") or {}).items():
+        got = next((("guessed" if c.guessed else "stated") for c in result.constraints if c.attribute == k), None)
+        if got is not None and got != want_basis:
+            errors.append(f"basis {k}={got} (want {want_basis})")
     produced_ranges = {r.attribute: (r.low, r.high) for r in result.ranges}
     want_ranges = {k: tuple(v) for k, v in (case.get("range") or {}).items()}
     for k, (lo, hi) in want_ranges.items():

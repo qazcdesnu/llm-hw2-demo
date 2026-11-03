@@ -169,7 +169,7 @@ sequenceDiagram
 
 | 항목 | 내용 |
 |---|---|
-| `memory.facts` | 속성 값 기록 `{attribute, value, quote(근거 발화), turn, source: said\|button, low, high}`. 속성별 마지막 값이 조건이 된다. 금액을 말하면 `value: "range"`와 `low`·`high`(숫자 범위) |
+| `memory.facts` | 속성 값 기록 `{attribute, value, quote(근거 발화), turn, source: said\|guess\|button, low, high}`. 속성별 마지막 값이 조건이 된다. 금액을 말하면 `value: "range"`와 `low`·`high`(숫자 범위) |
 | `memory.notes` | 속성 밖의 사용 맥락 (질문 작성기, 텍스트 관련도 질의) |
 | `memory.keywords` | 상품 설명 검색용 영어 키워드 (텍스트 관련도의 BM25 질의) |
 | `questions` | 속성별 질문 기록 `{text, turn, attempts, status: pending\|answered\|unanswered\|skipped}` |

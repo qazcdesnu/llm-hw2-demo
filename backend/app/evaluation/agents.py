@@ -42,6 +42,9 @@ def simulated_user(client: LLMClient, scenario: Scenario, category_name: str) ->
         "- If your preferences do not cover it, answer the way this person would most plausibly answer given their",
         "  situation. Say you're not sure or don't mind only when you really can't tell. Do not invent strong",
         "  requirements that are not in your preferences.",
+        "- If the chatbot states an assumption about what you want (e.g. 'so you want noise cancelling') and it",
+        "  does not match your preferences, or you don't care about it, say so briefly while answering the question.",
+        "  Do not contradict assumptions that match your preferences.",
         "- Do not bring up product names or brands first.",
         "- You are the customer. Do not ask questions or recommend anything. No quotes or labels, just your message.",
     ]))

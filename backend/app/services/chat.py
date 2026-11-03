@@ -128,21 +128,23 @@ def remember(state: ChatState, spec: CategorySpec, attribute: str, value: str, q
     return None
 
 
-def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> list[str]:
+def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> tuple[list[str], list[str]]:
     """해석 결과를 메모리와 추천 조정 상태에 반영하고, 새로 바뀐 것을 사람이 읽을 문구로 돌려준다.
 
-    속성 추출 결과는 그대로 믿는다(확신도 없음). 틀렸으면 사용자가 대화로 정정한다.
+    (말한 것, 짐작한 것) 두 목록을 돌려준다. 짐작한 값도 조건으로 똑같이 쓰지만(확신도 없음),
+    도우미가 짐작을 말로 드러내 사용자가 아니면 바로잡게 한다. 바로잡으면 메모리의 마지막 값이 이긴다.
 
     @docid chat.apply-parsed
     @see docs/architecture.md#3-대화-한-턴의-흐름
     @see docs/llm-parser.md#7-해석-결과를-대화-상태에-반영
     """
-    changes = []
+    changes, guesses = [], []
     state.memory.add_notes(parsed.notes)
     state.memory.add_keywords(parsed.keywords)
     for c in parsed.constraints:
-        if (label := remember(state, spec, c.attribute, c.value, c.quote)) is not None:
-            changes.append(label)
+        source = "guess" if c.guessed else "said"
+        if (label := remember(state, spec, c.attribute, c.value, c.quote, source)) is not None:
+            (guesses if c.guessed else changes).append(label)
     for r in parsed.ranges:
         if (label := remember(state, spec, r.attribute, RANGE, r.quote, low=r.low, high=r.high)) is not None:
             changes.append(label)
@@ -155,7 +157,7 @@ def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> l
     if parsed.price_order in ("cheaper", "pricier"):
         state.price_order = parsed.price_order
         changes.append(say.t(state.language, f"order.{parsed.price_order}"))
-    return changes
+    return changes, guesses
 
 
 def tie_order(catalog: Catalog, state: ChatState, use_text: bool = True) -> tuple[TieKey, str]:
@@ -275,6 +277,7 @@ class _Understanding:
 
     request_type: str | None = None
     changes: list[str] = field(default_factory=list)  # 이번 턴에 새로 바뀐 것 (사람이 읽는 문구)
+    guesses: list[str] = field(default_factory=list)  # 이번 턴에 짐작한 것 (도우미가 짐작이라고 말해 준다)
     unclear: bool = False  # 해석은 했지만 알아들은 것이 없음 → 다음 질문을 다르게 묻는다
 
 
@@ -319,7 +322,7 @@ def handle_message(
             written = writer(spec, QuestionRequest(
                 attribute=action.attribute, message=message, first_turn=first_turn,
                 retry=action.attribute in state.questions, unclear=understood.unclear,
-                learned=understood.changes, known=state.memory.describe(spec),
+                learned=understood.changes, guessed=understood.guesses, known=state.memory.describe(spec),
                 history=list(history or []), language=lang,
             ))
         if written is not None:
@@ -329,9 +332,10 @@ def handle_message(
         else:
             question = say.build_question(spec, action.attribute, lang=lang)
             prefix = f"{say.intro(spec, lang)}\n\n" if first_turn else ""
-            if understood.unclear and not understood.changes:
+            if understood.unclear and not (understood.changes or understood.guesses):
                 prefix += f"{say.t(lang, 'unclear_prefix')}\n"
-            reply = prefix + say.acknowledgement(understood.changes, lang) + question.text
+            reply = (prefix + say.acknowledgement(understood.changes, lang)
+                     + say.guess_note(understood.guesses, lang) + question.text)
             debug.question_source = "template"
         state.ask(action.attribute, question.text)
         return TurnResult(reply, state, debug, question)
@@ -341,7 +345,7 @@ def handle_message(
     state.last_recommended = [r.item.id for r in action.items]
     return TurnResult(
         say.recommendation_reply(spec, action.reason, action.limitations, basis,
-                                 understood.changes, lang),
+                                 understood.changes, lang, understood.guesses),
         state, debug,
         recommendations=[say.to_recommendation(spec, catalog.products[r.item.id], r, pref, lang)
                          for r in action.items],
@@ -400,10 +404,10 @@ def _understand(
         state.close_pending(answered=False)
         return _Understanding(request_type, unclear=True)
 
-    changes = apply_parsed(state, parsed, spec)
+    changes, guesses = apply_parsed(state, parsed, spec)
     said = {c.attribute for c in parsed.constraints} | {r.attribute for r in parsed.ranges}
-    if state.finished and not (said or changes):
+    if state.finished and not (said or changes or guesses):
         return _same_question(catalog, state, say.t(state.language, "refine_unclear"), request_type)
     if pending is not None:
         state.close_pending(answered=pending.attribute in said)
-    return _Understanding(request_type, changes, unclear=not (said or changes))
+    return _Understanding(request_type, changes, guesses, unclear=not (said or changes or guesses))

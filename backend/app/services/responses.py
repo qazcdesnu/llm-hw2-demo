@@ -36,6 +36,7 @@ TEXT = {
         "other_product": "지금은 {name}만 추천할 수 있어.",
         "off_topic": "나는 {name} 고르는 걸 도와주고 있어.",
         "ack": "좋아, {items}까지 챙길게.",
+        "guess": "{items} 쪽이 맞을 것 같아서 그렇게 볼게. 아니면 말해 줘.",
         "excluded": "{rank}번 상품 제외",
         "order.cheaper": "더 저렴한 순",
         "order.pricier": "더 비싼 순",
@@ -69,6 +70,7 @@ TEXT = {
         "other_product": "Right now I can only recommend {name}.",
         "off_topic": "I'm here to help you pick {name}.",
         "ack": "Got it, I'll keep {items} in mind.",
+        "guess": "Sounds like you'd want {items}, so I'll go with that. Tell me if not.",
         "excluded": "excluding #{rank}",
         "order.cheaper": "cheaper first",
         "order.pricier": "pricier first",
@@ -141,6 +143,11 @@ def acknowledgement(learned: list[str], lang: str = "ko") -> str:
     return t(lang, "ack", items=", ".join(learned)) + "\n" if learned else ""
 
 
+def guess_note(guesses: list[str], lang: str = "ko") -> str:
+    """고정 문구일 때 이번 턴에 짐작한 것 알림 (아니면 바로잡게 한다)."""
+    return t(lang, "guess", items=", ".join(guesses)) + "\n" if guesses else ""
+
+
 # ---------------------------------------------------------------- 추천
 
 def reasons_for(spec: CategorySpec, ranked: RankedItem, state: PreferenceState, lang: str = "ko") -> list[str]:
@@ -185,9 +192,10 @@ def describe_limitation(spec: CategorySpec, lim: Limitation, tie_basis: str | No
 
 
 def recommendation_reply(spec: CategorySpec, reason: str, limitations: list[Limitation],
-                         tie_basis: str | None, learned: list[str], lang: str = "ko") -> str:
+                         tie_basis: str | None, learned: list[str], lang: str = "ko",
+                         guessed: list[str] | None = None) -> str:
     stop = f"stop.{reason}" if f"stop.{reason}" in TEXT["ko"] else "stop.default"
-    lines = [acknowledgement(learned, lang) + t(lang, stop)]
+    lines = [acknowledgement(learned, lang) + guess_note(guessed or [], lang) + t(lang, stop)]
     lines += [text for lim in limitations if (text := describe_limitation(spec, lim, tie_basis, lang))]
     lines.append(t(lang, "refine_hint"))
     return "\n".join(lines)
