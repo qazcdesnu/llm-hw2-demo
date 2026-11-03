@@ -86,7 +86,7 @@ uv run python scripts/eval_parser.py --configs gpt-5-mini:low gpt-5-nano:low --v
 | + 어림한 금액 범위 = 가격대, 케이스 56개 | **55/56** | 56/56 | 5/5 | 1/1 | 4.2초 | $1.45 |
 
 - 55/56의 실패는 맥락이 있는 위험 요청에서 메모리의 값을 다시 뽑은 것이다(분류는 `unsafe`로 맞아 조건에 반영되지 않음). 실행마다 다른 케이스가 하나씩 흔들린다.
-- 남은 실패: "사격장에서 쓸 헤드폰"에서 `form_factor=over_ear`, `use_case=general`을 뽑음. 위험 단어 분류용 케이스라 이 문장에 맞춘 지시는 넣지 않았다(흔들림).
+- 남은 실패: "사격장에서 쓸 헤드폰"에서 `form_factor=over_ear`을 뽑음. 위험 단어 분류용 케이스라 이 문장에 맞춘 지시는 넣지 않았다(흔들림).
 - 확신도 없는 버전은 채점이 더 엄격하다(예전에는 추정 값이 기대 밖이어도 오답이 아니었다). optional 맞힘이 준 것은 "지하철 출퇴근 → 무선"처럼 분명하지 않은 값을 이제 넣지 않기 때문이다.
 - 비용은 호출 하나일 때($0.89)보다 늘었다. 질문 작성이 따로 든다.
 
@@ -117,7 +117,7 @@ uv run python scripts/eval_parser.py --configs gpt-5-mini:low gpt-5-nano:low --v
 | `notes` | 속성 밖의 사용 맥락. 중복 없이 최대 10개 | 속성 추출의 `notes` |
 | `keywords` | 상품 설명 검색용 영어 키워드. 중복 없이 최대 40개 | 속성 추출의 `keywords` |
 
-- **읽는 곳:** 다음 턴의 파서 입력(메모리 요약)과 질문 작성기 입력(메모리 요약), 추천 때 동률 정렬의 텍스트 관련도 질의([`search_text`](../backend/app/services/memory.py "sym:py:app.services.memory#ConversationMemory.search_text"): 근거 발화 + 맥락 + 키워드). 조건이 아닌 속성(주 용도)의 값도 여기 남아 동률 정렬에 쓰인다. 최근 대화는 메모리에 두지 않고 `messages` 테이블에서 8개를 읽어 질문 작성기에 넘긴다.
+- **읽는 곳:** 다음 턴의 파서 입력(메모리 요약)과 질문 작성기 입력(메모리 요약), 추천 때 동률 정렬의 텍스트 관련도 질의([`search_text`](../backend/app/services/memory.py "sym:py:app.services.memory#ConversationMemory.search_text"): 근거 발화 + 맥락 + 키워드). 최근 대화는 메모리에 두지 않고 `messages` 테이블에서 8개를 읽어 질문 작성기에 넘긴다.
 - **엔진과의 관계:** 엔진이 쓰는 [`PreferenceState`](../backend/app/core/model.py "docid:core.preference-state")는 저장하지 않고 매 턴 메모리(속성별 마지막 값)와 질문 기록에서 만든다([`ChatState.preference`](../backend/app/services/state.py "docid:chat.preference-of")). 그래서 같은 사실이 두 곳에서 어긋나지 않는다.
 - **Developer Panel:** 메모리(턴, 값, 근거 발화, 버튼 여부, 맥락)와 질문 기록(시도 횟수, 상태)을 보여준다.
 
@@ -233,7 +233,7 @@ uv run python scripts/eval_parser.py --configs gpt-5-mini:low gpt-5-nano:low --v
 
 - **대화 테스트:** [test_sessions.py](../backend/tests/test_sessions.py)는 가짜 파서·가짜 질문 작성기를 주입해 네트워크 없이 확인한다.
   - 확인 항목: 여러 조건 한 번에, 상황에서 뽑은 값도 조건(조건 위반 상품 제외), 위험·다른 상품 요청, 답 안 한 질문 내려놓기, 추천 후 조건 변경·제외·가격 정렬, 같은 조건 재언급, 메모리(근거 발화·맥락·버튼 답), 질문 작성기 입력과 실패 시 고정 질문, 무관한 말에 다시 묻고 넘어가기, LLM 판정을 규칙으로 덮어쓰지 않기, 영어 발화에 영어 문구·보기
-- **동률 정렬 테스트:** [test_relevance.py](../backend/tests/test_relevance.py). 주 용도가 엔진 조건이 아님, 가격 요청 → 주 용도 → 텍스트 관련도 → 평점 순서, BM25·임베딩 RRF, 임베딩 실패 시 BM25만, 질문 단계에서는 임베딩을 부르지 않음.
+- **동률 정렬 테스트:** [test_relevance.py](../backend/tests/test_relevance.py). 주 용도가 정의에 없고 예전 세션의 그 사실은 무시, 가격 요청 → 텍스트 관련도 → 평점 순서, BM25·임베딩 RRF, 임베딩 실패 시 BM25만, 질문 단계에서는 임베딩을 부르지 않음.
 - **대화 상태 테스트:** [test_state.py](../backend/tests/test_state.py). 메모리에서 엔진 입력 만들기(정정·상관없음·제외), 질문 기록 생명주기(답 안 함 → 다시 묻기 → 넘어감), 저장 왕복.
 - **파서·질문 작성기 단위 테스트:** [test_parser.py](../backend/tests/test_parser.py). 두 호출이 실제로 동시에 나가는지(barrier), 결과 합치기, 프롬프트 입력, 실패 처리, 페르소나 프롬프트에 속성 이름이 없는지.
 - **실제 LLM을 막는 장치:** `.env`에 키가 있어도 테스트는 실제 LLM을 부르지 않는다. `get_parser`, `get_question_writer`, `get_embedder` 의존성을 테스트에서 덮어쓴다.

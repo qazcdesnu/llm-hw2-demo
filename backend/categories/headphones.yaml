@@ -135,28 +135,9 @@ attributes:
         map:
           "yes": ipx ?\d|\bip\d\d\b|waterproof|water[- ]resistan|sweat[- ]?proof|sweat[- ]resistan
 
-  - key: use_case
-    label: 주 용도
-    label_en: Main use
-    # 상품도 사용자도 용도 하나로 정하기 어렵다(업무용으로 산 게이밍 헤드셋, 운동에도 쓰는 일상용).
-    # 평가에서 정답이 밀린 원인의 대부분이라 묻지도 거르지도 않고, 동률 정렬에만 쓴다 (2026-10-31, I-13).
-    askable: false
-    constraint: false
-    question: 주로 뭐 할 때 쓸 거야? 운동, 게임, 아이용, 아니면 일상용?
-    question_en: What will you mostly use them for? Workouts, gaming, for a kid, or everyday?
-    values:
-      - {value: kids, label: 아이용, label_en: Kids}
-      - {value: gaming, label: 게임, label_en: Gaming}
-      - {value: sports, label: 운동, label_en: Sports}
-      - {value: general, label: 일상, label_en: Everyday}
-    rules:
-      - type: keywords
-        fields: [title, features]
-        map:
-          kids: \bkids?\b|children|volume[- ]limit
-          gaming: gaming|gamer
-          sports: \bsports?\b|running|workout|\bgym\b
-    default: general
+  # 주 용도(use_case: 운동·게임·아이용·일상)는 2026-11-03에 뺐다. 상품 메타데이터의 용도와 실제 구매자의
+  # 사용 목적이 자주 다르고(업무용으로 산 게이밍 헤드셋) 값도 너무 다양하다. 쓰임새는 대화의 맥락·키워드로
+  # 동률 정렬(텍스트 관련도)에만 반영된다 (I-13).
 
   - key: brand
     label: 브랜드

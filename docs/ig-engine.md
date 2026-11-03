@@ -62,7 +62,7 @@
 
 **질문 후보** ([`candidate_questions`](../backend/app/core/question_selector.py "sym:py:app.core.question_selector#candidate_questions"))
 - `askable`이고, 아직 답하지 않았고, 아직 묻지 않은 속성이다.
-- 조건이 아닌 속성(`constraint: false`, 헤드폰은 주 용도)은 엔진에 아예 넣지 않는다([`from_catalog`](../backend/app/core/adapters.py "docid:core.from-catalog")). 그래서 묻지도, 확률 계산에 쓰지도 않는다(2026-10-31, [4절](#4-추천과-한계-표시)).
+- 질문 후보는 연결 방식, 착용 방식, ANC, 가격대, 마이크, 방수 6개다(브랜드는 묻지 않음). 주 용도는 2026-11-03에 속성에서 뺐다([4절](#4-추천과-한계-표시)).
 
 **정책** (평가에서 이것만 바꿔 비교한다)
 
@@ -108,14 +108,13 @@
 | 순서 | 기준 | 비고 |
 |---|---|---|
 | 1 | 사용자가 요청한 가격순 | "더 싼 걸로" ([LLM 파서 9절](llm-parser.md#9-멀티턴-추천-조정)) |
-| 2 | 조건이 아닌 속성(`constraint: false`, 헤드폰은 주 용도)이 말한 값과 맞는가 | 맞지 않는 개수가 적은 순 |
-| 3 | 텍스트 관련도: BM25 + 임베딩 순위를 RRF(k = 60)로 합침 | [`relevance_scores`](../backend/app/services/relevance.py "docid:chat.text-relevance") |
-| 4 | 인기도 점수 | |
+| 2 | 텍스트 관련도: BM25 + 임베딩 순위를 RRF(k = 60)로 합침 | [`relevance_scores`](../backend/app/services/relevance.py "docid:chat.text-relevance") |
+| 3 | 인기도 점수 | |
 
 - **상품 글:** 상품명 + 특징(features) + 세부 정보(details, 판매 순위·출시일 등 제외), 최대 6,000자([`product_text`](../backend/app/services/relevance.py "sym:py:app.services.relevance#product_text")).
 - **BM25 질의:** 속성 추출기가 매 턴 뽑는 영어 키워드(메모리 `keywords`). 상품 글이 영어라, 한국어 대화도 키워드는 영어로 뽑는다.
 - **임베딩:** 상품 임베딩은 미리 만들어 SQLite `product_embeddings`에 저장한다([build_embeddings.py](../backend/scripts/build_embeddings.py), `text-embedding-3-small` 512차원, 4,628개). 실행 중에는 질의 글(근거 발화 + 맥락 + 키워드) 하나만 임베딩한다. 색인은 카탈로그·임베딩이 바뀔 때까지 캐시한다([`load_text_index`](../backend/app/services/relevance.py "sym:py:app.services.relevance#load_text_index")). 임베딩이 없거나 호출이 실패하면 BM25만 쓴다.
-- **주 용도를 조건에서 뺀 이유:** 상품도 사용자도 용도 하나로 정하기 어렵다(업무용으로 산 게이밍 헤드셋, 운동에도 쓰는 일상용 헤드폰). 평가에서 정답이 1위 동률 묶음 밖으로 밀린 7건 중 5건이 주 용도 불일치였다([evaluation.md 5절](evaluation.md#5-결과)). 그래서 묻지 않고(askable: false) 거르지도 않으며, 사용자가 말하면 정렬에만 쓴다.
+- **주 용도(use_case)를 속성에서 뺀 이유 (2026-11-03):** 상품 메타데이터의 용도와 실제 구매자의 사용 목적이 자주 다르고(업무용으로 산 게이밍 헤드셋, 운동에도 쓰는 일상용 헤드폰), 값(운동·게임·아이용·일상)도 너무 다양하다. 평가에서 정답이 1위 동률 묶음 밖으로 밀린 7건 중 5건이 주 용도 불일치였다([evaluation.md 5절](evaluation.md#5-결과)). 처음(2026-10-31)에는 묻지 않고 정렬에만 쓰려 했으나 완전히 뺐다. 쓰임새는 대화의 맥락·키워드로 텍스트 관련도에만 반영된다.
 - 사용자에게는 "N개가 똑같이 잘 맞아서, 얘기해 준 내용에 가까운 순으로 골랐어"로 알린다. Developer Panel의 `Tie order`에 기준이 보인다.
 
 **한계** ([`Limitation`](../backend/app/core/engine.py "sym:py:app.core.engine#Limitation")): 대화 관리자가 문장으로 바꿔 사용자에게 알린다.
@@ -141,7 +140,7 @@ uv run python scripts/ig_demo.py headphones --target B0BHR5VQC9 --policy random 
 ## 6. 예비 확인 결과 (2026-10-26)
 
 > **150개 카탈로그 기준 결과다.** 카탈로그를 4,628개로 넓힌 뒤에는 처음 엔트로피가 12.18 bits이고, 첫 질문의 IG 순위는 같다(use_case 1.32 > price_band 1.22 > form_factor 1.16 > …). 정식 측정은 Phase 4에서 4,628개로 다시 한다.
-> **주 용도(use_case)가 있던 때의 결과다.** 2026-10-31부터 주 용도는 묻지 않으므로 지금은 가격대가 첫 질문이 된다. 대화 평가(실제 구매 기록 시나리오, LLM 가상 사용자)는 [evaluation.md](evaluation.md)에 있다.
+> **주 용도(use_case)가 있던 때의 결과다.** 주 용도는 2026-11-03에 속성에서 뺐으므로 지금은 가격대가 첫 질문이 된다. 대화 평가(실제 구매 기록 시나리오, LLM 가상 사용자)는 [evaluation.md](evaluation.md)에 있다.
 
 헤드폰 카탈로그 150개의 각 상품을 목표로, 목표의 속성대로 답하는 사용자와 대화했다. 목표 속성이 unknown이면 "상관없음"으로 답했다.
 엔진 동작 확인용이다. 정식 평가(지표 정의, 노이즈, 반복)는 [roadmap Phase 4](roadmap.md#phase-4-정량-평가)에서 한다.

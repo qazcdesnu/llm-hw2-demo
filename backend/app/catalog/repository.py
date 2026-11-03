@@ -1,12 +1,15 @@
 """카테고리 정의와 상품 카탈로그의 SQLite 저장·조회."""
 
 import json
+import logging
 import sqlite3
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 
 from app.catalog.extract import Extracted
-from app.catalog.spec import CategorySpec
+from app.catalog.spec import CategorySpec, load_category_spec
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -44,7 +47,12 @@ def save_category(conn: sqlite3.Connection, spec: CategorySpec) -> None:
 def replace_products(
     conn: sqlite3.Connection, spec: CategorySpec, rows: Iterable[tuple[dict, dict[str, Extracted]]]
 ) -> int:
-    """카테고리의 상품을 모두 지우고 rows(원본 상품, 추출 속성)로 바꾼다."""
+    """카테고리의 상품을 모두 지우고 rows(원본 상품, 추출 속성)로 바꾼다.
+
+    정의(spec)에 없는 속성은 넣지 않는다(예: 정의에서 뺀 속성이 남아 있는 카탈로그 JSON).
+
+    @see docs/category-spec.md#현재-제약
+    """
     save_category(conn, spec)
     conn.execute("DELETE FROM products WHERE category_id = ?", (spec.id,))
     count = 0
@@ -68,7 +76,8 @@ def replace_products(
         conn.executemany(
             "INSERT INTO product_attributes (product_id, attribute, value, source, evidence)"
             " VALUES (?, ?, ?, ?, ?)",
-            [(product_id, key, e.value, e.source, e.evidence) for key, e in attributes.items()],
+            [(product_id, key, e.value, e.source, e.evidence) for key, e in attributes.items()
+             if spec.has_attribute(key)],
         )
         count += 1
     return count
@@ -109,8 +118,27 @@ def export_catalog(conn: sqlite3.Connection, category_id: str) -> dict:
 
 
 def load_category(conn: sqlite3.Connection, category_id: str) -> CategorySpec | None:
+    """DB에 저장된 정의 스냅샷. YAML이 그 뒤에 바뀌었으면 경고를 남긴다(load_catalog로 다시 넣어야 반영됨)."""
     row = conn.execute("SELECT spec FROM categories WHERE id = ?", (category_id,)).fetchone()
-    return CategorySpec.model_validate_json(row[0]) if row else None
+    if not row:
+        return None
+    spec = CategorySpec.model_validate_json(row[0])
+    if is_stale(spec):
+        logger.warning("categories/%s.yaml이 DB의 정의와 다르다. "
+                       "uv run python scripts/load_catalog.py %s 로 다시 넣어야 반영된다", category_id, category_id)
+    return spec
+
+
+def is_stale(spec: CategorySpec) -> bool:
+    """DB 스냅샷이 지금의 YAML 정의와 다른가 (YAML이 없으면 False).
+
+    @see docs/category-spec.md#현재-제약
+    """
+    try:
+        current = load_category_spec(spec.id)
+    except FileNotFoundError:
+        return False
+    return current.model_dump() != spec.model_dump()
 
 
 def list_categories(conn: sqlite3.Connection) -> list[CategorySpec]:

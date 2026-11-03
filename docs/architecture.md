@@ -51,7 +51,7 @@ flowchart LR
 | 대화 관리자 | [`handle_message`](../backend/app/services/chat.py "docid:chat.handle-turn") | 한 턴을 해석 → 상태 갱신 → 결정 → 표현으로 처리 ([3절](#3-대화-한-턴의-흐름)) | ✅ |
 | 대화 상태 | [`ChatState`](../backend/app/services/state.py "sym:py:app.services.state#ChatState") | 메모리, 질문 기록, 추천 조정을 저장. 엔진 입력은 저장하지 않고 매 턴 만듦 | ✅ |
 | 응답 표현 | [responses.py](../backend/app/services/responses.py) | 추천 근거·한계·안내 문구 템플릿(한국어·영어, 사용자 발화의 언어), 보기 버튼, 고정 질문(대체용) | ✅ |
-| 텍스트 관련도 | [`relevance_scores`](../backend/app/services/relevance.py "docid:chat.text-relevance"), [`tie_order`](../backend/app/services/chat.py "docid:chat.tie-order"), [`CatalogSearch`](../backend/app/catalog/search.py "docid:catalog.search") | 조건이 같은 상품 사이를 주 용도 일치 → 대화와 상품 글의 관련도(BM25 + 미리 만든 상품 임베딩, RRF) → 평점 순으로 정렬 ([IG 엔진 4절](ig-engine.md#4-추천과-한계-표시)) | ✅ |
+| 텍스트 관련도 | [`relevance_scores`](../backend/app/services/relevance.py "docid:chat.text-relevance"), [`tie_order`](../backend/app/services/chat.py "docid:chat.tie-order"), [`CatalogSearch`](../backend/app/catalog/search.py "docid:catalog.search") | 조건이 같은 상품 사이를 대화와 상품 글의 관련도(BM25 + 미리 만든 상품 임베딩, RRF) → 평점 순으로 정렬 ([IG 엔진 4절](ig-engine.md#4-추천과-한계-표시)) | ✅ |
 | LLM 클라이언트 | [`LLMClient`](../backend/app/llm/base.py "docid:llm.client"), [`OpenAIClient`](../backend/app/llm/openai_client.py "sym:py:app.llm.openai_client#OpenAIClient"), [`get_llm_client`](../backend/app/llm/__init__.py "sym:py:app.llm#get_llm_client") | provider 공통 인터페이스 `complete` / `parse` / `embed`, OpenAI 구현 | ✅ |
 | LLM 파서 | [`parse_message`](../backend/app/services/parser.py "docid:chat.parse-message") ([LLM 파서 문서](llm-parser.md)) | 두 호출을 동시에: 요청 분류(Safety·발화 언어)·추천 조정(제외, 가격 정렬) / 속성 추출([`extract_attributes`](../backend/app/services/extractor.py "docid:chat.extract-attributes"): 속성 값과 근거 발화·정정·사용 맥락·영어 검색 키워드. 결과를 그대로 믿음) | ✅ |
 | 대화 메모리 | [`ConversationMemory`](../backend/app/services/memory.py "sym:py:app.services.memory#ConversationMemory") ([LLM 파서 4절](llm-parser.md#4-대화-메모리)) | 대화에서 알아낸 사실의 유일한 기록: 속성 값과 근거 발화, 속성 밖의 사용 맥락. 다음 턴의 추출·질문 맥락 | ✅ |
@@ -98,7 +98,7 @@ flowchart LR
 |---|---|---|
 | 1. 해석 | 버튼 답 그대로, 또는 LLM 파서(요청 분류 ∥ 속성 추출). LLM이 없거나 실패하면 보기 이름 매칭([`match_text`](../backend/app/services/chat.py "sym:py:app.services.chat#match_text")) | [`parse_message`](../backend/app/services/parser.py "docid:chat.parse-message") |
 | 2. 상태 갱신 | 알아낸 속성 값을 근거 발화와 함께 메모리에 기록, 대기 질문을 닫음(답함 / 답 안 함), 추천 조정(제외·가격 정렬) | [`apply_parsed`](../backend/app/services/chat.py "docid:chat.apply-parsed"), [`ChatState`](../backend/app/services/state.py "sym:py:app.services.state#ChatState") |
-| 3. 결정 | 메모리·질문 기록에서 엔진 입력을 만들고([`ChatState.preference`](../backend/app/services/state.py "docid:chat.preference-of"), 조건이 아닌 속성 제외), IG 엔진이 질문 또는 추천을 정함. 추천이면 조건이 같은 상품 사이를 주 용도 일치 → 텍스트 관련도 → 평점 순으로 정렬 | [`IGEngine.step`](../backend/app/core/engine.py "docid:core.engine-step"), [`decide`](../backend/app/services/chat.py "sym:py:app.services.chat#decide") |
+| 3. 결정 | 메모리·질문 기록에서 엔진 입력을 만들고([`ChatState.preference`](../backend/app/services/state.py "docid:chat.preference-of"), 정의에 없는 속성 제외), IG 엔진이 질문 또는 추천을 정함. 추천이면 조건이 같은 상품 사이를 텍스트 관련도 → 평점 순으로 정렬 | [`IGEngine.step`](../backend/app/core/engine.py "docid:core.engine-step"), [`decide`](../backend/app/services/chat.py "sym:py:app.services.chat#decide") |
 | 4. 표현 | 사용자 발화의 언어(한국어·영어)로. 질문은 질문 작성기(방금 알게 된 것을 결론처럼 말하고 다음 질문을 돌려 묻기), 추천·안내는 두 언어 템플릿 | [`write_question`](../backend/app/services/questioner.py "docid:chat.write-question"), [responses.py](../backend/app/services/responses.py) |
 
 - 보기 버튼을 누르면 `answer`를 그대로 쓴다(메모리에도 남긴다). 해석에는 LLM을 부르지 않는다.
@@ -131,7 +131,7 @@ sequenceDiagram
         C->>C: 메모리에 기록, 대기 질문 닫기
         C->>E: 메모리에서 만든 선호 (조건 = 1−ε 증거)
         alt 종료 조건 충족
-            C->>C: 동률 정렬 (주 용도, BM25 + 질의 임베딩 RRF)
+            C->>C: 동률 정렬 (BM25 + 질의 임베딩 RRF)
             E-->>C: Top-3 + 근거(evidence)
         else
             E-->>C: 기대 IG 최대 속성

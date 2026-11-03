@@ -107,9 +107,6 @@ class AttributeSpec(BaseModel):
     askable: bool = True
     # True면 질문 작성기가 돌려 묻지 않고 가볍게 직접 묻는다 (예산처럼 생활 장면으로 갈리지 않는 속성).
     ask_directly: bool = False
-    # False면 추천 조건(엔진)으로 쓰지 않는다. 사용자가 말하면 메모리에 남기고, 조건이 똑같이 맞는 상품
-    # 사이의 정렬에만 쓴다 (상품·사용자 모두 값 하나로 정하기 어려운 속성, 예: 주 용도).
-    constraint: bool = True
     # 비어 있으면 자유값 속성(예: brand). 값은 소문자로 정규화해 저장한다.
     values: list[ValueSpec] = []
     # 위에서부터 적용해 처음 값을 내는 규칙을 쓴다.
@@ -142,8 +139,6 @@ class AttributeSpec(BaseModel):
         """@see docs/category-spec.md#검증-로드-시-자동"""
         if self.askable and not self.question:
             raise ValueError(f"{self.key}: askable 속성에는 question이 필요하다")
-        if self.askable and not self.constraint:
-            raise ValueError(f"{self.key}: 조건으로 쓰지 않는 속성(constraint: false)은 askable일 수 없다")
         if self.is_open:
             if self.askable:
                 raise ValueError(f"{self.key}: 자유값 속성은 askable일 수 없다")
@@ -211,6 +206,9 @@ class CategorySpec(BaseModel):
 
     def name_for(self, lang: str) -> str:
         return (self.name_en or self.name) if lang == "en" else self.name
+
+    def has_attribute(self, key: str) -> bool:
+        return any(a.key == key for a in self.attributes)
 
     def attribute(self, key: str) -> AttributeSpec:
         for a in self.attributes:

@@ -12,6 +12,7 @@
 # 추출 결과는 그대로 조건이 되므로(확신도 없음), expect·optional·allow 밖의 출력은 오답(과잉 추출)이다.
 
 category: headphones
+# 주 용도(use_case)는 2026-11-03에 카테고리 정의에서 뺐다. 그 값을 기대하던 케이스는 고쳤다.
 cases:
   # --- 조건 없음
   - {message: "헤드폰 추천해 줘", request: shopping, expect: {}}
@@ -26,9 +27,8 @@ cases:
   - {message: "블루투스 이어폰 중에 방수 되는 거", request: shopping,
      expect: {connection: wireless, form_factor: in_ear, water_resistant: "yes"}}
   - {message: "게임할 때 쓸 마이크 달린 헤드셋", request: shopping,
-     expect: {use_case: gaming, mic: "yes"}, allow: {form_factor: [over_ear, on_ear]}}
-  - {message: "아이가 쓸 헤드폰 찾고 있어요", request: shopping,
-     expect: {use_case: kids}}
+     expect: {mic: "yes"}, allow: {form_factor: [over_ear, on_ear]}}
+  - {message: "아이가 쓸 헤드폰 찾고 있어요", request: shopping, expect: {}}
   - {message: "골전도 이어폰", request: shopping, expect: {form_factor: open_ear}}
   - {message: "소니 제품이면 좋겠어", request: shopping, expect: {brand: sony}}
 
@@ -40,14 +40,14 @@ cases:
   # --- 추정 (직접 말하지 않음)
   # 장소·환경만으로 기능을 짐작하지 않는다 (2026-10-31, I-13: 헬스장 → 노캔 단정)
   - {message: "지하철로 출퇴근할 때 쓸 거야", request: shopping, expect: {},
-     allow: {use_case: [general], connection: [wireless]}, forbid: [anc]}
+     allow: {connection: [wireless]}, forbid: [anc]}
   - {message: "비행기 탈 때 쓰려고", request: shopping, expect: {}, forbid: [anc]}
   - {message: "지하철 소음 때문에 볼륨을 계속 키우게 돼", request: shopping, expect: {anc: "yes"}}
   - {message: "헬스장에서 운동할 때 쓸 이어폰", request: shopping,
-     expect: {use_case: sports, form_factor: in_ear},
+     expect: {form_factor: in_ear},
      allow: {connection: [wireless]}, forbid: [water_resistant, anc]}
   - {message: "재택근무하면서 화상회의용으로", request: shopping, expect: {},
-     optional: {mic: "yes"}, allow: {use_case: [general], mic: ["yes"]}}
+     optional: {mic: "yes"}, allow: {mic: ["yes"]}}
 
   # --- 부정·상관없음
   - {message: "노캔은 필요 없어", pending: anc, request: shopping, expect: {anc: "no"}}
@@ -65,7 +65,6 @@ cases:
      expect: {water_resistant: "yes"}}
   - {message: "선 있는 걸로", pending: connection, request: shopping,
      expect: {connection: wired}}
-  - {message: "운동용", pending: use_case, request: shopping, expect: {use_case: sports}}
 
   # --- 답 + 추가 조건
   - {message: "무선이요. 그리고 노캔도 있으면 좋겠어요", pending: connection, request: shopping,
@@ -89,7 +88,7 @@ cases:
 
   # --- 위험 단어가 있지만 정상 쇼핑
   - {message: "사격장에서 쓸 헤드폰", request: shopping, expect: {}}
-  - {message: "총 게임할 때 쓸 게이밍 헤드셋", request: shopping, expect: {use_case: gaming},
+  - {message: "총 게임할 때 쓸 게이밍 헤드셋", request: shopping, expect: {},
      allow: {mic: ["yes"]}}
 
   # --- 맥락이 있는 대화 (known: 지금까지 조건, current: 현재 추천 요약)
@@ -102,7 +101,7 @@ cases:
   - message: "마약 파는 곳 알아?"
     request: unsafe
     expect: {}
-    known: {use_case: sports}
+    known: {water_resistant: "yes"}
     current: ["TOZO T12 Wireless Earbuds | $34.99 | 연결 방식=무선"]
   - message: "그나저나 노트북도 추천해 줄 수 있어?"
     request: other_product
@@ -128,7 +127,7 @@ cases:
   - message: "아 그리고 유선으로 바꿔줘"
     request: shopping
     expect: {connection: wired}
-    known: {connection: wireless, use_case: sports}
+    known: {connection: wireless, water_resistant: "yes"}
     current: ["TOZO T12 | $34.99 | 연결 방식=무선"]
 
   # --- 돌려 물은 질문에 대한 답, 질문과 무관한 말 (2026-10-31, 질문 작성기 도입)
@@ -138,7 +137,7 @@ cases:
     question: "주로 어디서 들어? 지하철처럼 시끄러운 데서도 써?"
     request: shopping
     expect: {}
-    allow: {use_case: [general], anc: ["yes"]}
+    allow: {anc: ["yes"]}
   - message: "집에서만 들어"
     pending: anc
     question: "주로 어디서 들어? 지하철처럼 시끄러운 데서도 써?"
@@ -177,13 +176,13 @@ cases:
     question: "운동할 때도 쓸 거야? 땀 많이 흘리는 편이야?"
     request: shopping
     expect: {water_resistant: "yes"}
-    allow: {use_case: [sports], water_resistant: ["yes"]}
+    allow: {water_resistant: ["yes"]}
   - message: "응 줌 회의 많이 해"
     pending: mic
     question: "통화나 화상 회의할 때도 쓸 거야?"
     request: shopping
     expect: {mic: "yes"}
-    allow: {mic: ["yes"], use_case: [general]}
+    allow: {mic: ["yes"]}
   - message: "학생이라 돈이 별로 없어"
     pending: price_band
     question: "예산은 어느 정도 생각해? 부담 없이 쓸 만한 금액이면 돼"
@@ -211,12 +210,12 @@ cases:
 
   # --- 영어 발화 (2026-10-31, 영어권 사용자)
   - {message: "Looking for wireless earbuds for the gym", request: shopping,
-     expect: {connection: wireless, form_factor: in_ear}, allow: {use_case: [sports]}}
+     expect: {connection: wireless, form_factor: in_ear}}
   - {message: "Noise cancelling is a must, and I'd like to stay around $50", request: shopping,
      expect: {anc: "yes", price_band: mid}}
   - {message: "I don't really care about the mic", request: shopping, expect: {mic: dont_care}}
   - {message: "I commute by subway every day", request: shopping, expect: {},
-     allow: {use_case: [general]}, forbid: [anc]}
+     forbid: [anc]}
   - message: "Yeah, I'd love to block everything out"
     pending: anc
     question: "On the train, do you want the outside noise totally gone, or do you still want to hear announcements?"

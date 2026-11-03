@@ -6,6 +6,7 @@
 
 | 완료일 | 작업 | Phase | 결과 / 산출물 |
 |---|---|---|---|
+| 2026-11-03 | 주 용도(use_case) 속성 삭제 | 3 | 상품 메타데이터의 용도와 실제 사용 목적이 자주 다르고 값이 너무 다양해서 YAML에서 삭제. `constraint` 플래그와 동률 정렬의 주 용도 단계 제거(가격 요청 → 텍스트 관련도 → 평점). 카탈로그 로드 시 정의에 없는 속성은 저장하지 않음, 카탈로그 JSON 다시 내보냄(주 용도 값만 삭제). 예전 세션의 주 용도 사실은 무시. DB 정의 스냅샷이 YAML과 다르면 경고([`is_stale`](../backend/app/catalog/repository.py "sym:py:app.catalog.repository#is_stale")). run 7이 옛 정의로 돌았던 것을 발견해 문서의 해석을 정정. 파서 평가 61/62 |
 | 2026-11-03 | 평가 지표를 정답 순위 백분율로 교체 | 4 | Hit@1·Hit@3·MRR·절대 순위를 빼고 순위 ÷ 후보 수 × 100의 평균·중앙값(텍스트 정렬 없는 값 포함)으로 교체([`rank_percent`](../backend/app/evaluation/systems.py "docid:eval.rank-percent")). 자동·매뉴얼 평가, 평가 모드 화면, `run_eval.py` 출력. 저장된 run 1~7도 다시 계산(run 7: ig 평균 11.2% / 중앙값 6.0%, random 10.8% / 6.7%). 문서 표 갱신 |
 | 2026-11-02 | 입력창 모델 선택 | 3 | OpenAI API 가격 페이지의 텍스트 모델 중 호출되고 reasoning effort low를 받는 19개를 드롭다운으로(기본 `gpt-5-mini`, 가격 표시). `GET /api/models`, 메시지 요청의 `model` |
 | 2026-10-31 | 영어 사용자 대응, 주 용도 조건 제외, 동률 텍스트 정렬 | 3·4 | 챗봇이 사용자 발화의 언어로 답함(요청 분류기 `language`, 고정 문구 한국어·영어 두 벌, YAML `*_en`). 평가 프롬프트(시나리오·가상 사용자·심판·LLM 비교군) 영어로, 시나리오 10개 재생성. `constraint: false`(주 용도): 묻지도 거르지도 않고 동률 정렬에만. 동률 정렬 [`tie_order`](../backend/app/services/chat.py "docid:chat.tie-order"): 가격 요청 → 주 용도 → 텍스트 관련도(BM25 + 임베딩 RRF, [relevance.py](../backend/app/services/relevance.py)) → 평점. 상품 임베딩은 미리 만들어 SQLite에 저장([build_embeddings.py](../backend/scripts/build_embeddings.py), 4,628개). 추출기 영어 키워드, 메모리 `keywords`. 파서 평가 63/63. 평가 run 7: ig 첫 적중, 텍스트 정렬은 같은 대화의 평점순보다 대체로 손해([evaluation.md 5절](evaluation.md#5-결과)). 테스트 136개 |

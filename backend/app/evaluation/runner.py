@@ -65,9 +65,13 @@ def load_context(conn: sqlite3.Connection, category_id: str) -> EvalContext:
 
 # ---------------------------------------------------------------- 지표
 
-def attribute_match(scenario: Scenario, product_attrs: dict[str, str]) -> float | None:
-    """1위 상품이 정답 상품의 속성과 얼마나 같은가 (정답의 알려진 속성 중 같은 비율)."""
-    target = scenario.target_attributes
+def attribute_match(scenario: Scenario, product_attrs: dict[str, str],
+                    spec: CategorySpec | None = None) -> float | None:
+    """1위 상품이 정답 상품의 속성과 얼마나 같은가 (정답의 알려진 속성 중 같은 비율).
+
+    spec을 주면 지금 정의에 있는 속성만 센다(시나리오에 남은, 정의에서 뺀 속성은 제외).
+    """
+    target = {k: v for k, v in scenario.target_attributes.items() if spec is None or spec.has_attribute(k)}
     if not target:
         return None
     return sum(product_attrs.get(k) == v for k, v in target.items()) / len(target)
@@ -75,7 +79,7 @@ def attribute_match(scenario: Scenario, product_attrs: dict[str, str]) -> float 
 
 def episode_metrics(scenario: Scenario, recommended: list[str], catalog: Catalog) -> dict:
     top1 = catalog.products.get(recommended[0]) if recommended else None
-    return {"attribute_match": attribute_match(scenario, top1.attributes) if top1 else None}
+    return {"attribute_match": attribute_match(scenario, top1.attributes, catalog.spec) if top1 else None}
 
 
 def summarize(results: list[dict]) -> dict[str, dict]:

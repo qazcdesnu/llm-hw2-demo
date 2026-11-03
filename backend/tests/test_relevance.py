@@ -1,4 +1,4 @@
-"""동률 정렬: 조건이 아닌 속성(주 용도), 텍스트 관련도(BM25 + 임베딩 RRF), 평점."""
+"""동률 정렬: 가격 요청, 텍스트 관련도(BM25 + 임베딩 RRF), 평점."""
 
 import json
 
@@ -13,19 +13,18 @@ SPEC = load_category_spec("headphones")
 
 # 모두 무선 인이어(ANC만 갈림) → 무선 조건으로는 동률. 평점은 P1 > P2 > P3 > P4
 PRODUCTS = [
-    ("P1", "Studio earbuds", "general", 4.9),
-    ("P2", "Gaming earbuds with boom mic", "gaming", 4.8),
-    ("P3", "Running earbuds with ear hooks, secure fit, sweatproof", "sports", 4.7),
-    ("P4", "Sport earbuds lightweight", "sports", 4.6),
+    ("P1", "Studio earbuds", 4.9),
+    ("P2", "Gaming earbuds with boom mic", 4.8),
+    ("P3", "Running earbuds with ear hooks, secure fit, sweatproof", 4.7),
+    ("P4", "Sport earbuds lightweight", 4.6),
 ]
-TEXTS = {pid: f"{title}\n\n" for pid, title, _, _ in PRODUCTS}
+TEXTS = {pid: f"{title}\n\n" for pid, title, _ in PRODUCTS}
 
 
 def products():
     return [Product(pid, "headphones", title, None, 30.0, rating, 1000, None,
-                    {"connection": "wireless", "form_factor": "in_ear", "use_case": use,
-                     "anc": "yes" if n % 2 else "no"})
-            for n, (pid, title, use, rating) in enumerate(PRODUCTS)]
+                    {"connection": "wireless", "form_factor": "in_ear", "anc": "yes" if n % 2 else "no"})
+            for n, (pid, title, rating) in enumerate(PRODUCTS)]
 
 
 def state_with(*facts: tuple[str, str], keywords=()) -> ChatState:
@@ -42,12 +41,13 @@ def ordered(catalog, state) -> list[str]:
     return [i.id for i in items]
 
 
-def test_use_case_is_not_an_engine_constraint():
+def test_use_case_is_gone_and_old_facts_are_ignored():
+    """주 용도는 정의에서 뺐다(2026-11-03). 예전 세션에 남은 그 사실은 엔진 입력·요약에서 빠진다."""
     catalog = build_catalog(SPEC, products())
-    assert "use_case" not in catalog.engine.attributes
-    assert not SPEC.attribute("use_case").askable
-    pref = catalog.preference(state_with(("connection", "wireless"), ("use_case", "sports")))
-    assert pref.explicit == {"connection": "wireless"}
+    assert not SPEC.has_attribute("use_case") and "use_case" not in catalog.engine.attributes
+    state = state_with(("connection", "wireless"), ("use_case", "sports"))
+    assert catalog.preference(state).explicit == {"connection": "wireless"}
+    assert not any("use_case" in line or "용도" in line for line in state.memory.describe(SPEC))
 
 
 def test_ties_go_by_rating_without_conversation_text():
@@ -56,11 +56,10 @@ def test_ties_go_by_rating_without_conversation_text():
     assert tie_order(catalog, state_with())[1] == "rating"
 
 
-def test_soft_attribute_match_then_text_relevance():
+def test_text_relevance_orders_ties():
     catalog = build_catalog(SPEC, products(), text=TextIndex.from_texts(TEXTS))
-    state = state_with(("use_case", "sports"), keywords=["secure fit", "running"])
-    # 용도가 맞는 P3·P4가 먼저, 그 안에서 키워드가 맞는 P3가 먼저
-    assert ordered(catalog, state)[:2] == ["P3", "P4"]
+    state = state_with(keywords=["secure fit", "running"])
+    assert ordered(catalog, state)[0] == "P3"  # 평점은 가장 낮지만 대화와 가장 가깝다
     assert tie_order(catalog, state)[1] == "relevance"
 
 
@@ -68,7 +67,7 @@ def test_price_request_comes_before_everything_else():
     items = products()
     items[3].price = 10.0
     catalog = build_catalog(SPEC, items, text=TextIndex.from_texts(TEXTS))
-    state = state_with(("use_case", "gaming"))
+    state = state_with(keywords=["gaming"])
     state.price_order = "cheaper"
     assert ordered(catalog, state)[0] == "P4"
     assert tie_order(catalog, state)[1] == "cheaper"

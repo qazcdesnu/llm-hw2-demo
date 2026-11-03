@@ -48,12 +48,12 @@ class Catalog:
     spec: CategorySpec
     products: dict[str, Product]
     engine: IGEngine
-    # 동률 정렬의 텍스트 관련도 (없으면 조건이 아닌 속성 → 평점순으로만 정렬)
+    # 동률 정렬의 텍스트 관련도 (없으면 평점순으로만 정렬)
     text: TextIndex | None = None
     embed: Embedder | None = None
 
     def preference(self, state: ChatState) -> PreferenceState:
-        """엔진 입력. 조건이 아닌 속성(constraint: false)의 사실은 넣지 않는다."""
+        """엔진 입력. 엔진에 없는 속성의 사실(예: 정의에서 뺀 속성이 남은 예전 세션)은 넣지 않는다."""
         return state.preference(self.engine.attributes)
 
 
@@ -156,11 +156,10 @@ def tie_order(catalog: Catalog, state: ChatState, use_text: bool = True) -> tupl
     """조건이 똑같이 맞는(확률이 같은) 상품 사이의 순서와, 그 순서를 사용자에게 설명할 기준.
 
     1. 사용자가 요청한 가격순 ("더 싼 걸로")
-    2. 조건이 아닌 속성(예: 주 용도)이 말한 값과 맞는 상품
-    3. 대화와 상품 설명의 텍스트 관련도 (BM25 + 임베딩, RRF)
-    4. 평점(인기도)
+    2. 대화와 상품 설명의 텍스트 관련도 (BM25 + 임베딩, RRF). 쓰임새("헬스장에서")도 여기로 반영된다
+    3. 평점(인기도)
     텍스트 관련도는 질의 임베딩 호출이 들어서, 추천할 때만 이 함수를 부른다(decide).
-    use_text=False면 3을 뺀다 (평가에서 텍스트 관련도의 효과를 따로 잴 때).
+    use_text=False면 2를 뺀다 (평가에서 텍스트 관련도의 효과를 따로 잴 때).
 
     @docid chat.tie-order
     @see backend/README.md#구조
@@ -170,8 +169,6 @@ def tie_order(catalog: Catalog, state: ChatState, use_text: bool = True) -> tupl
     """
     order = state.price_order if state.price_order in ("cheaper", "pricier") else None
     sign = 1 if order == "cheaper" else -1
-    soft = {f.attribute: f.value for f in state.memory.latest().values()
-            if not catalog.spec.attribute(f.attribute).constraint and f.value != DONT_CARE}
     relevance: dict[str, float] = {}
     if use_text and catalog.text is not None:
         relevance = relevance_scores(catalog.text, " ".join(state.memory.keywords),
@@ -181,10 +178,9 @@ def tie_order(catalog: Catalog, state: ChatState, use_text: bool = True) -> tupl
         product = catalog.products[item.id]
         price = 0.0 if order is None else (
             float("inf") if product.price is None else sign * product.price)
-        mismatch = sum(product.attributes.get(a) != v for a, v in soft.items())
-        return (price, mismatch, -relevance.get(item.id, 0.0), -item.score)
+        return (price, -relevance.get(item.id, 0.0), -item.score)
 
-    basis = order or ("relevance" if relevance or soft else "rating")
+    basis = order or ("relevance" if relevance else "rating")
     return key, basis
 
 

@@ -50,7 +50,6 @@ attributes:
     question_en: Are you okay with a cable, or do you want wireless?   # 선택. 영어 사용자용
     askable: true              # false면 시스템이 먼저 묻지 않음 (사용자가 말하면 조건으로는 사용)
     ask_directly: false        # true면 질문 작성기가 돌려 묻지 않고 바로 물음 (예산처럼 생활 장면으로 갈리지 않는 속성)
-    constraint: true           # false면 추천 조건으로 쓰지 않고 동률 정렬에만 씀 (값 하나로 정하기 어려운 속성, 예: 주 용도). askable과 함께 쓸 수 없음
     values:                    # 비우면 자유값 속성 (예: brand, 소문자로 저장)
       - {value: wireless, label: 무선, label_en: Wireless}
       - {value: wired, label: 유선, label_en: Wired}
@@ -78,7 +77,6 @@ attributes:
 - 규칙과 `default`가 내는 값은 모두 `values`에 선언되어 있어야 함
 - 정규식 문법 오류 금지, 속성 key 중복 금지
 - `askable` 속성은 `question` 필수, 자유값 속성은 `askable: false`
-- `constraint: false` 속성은 `askable: false`여야 함 (엔진에 넣지 않으므로 물을 수 없음)
 - `*_en`은 선택이다. 없으면 영어 사용자에게도 한국어 문구를 보여준다
 - `question`은 대체용 직접 질문이다. 평소 질문은 질문 작성기가 대화에 맞춰 돌려 묻고, 돌려 묻는 질문은 정의에 적지 않는다([LLM 파서 5절](llm-parser.md#5-질문-작성기-친구-페르소나))
 - 서버는 DB에 저장된 정의 스냅샷을 읽는다. 질문 문구 등 정의를 고치면 `uv run python scripts/load_catalog.py <id>`(또는 `build_catalog.py`)로 다시 넣는다
@@ -94,4 +92,6 @@ attributes:
 - `product_embeddings`: 상품 글(상품명·특징·세부 정보) 임베딩. `build_embeddings.py`로 미리 만든다. 카탈로그를 다시 로드해도 지워지지 않고, 글이 바뀐 상품만 다시 만든다
 
 ## 현재 제약
-- 속성은 상품당 값 하나 (단일값). `use_case`처럼 여러 값이 가능한 속성은 우선순위가 높은 값 하나만 저장한다. 그래서 헤드폰의 `use_case`는 조건으로 쓰지 않고(`constraint: false`) 동률 정렬에만 쓴다.
+- 속성은 상품당 값 하나 (단일값). 주 용도처럼 여러 값이 가능하고 실제 쓰임과 자주 어긋나는 속성은 넣지 않는다(헤드폰의 `use_case`는 2026-11-03에 뺐다).
+- 정의에서 속성을 빼면 카탈로그를 다시 로드할 때 그 속성 값은 저장하지 않는다([`replace_products`](../backend/app/catalog/repository.py "sym:py:app.catalog.repository#replace_products")).
+- **서버와 평가는 DB의 정의 스냅샷을 읽는다.** YAML을 고친 뒤 `load_catalog.py`를 다시 실행하지 않으면 반영되지 않는다. 스냅샷이 YAML과 다르면 로그에 경고를 남긴다([`is_stale`](../backend/app/catalog/repository.py "sym:py:app.catalog.repository#is_stale")).

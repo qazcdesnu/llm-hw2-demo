@@ -4,7 +4,8 @@ import pytest
 from pydantic import ValidationError
 
 from app.catalog.extract import extract_attributes
-from app.catalog.repository import list_categories, load_category, load_products, replace_products
+from app.catalog.extract import Extracted
+from app.catalog.repository import is_stale, list_categories, load_category, load_products, replace_products
 from app.catalog.spec import CategorySpec, load_all_category_specs, load_category_spec
 from app.db import connect, init_db
 
@@ -67,7 +68,7 @@ def test_keywords_band_and_defaults(headphones):
     assert v["anc"] == "yes"
     assert v["water_resistant"] == "yes"
     assert v["mic"] == "yes"
-    assert v["use_case"] == "sports"
+    assert "use_case" not in v  # 주 용도는 정의에서 뺐다 (2026-11-03)
     assert v["price_band"] == "high"
 
 
@@ -206,3 +207,21 @@ def test_sampling_without_size_keeps_all_eligible(headphones):
         rows.append((item, extract_attributes(headphones, item)))
     picked = stratified_sample(rows, SamplingSpec(require_known=["form_factor"]))
     assert len(picked) == 20  # form_factor가 확인된 것만, 개수 제한 없음
+
+
+def test_attributes_outside_the_definition_are_not_stored(tmp_path, headphones):
+    """정의에서 뺀 속성(예: 예전 카탈로그 JSON의 use_case)은 로드할 때 저장하지 않는다."""
+    db_path = tmp_path / "t.db"
+    init_db(db_path)
+    item = {"parent_asin": "X1", "title": "Earbuds", "price": 30.0}
+    attrs = {"connection": Extracted("wireless", "test"), "use_case": Extracted("sports", "test")}
+    with closing(connect(db_path)) as conn:
+        replace_products(conn, headphones, [(item, attrs)])
+        assert load_products(conn, "headphones")[0].attributes == {"connection": "wireless"}
+
+
+def test_stale_definition_is_detected(headphones):
+    """DB의 정의 스냅샷이 지금 YAML과 다르면 is_stale (load_catalog를 다시 돌려야 반영됨)."""
+    assert not is_stale(headphones)
+    changed = headphones.model_copy(update={"attributes": headphones.attributes[:-1]})
+    assert is_stale(changed)

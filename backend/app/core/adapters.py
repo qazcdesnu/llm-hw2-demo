@@ -34,13 +34,9 @@ def popularity_scores(products: Sequence[Product]) -> list[float]:
 def from_catalog(
     spec: CategorySpec, products: Sequence[Product]
 ) -> tuple[dict[str, AttributeDef], list[Item]]:
-    """@docid core.from-catalog
-    @see docs/ig-engine.md#3-질문-선택
-    """
+    """@docid core.from-catalog"""
     attributes = {}
     for a in spec.attributes:
-        if not a.constraint:  # 조건이 아닌 속성은 엔진에 넣지 않는다 (동률 정렬은 chat.py)
-            continue
         if a.is_open:
             # 자유값 속성(brand 등)은 카탈로그에 실제로 있는 값들이 값 목록이 된다.
             values = tuple(sorted({p.attributes[a.key] for p in products if a.key in p.attributes}))

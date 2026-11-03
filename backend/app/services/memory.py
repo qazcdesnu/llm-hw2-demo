@@ -78,7 +78,7 @@ class ConversationMemory:
     def describe(self, spec: CategorySpec) -> list[str]:
         """LLM 프롬프트에 넣을 '지금까지 알게 된 것' (사람이 읽는 문장)."""
         lines = [f"{label_of(spec, f.attribute, f.value)} (근거: \"{f.quote}\")"
-                 for f in self.latest().values()]
+                 for f in self.latest().values() if spec.has_attribute(f.attribute)]
         return lines + [f"맥락: {n}" for n in self.notes]
 
     def to_dict(self) -> dict:
