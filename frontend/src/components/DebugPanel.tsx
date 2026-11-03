@@ -6,6 +6,11 @@ const STOP_REASONS: Record<string, string> = {
   no_informative_question: "더 물어도 구별 불가",
 };
 
+// 숫자 범위 조건 표시 ("$10~25", "~$30", "$60~")
+function formatRange(lo: number | null, hi: number | null): string {
+  return `${lo != null ? `$${lo}` : ""}~${hi != null ? `$${hi}` : ""}`;
+}
+
 /**
  * Developer Panel: 엔진 내부 상태(질문별 기대 IG, 엔트로피, 상위 후보 확률, 수집된 선호),
  * 대화 메모리(속성 값과 근거 발화, 사용 맥락), 질문 작성기가 고른 접근을 보여준다.
@@ -23,6 +28,7 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
   const explicit = Object.entries(debug.preferences.explicit ?? {});
   const dontCare = debug.preferences.dont_care ?? [];
   const excluded = debug.preferences.excluded ?? [];
+  const ranges = Object.entries(debug.preferences.ranges ?? {});
   const facts = debug.memory?.facts ?? [];
   const notes = debug.memory?.notes ?? [];
   const questions = debug.memory?.questions ?? [];
@@ -103,7 +109,8 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
             <ul className="prefs">
               {facts.map((f, i) => (
                 <li key={i}>
-                  <span className="muted">t{f.turn}</span> {f.attribute}=<b>{f.value}</b>{" "}
+                  <span className="muted">t{f.turn}</span> {f.attribute}=
+                  <b>{f.value === "range" ? formatRange(f.low ?? null, f.high ?? null) : f.value}</b>{" "}
                   <span className="muted">
                     ← {f.source === "button" ? "버튼" : ""} "{f.quote}"
                   </span>
@@ -133,13 +140,18 @@ export default function DebugPanel({ debug }: { debug: DebugInfo | null }) {
         )}
         <dt>Preferences</dt>
         <dd>
-          {explicit.length + dontCare.length + excluded.length === 0 ? (
+          {explicit.length + dontCare.length + excluded.length + ranges.length === 0 ? (
             "-"
           ) : (
             <ul className="prefs">
               {explicit.map(([k, v]) => (
                 <li key={k}>
                   {k}=<b>{v}</b>
+                </li>
+              ))}
+              {ranges.map(([k, [lo, hi]]) => (
+                <li key={k}>
+                  {k}=<b>{formatRange(lo, hi)}</b>
                 </li>
               ))}
               {dontCare.map((k) => (

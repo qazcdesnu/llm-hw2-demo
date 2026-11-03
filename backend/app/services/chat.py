@@ -23,7 +23,7 @@ from app.core.question_selector import QuestionPolicy
 from app.core.recommender import TieKey
 from app.schemas import DebugInfo, Question, QuestionScore, Recommendation
 from app.services import responses as say
-from app.services.memory import Fact
+from app.services.memory import RANGE, Fact
 from app.services.parser import ParseContext, ParseResult
 from app.services.questioner import QuestionRequest, WrittenQuestion
 from app.services.relevance import Embedder, TextIndex, relevance_scores
@@ -118,10 +118,13 @@ def validate_answer(spec: CategorySpec, attribute: str, value: str) -> None:
 # ---------------------------------------------------------------- 상태 갱신
 
 def remember(state: ChatState, spec: CategorySpec, attribute: str, value: str, quote: str,
-             source: str = "said") -> str | None:
-    """사실을 메모리에 남긴다. 새로 알게 된 것이면 사용자에게 알릴 문구, 이미 알던 값이면 None."""
-    if state.memory.remember(Fact(attribute, value, quote, state.turn, source)):
-        return say.change_label(spec, attribute, value, state.language)
+             source: str = "said", low: float | None = None, high: float | None = None) -> str | None:
+    """사실을 메모리에 남긴다. 새로 알게 된 것이면 사용자에게 알릴 문구, 이미 알던 값이면 None.
+
+    value가 RANGE면 low·high가 숫자 범위다("$10~25").
+    """
+    if state.memory.remember(Fact(attribute, value, quote, state.turn, source, low, high)):
+        return say.change_label(spec, attribute, value, state.language, low, high)
     return None
 
 
@@ -139,6 +142,9 @@ def apply_parsed(state: ChatState, parsed: ParseResult, spec: CategorySpec) -> l
     state.memory.add_keywords(parsed.keywords)
     for c in parsed.constraints:
         if (label := remember(state, spec, c.attribute, c.value, c.quote)) is not None:
+            changes.append(label)
+    for r in parsed.ranges:
+        if (label := remember(state, spec, r.attribute, RANGE, r.quote, low=r.low, high=r.high)) is not None:
             changes.append(label)
     for rank in parsed.exclude_ranks:
         if rank <= len(state.last_recommended):
@@ -395,7 +401,7 @@ def _understand(
         return _Understanding(request_type, unclear=True)
 
     changes = apply_parsed(state, parsed, spec)
-    said = {c.attribute for c in parsed.constraints}
+    said = {c.attribute for c in parsed.constraints} | {r.attribute for r in parsed.ranges}
     if state.finished and not (said or changes):
         return _same_question(catalog, state, say.t(state.language, "refine_unclear"), request_type)
     if pending is not None:

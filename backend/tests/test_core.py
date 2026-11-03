@@ -2,9 +2,9 @@ import math
 
 import pytest
 
-from app.core.belief_tracker import compute_belief, entropy, likelihood
+from app.core.belief_tracker import compute_belief, entropy, likelihood, range_likelihood
 from app.core.engine import Ask, EngineConfig, IGEngine, Recommend
-from app.core.model import DONT_CARE, AttributeDef, Item, Observation, PreferenceState
+from app.core.model import DONT_CARE, AttributeDef, Item, Observation, PreferenceState, RangeObservation
 from app.core.question_selector import (
     FixedOrderPolicy, InformationGainPolicy, RandomPolicy, expected_information_gain,
 )
@@ -189,3 +189,45 @@ def test_policies_choose_from_same_candidates():
     picks = {RandomPolicy(seed).choose(candidates).attribute for seed in range(20)}
     assert picks == {"connection", "form", "anc"}
     assert RandomPolicy(3).choose(candidates) == RandomPolicy(3).choose(list(reversed(candidates)))
+
+
+# ---------------------------------------------------------------- 숫자 범위 (가격)
+
+PRICE = AttributeDef("price_band", ("low", "mid", "high"))
+
+
+def priced(id: str, price: float | None, band: str) -> Item:
+    return Item(id, {"price_band": band}, 0.0, {} if price is None else {"price_band": price})
+
+
+def test_range_likelihood_uses_the_actual_number():
+    """경계에 걸친 예산($15~25)은 구간(low/mid)이 아니라 실제 가격으로 판정한다."""
+    obs = RangeObservation("price_band", 15, 25, 0.95)
+    assert range_likelihood(priced("a", 18, "low"), obs, PRICE) == 0.95
+    assert range_likelihood(priced("b", 24, "mid"), obs, PRICE) == 0.95  # 구간은 mid지만 범위 안
+    assert range_likelihood(priced("c", 40, "mid"), obs, PRICE) == pytest.approx(0.025)
+    assert range_likelihood(priced("d", None, "mid"), obs, PRICE) == pytest.approx(1 / 3)
+    assert RangeObservation("price_band", None, 30, 0.95).contains(30)
+
+
+def test_range_replaces_band_answer_and_counts_as_resolved():
+    pref = PreferenceState()
+    pref.answer("price_band", "mid")
+    pref.answer_range("price_band", 15, 25)
+    assert pref.explicit == {} and pref.ranges == {"price_band": (15, 25)}
+    assert "price_band" in pref.resolved()  # 범위를 말하면 가격대 질문은 하지 않는다
+    pref.answer("price_band", "high")  # 정정: 마지막 답이 이긴다
+    assert pref.ranges == {} and pref.explicit == {"price_band": "high"}
+    assert PreferenceState.from_dict(PreferenceState(ranges={"price_band": (None, 30)}).to_dict()).ranges == {
+        "price_band": (None, 30)}
+
+
+def test_recommend_filters_by_range_and_marks_unknown_price():
+    items = [priced("cheap", 12, "low"), priced("edge", 24, "mid"), priced("pricey", 80, "high"),
+             priced("noprice", None, "mid")]
+    pref = PreferenceState(ranges={"price_band": (15, 25)})
+    belief = compute_belief(items, {"price_band": PRICE}, pref.observations(0.05))
+    ranked = recommend(items, belief, pref, k=4)
+    assert ranked[0].item.id == "edge" and ranked[0].matched == ["price_band"]
+    by_id = {r.item.id: r for r in ranked}
+    assert by_id["noprice"].unknown == ["price_band"] and by_id["cheap"].violated == ["price_band"]

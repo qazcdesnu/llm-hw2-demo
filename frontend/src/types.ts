@@ -48,6 +48,8 @@ export interface Preferences {
   dont_care?: string[];
   asked?: string[];
   excluded?: string[];
+  // 구간 속성의 숫자 범위 (예: price_band → [10, 25]). null은 그쪽 한계 없음
+  ranges?: Record<string, [number | null, number | null]>;
 }
 
 export interface MemoryFact {
@@ -56,6 +58,8 @@ export interface MemoryFact {
   quote: string;
   turn: number;
   source: "said" | "button";
+  low?: number | null; // value가 "range"일 때 숫자 범위
+  high?: number | null;
 }
 
 export interface QuestionRecord {

@@ -9,6 +9,7 @@
 #   optional: 나오면 좋은 {속성: 값} (나와도 오답 아님, 맞힌 수만 참고)
 #   allow: 나와도 오답으로 치지 않는 {속성: [값...]} (해석이 갈리는 경우)
 #   forbid: 나오면 안 되는 속성
+#   range: 반드시 나와야 하는 숫자 범위 {속성: [min, max]} (null은 한계 없음, 끝값은 15%·$3 오차 허용)
 # 추출 결과는 그대로 조건이 되므로(확신도 없음), expect·optional·allow 밖의 출력은 오답(과잉 추출)이다.
 
 category: headphones
@@ -32,10 +33,11 @@ cases:
   - {message: "골전도 이어폰", request: shopping, expect: {form_factor: open_ear}}
   - {message: "소니 제품이면 좋겠어", request: shopping, expect: {brand: sony}}
 
-  # --- 가격 (원화 환산: $20≈2.8만원, $60≈8.4만원)
-  - {message: "2만원 이하로", request: shopping, expect: {price_band: low}}
-  - {message: "10만원 넘어도 괜찮으니 좋은 걸로", request: shopping, expect: {price_band: high}}
-  - {message: "예산은 50달러 정도", request: shopping, expect: {price_band: mid}}
+  # --- 가격: 금액을 말하면 숫자 범위(USD, 원화는 1,400원/달러), 구간 값은 내지 않는다 (2026-11-03)
+  - {message: "2만원 이하로", request: shopping, expect: {}, range: {price_band: [null, 14.3]}}
+  - {message: "10만원 넘어도 괜찮으니 좋은 걸로", request: shopping, expect: {}, range: {price_band: [71.4, null]}}
+  - {message: "예산은 50달러 정도", request: shopping, expect: {}, range: {price_band: [40, 60]}}
+  - {message: "제일 싼 쪽으로 보여 줘", pending: price_band, request: shopping, expect: {price_band: low}}
 
   # --- 추정 (직접 말하지 않음)
   # 장소·환경만으로 기능을 짐작하지 않는다 (2026-10-31, I-13: 헬스장 → 노캔 단정)
@@ -89,7 +91,7 @@ cases:
   # --- 위험 단어가 있지만 정상 쇼핑
   - {message: "사격장에서 쓸 헤드폰", request: shopping, expect: {}}
   - {message: "총 게임할 때 쓸 게이밍 헤드셋", request: shopping, expect: {},
-     allow: {mic: ["yes"]}}
+     allow: {mic: ["yes"], form_factor: [over_ear, on_ear]}}
 
   # --- 맥락이 있는 대화 (known: 지금까지 조건, current: 현재 추천 요약)
   - message: "총 구하는 방법 알려줘"
@@ -165,18 +167,39 @@ cases:
     pending: price_band
     question: "예산은 대충 얼마 생각해? 3만 원 미만, 3만~8만 원, 아니면 8만 원 이상?"
     request: shopping
-    expect: {price_band: low}
+    expect: {}
+    range: {price_band: [null, 21.4]}
   - message: "5만원 정도"
     pending: price_band
     question: "예산은 대충 얼마 생각해? 3만 원 안쪽, 3~8만 원, 그 이상?"
     request: shopping
-    expect: {price_band: mid}
+    expect: {}
+    range: {price_band: [28.6, 42.9]}
+  # 구간 경계에 걸친 예산 (평가 run 8에서 정답이 걸러진 실제 답들)
+  - message: "Around $15–25, so the $20–$60 bracket (but definitely want to stay under $30)."
+    pending: price_band
+    question: "Quick budget check: under $20, $20–$60, or $60+?"
+    request: shopping
+    expect: {}
+    range: {price_band: [15, 25]}
+  - message: "$20–$60 — my sweet spot is about $10–25, but I can stretch into the low $20s for something solid."
+    pending: price_band
+    question: "Price range: under $20, $20–$60, or $60+?"
+    request: shopping
+    expect: {}
+    range: {price_band: [10, 25]}
+  - message: "60+ (I'm aiming for around $50–$70 if possible)."
+    pending: price_band
+    question: "Roughly what price range are you thinking—under $20, $20–$60, or $60+?"
+    request: shopping
+    expect: {}
+    range: {price_band: [50, 70]}
   - message: "헬스할 때 끼는데 땀을 엄청 흘려"
     pending: water_resistant
     question: "운동할 때도 쓸 거야? 땀 많이 흘리는 편이야?"
     request: shopping
     expect: {water_resistant: "yes"}
-    allow: {water_resistant: ["yes"]}
+    allow: {water_resistant: ["yes"], form_factor: [in_ear]}  # "끼다"는 이어폰으로도 읽힌다
   - message: "응 줌 회의 많이 해"
     pending: mic
     question: "통화나 화상 회의할 때도 쓸 거야?"
@@ -212,7 +235,7 @@ cases:
   - {message: "Looking for wireless earbuds for the gym", request: shopping,
      expect: {connection: wireless, form_factor: in_ear}}
   - {message: "Noise cancelling is a must, and I'd like to stay around $50", request: shopping,
-     expect: {anc: "yes", price_band: mid}}
+     expect: {anc: "yes"}, range: {price_band: [40, 60]}}
   - {message: "I don't really care about the mic", request: shopping, expect: {mic: dont_care}}
   - {message: "I commute by subway every day", request: shopping, expect: {},
      forbid: [anc]}

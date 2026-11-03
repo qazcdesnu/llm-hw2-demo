@@ -46,7 +46,7 @@ def test_parse_message_merges_router_and_extractor_calls():
     extraction = Extraction(constraints=[
         Constraint(attribute="anc", value="yes", quote=" 지하철 "),
         Constraint(attribute="connection", value="bluetooth", quote="x"),
-    ], notes=["지하철 출퇴근", " "], keywords=["commute", " "])
+    ], notes=["지하철 출퇴근", " "], keywords=["commute", " "], ranges=[])
     # 두 호출이 동시에 나가지 않으면 barrier에서 시간 초과(BrokenBarrierError)
     client = FakeClient(route(exclude=[1, 9], order="cheaper"), extraction,
                         barrier=threading.Barrier(2, timeout=5))
@@ -65,13 +65,13 @@ def test_parse_message_merges_router_and_extractor_calls():
 
 
 def test_adjustments_are_ignored_without_current_recommendations():
-    client = FakeClient(route(exclude=[1], order="cheaper"), Extraction(constraints=[], notes=[], keywords=[]))
+    client = FakeClient(route(exclude=[1], order="cheaper"), Extraction(constraints=[], notes=[], keywords=[], ranges=[]))
     result = parse_message(client, SPEC, "더 싼 걸로")
     assert result.exclude_ranks == [] and result.price_order == "none"
 
 
 def test_llm_parser_returns_none_on_failure():
-    client = FakeClient(route(), Extraction(constraints=[], notes=[], keywords=[]), fail=True)
+    client = FakeClient(route(), Extraction(constraints=[], notes=[], keywords=[], ranges=[]), fail=True)
     assert LLMParser(client)(SPEC, "무선", ParseContext()) is None
 
 

@@ -131,6 +131,11 @@ class AttributeSpec(BaseModel):
     def label_for(self, lang: str) -> str:
         return (self.label_en or self.label) if lang == "en" else self.label
 
+    @property
+    def numeric_field(self) -> str | None:
+        """구간 규칙(band)으로 만든 속성이면 그 숫자 필드 이름(예: price). 범위 조건을 받을 수 있다."""
+        return next((r.field for r in self.rules if isinstance(r, BandRule)), None)
+
     def question_for(self, lang: str) -> str | None:
         return (self.question_en or self.question) if lang == "en" else self.question
 

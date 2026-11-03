@@ -425,7 +425,7 @@ def test_memory_keeps_facts_with_quotes_and_notes(chat):
     memory = res["debug"]["memory"]
     facts = {f["attribute"]: f for f in memory["facts"]}
     assert facts == {"connection": {"attribute": "connection", "value": "wireless", "quote": "무선으로",
-                                    "turn": 1, "source": "said"}}
+                                    "turn": 1, "source": "said", "low": None, "high": None}}
     assert memory["notes"] == ["지하철 출퇴근"]
     # 엔진 입력은 메모리에서 만든다
     assert res["debug"]["preferences"]["explicit"] == {"connection": "wireless"}
@@ -567,3 +567,19 @@ def test_chosen_model_reaches_parser_and_writer(tmp_path):
         assert c.post(f"/api/sessions/{sid}/messages",
                       json={"message": "x", "model": "no-such-model"}).status_code == 422
     assert asked == [("parse", other), ("write", other), ("parse", None), ("write", None)]
+
+
+def test_numeric_budget_is_kept_as_a_range(parser_client):
+    """"$25 안쪽"은 가격대 구간으로 뭉개지 않고 범위로 기록·표시한다. 가격대는 다시 묻지 않는다."""
+    from app.services.parser import ParsedRange
+
+    client, parser = parser_client
+    parser.table["25달러 안쪽"] = ParseResult(
+        "shopping", [], ranges=[ParsedRange("price_band", None, 25.0, "25달러 안쪽")])
+    sid = new_session(client)
+    res = send(client, sid, "25달러 안쪽").json()
+    assert "가격대 $25 이하" in res["reply"]
+    assert res["debug"]["preferences"]["ranges"] == {"price_band": [None, 25.0]}
+    fact = res["debug"]["memory"]["facts"][0]
+    assert (fact["value"], fact["low"], fact["high"]) == ("range", None, 25.0)
+    assert res["question"] is None or res["question"]["attribute"] != "price_band"

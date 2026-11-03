@@ -48,6 +48,7 @@
 | 요청 분류 | `price_order` | "더 싼 걸로" → `cheaper`, "더 비싸도 좋은 걸로" → `pricier`, 그 외 `none` |
 | 속성 추출 | `constraints[]` | `{attribute(enum), value, quote}`. 이번 발화에서 새로 말하거나 바뀐 것만. `quote`는 근거 발화를 그대로 인용 |
 | 속성 추출 | `notes[]` | 속성으로 표현되지 않는 사용 맥락("지하철 출퇴근", "안경 착용"). 사용자가 쓴 언어로 |
+| 속성 추출 | `ranges[]` | `{attribute, min, max, quote}`. 금액을 말했을 때의 숫자 범위(USD, 원화는 1,400원/달러). 있으면 같은 속성의 구간 값은 내지 않는다. `band` 규칙으로 만든 속성(가격대)만 |
 | 속성 추출 | `keywords[]` | 상품 설명 검색용 영어 키워드("하루 종일 껴도 편했으면" → `comfortable`, `all day wear`). 동률 정렬의 BM25 질의([IG 엔진 4절](ig-engine.md#4-추천과-한계-표시)) |
 
 - **속성 이름:** enum이라 정의에 없는 속성은 나올 수 없다.

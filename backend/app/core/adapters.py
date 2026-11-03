@@ -34,7 +34,9 @@ def popularity_scores(products: Sequence[Product]) -> list[float]:
 def from_catalog(
     spec: CategorySpec, products: Sequence[Product]
 ) -> tuple[dict[str, AttributeDef], list[Item]]:
-    """@docid core.from-catalog"""
+    """@docid core.from-catalog
+    @see docs/ig-engine.md#1-답변-가능도-모델
+    """
     attributes = {}
     for a in spec.attributes:
         if a.is_open:
@@ -46,8 +48,10 @@ def from_catalog(
             attributes[a.key] = AttributeDef(a.key, values, a.askable)
 
     scores = popularity_scores(products)
+    numeric = {a.key: a.numeric_field for a in spec.attributes if a.numeric_field and a.key in attributes}
     items = [
-        Item(p.id, {k: v for k, v in p.attributes.items() if k in attributes}, score)
+        Item(p.id, {k: v for k, v in p.attributes.items() if k in attributes}, score,
+             {k: x for k, f in numeric.items() if (x := getattr(p, f, None)) is not None})
         for p, score in zip(products, scores)
     ]
     return attributes, items

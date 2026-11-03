@@ -16,6 +16,7 @@ from app.core.engine import Limitation
 from app.core.model import DONT_CARE, PreferenceState
 from app.core.recommender import RankedItem
 from app.schemas import Option, Question, Recommendation
+from app.services.memory import RANGE
 
 TEXT = {
     "ko": {
@@ -47,6 +48,9 @@ TEXT = {
         "relaxed": "조건을 모두 만족하는 상품이 부족해서, 일부 조건이 다른 것도 같이 보여 줄게.",
         "reason.unknown": "{label}: 상품 정보에 없어 확인 못 함",
         "reason.violated": "{label}: {value} (말한 조건과 다름)",
+        "range.both": "${low:g}~{high:g}",
+        "range.max": "${high:g} 이하",
+        "range.min": "${low:g} 이상",
     },
     "en": {
         "dont_care": "Doesn't matter",
@@ -77,6 +81,9 @@ TEXT = {
         "relaxed": "Not enough products meet every condition, so I'm also showing some that differ a bit.",
         "reason.unknown": "{label}: not listed, couldn't check",
         "reason.violated": "{label}: {value} (differs from what you asked)",
+        "range.both": "${low:g}–{high:g}",
+        "range.max": "up to ${high:g}",
+        "range.min": "${low:g}+",
     },
 }
 
@@ -92,11 +99,22 @@ def value_label(attr: AttributeSpec, value: str, lang: str = "ko") -> str:
     return next((v.label_for(lang) for v in attr.values if v.value == value), value)
 
 
-def change_label(spec: CategorySpec, attribute: str, value: str, lang: str = "ko") -> str:
-    """새로 알게 된 것을 사용자에게 알릴 때의 문구 ('마이크 필요', 'Mic: Needed')."""
+def range_label(low: float | None, high: float | None, lang: str = "ko") -> str:
+    """숫자 범위 ('$10~25', '$30 이하', '$60 이상')."""
+    if low is not None and high is not None:
+        return t(lang, "range.both", low=low, high=high)
+    if high is not None:
+        return t(lang, "range.max", high=high)
+    return t(lang, "range.min", low=low)
+
+
+def change_label(spec: CategorySpec, attribute: str, value: str, lang: str = "ko",
+                 low: float | None = None, high: float | None = None) -> str:
+    """새로 알게 된 것을 사용자에게 알릴 때의 문구 ('마이크 필요', 'Mic: Needed', '가격대 $10~25')."""
     attr = spec.attribute(attribute)
     sep = ": " if lang == "en" else " "
-    return f"{attr.label_for(lang)}{sep}{value_label(attr, value, lang)}"
+    shown = range_label(low, high, lang) if value == RANGE else value_label(attr, value, lang)
+    return f"{attr.label_for(lang)}{sep}{shown}"
 
 
 def build_question(spec: CategorySpec, attribute: str, text: str | None = None, lang: str = "ko") -> Question:
@@ -129,14 +147,17 @@ def reasons_for(spec: CategorySpec, ranked: RankedItem, state: PreferenceState, 
     reasons = []
     for key in ranked.matched:
         attr = spec.attribute(key)
-        reasons.append(f"{attr.label_for(lang)}: {value_label(attr, state.explicit[key], lang)}")
+        if key in state.ranges:  # 숫자 범위 조건: 실제 값을 보여 준다
+            reasons.append(f"{attr.label_for(lang)}: {range_label(*state.ranges[key], lang)}")
+        else:
+            reasons.append(f"{attr.label_for(lang)}: {value_label(attr, state.explicit[key], lang)}")
     for key in ranked.unknown:
         reasons.append(t(lang, "reason.unknown", label=spec.attribute(key).label_for(lang)))
     for key in ranked.violated:
         attr = spec.attribute(key)
-        actual = ranked.item.attributes.get(key, "")
-        reasons.append(t(lang, "reason.violated", label=attr.label_for(lang),
-                         value=value_label(attr, actual, lang)))
+        number = ranked.item.numbers.get(key) if key in state.ranges else None
+        actual = f"${number:g}" if number is not None else value_label(attr, ranked.item.attributes.get(key, ""), lang)
+        reasons.append(t(lang, "reason.violated", label=attr.label_for(lang), value=actual))
     return reasons
 
 
