@@ -39,7 +39,7 @@ uv run python scripts/run_eval.py headphones --limit 10          # 대화 평가
 - `categories/`: 카테고리 정의 YAML (작성법: [category-spec.md](../docs/category-spec.md))
 - `app/evaluation/`: 평가 (시나리오, 가상 사용자, 비교군, LLM 심판, 실행기). 설명 [evaluation.md](../docs/evaluation.md)
 - `app/core/`: IG 엔진 (웹·DB와 무관한 순수 Python, 평가 코드에서도 사용). 진입점 [`IGEngine`](app/core/engine.py "docid:core.engine"), 설명 [ig-engine.md](../docs/ig-engine.md)
-- `scripts/`: 데이터 스크립트 (`filter_category.py` → `build_catalog.py` → `export_validation.py`, 원본 없이 적재 `load_catalog.py`, 상품 임베딩 `build_embeddings.py`, 평가 데이터 `download_amazon_c4.py`·`build_scenarios.py`·`run_eval.py`·`export_eval_runs.py`, 분석 `analyze_headphones.py`, 엔진 데모 `ig_demo.py`)
+- `scripts/`: 데이터 스크립트 (`filter_category.py` → `build_catalog.py` → `export_validation.py`, 원본 없이 적재 `load_catalog.py`, 상품 임베딩 `build_embeddings.py`, 평가 데이터 `download_amazon_c4.py`·`build_scenarios.py`·`run_eval.py`, 분석 `analyze_headphones.py`, 엔진 데모 `ig_demo.py`)
 - `data/catalog/<id>.json`: 빌드된 카탈로그 (git 포함)
 - `data/raw/`: 외부 원본 데이터 (git 제외). Amazon Reviews 2023 메타(`meta_*.jsonl`), Amazon-C4 평가 질의(`amazon-c4/`)
 
