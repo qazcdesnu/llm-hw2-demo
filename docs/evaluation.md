@@ -87,7 +87,7 @@ cd backend
 uv run python scripts/run_eval.py headphones --limit 10                 # ig, random, llm
 uv run python scripts/run_eval.py headphones --limit 3 --systems ig llm
 ```
-결과는 SQLite(`eval_runs`, `eval_episodes`, 매뉴얼은 `eval_manual`)에 남고 평가 모드에서도 보인다. 10 × 3 한 번에 약 12분(대화 하나 ig·random 약 65초, llm 약 33초, 4개 동시).
+결과는 SQLite(`eval_runs`, `eval_episodes`, 매뉴얼은 `eval_manual`)에 남고 평가 모드에서도 보인다. DB는 git에서 제외되므로, 공유할 run은 `uv run python scripts/export_eval_runs.py <run id…>`로 `backend/evaluation/runs/run-<id>.json`에 내보낸다(지금 run 3·5·7~13, run별 코드 변경은 [README 평가 실행 기록](../README.md#평가-실행-기록-run별-코드-변경)). 10 × 3 한 번에 약 12분(대화 하나 ig·random 약 65초, llm 약 33초, 4개 동시).
 
 **API** ([evaluation.py](../backend/app/api/evaluation.py))
 

@@ -1,0 +1,2224 @@
+{
+ "id": 12,
+ "created_at_utc": "2026-11-03 12:34:17",
+ "status": "done",
+ "config": {
+  "systems": [
+   "ig",
+   "random",
+   "llm"
+  ],
+  "scenario_ids": [
+   "c4-19122",
+   "c4-3095",
+   "c4-219",
+   "c4-6486",
+   "c4-5173",
+   "c4-5123",
+   "c4-3295",
+   "c4-2622",
+   "c4-15205",
+   "c4-1859"
+  ]
+ },
+ "summary": {
+  "ig": {
+   "episodes": 10,
+   "errors": 0,
+   "recommended": 10,
+   "rank_pct_mean": 2.673,
+   "rank_pct_median": 2.02,
+   "rank_pct_mean_no_text": 2.647,
+   "rank_pct_median_no_text": 0.778,
+   "attribute_match": 0.967,
+   "questions": 3.4,
+   "confirms": 1.1,
+   "fit": 3.1,
+   "naturalness": 4.2,
+   "efficiency": 4.9,
+   "seconds": 89.59
+  },
+  "llm": {
+   "episodes": 10,
+   "errors": 0,
+   "recommended": 10,
+   "rank_pct_mean": null,
+   "rank_pct_median": null,
+   "rank_pct_mean_no_text": null,
+   "rank_pct_median_no_text": null,
+   "attribute_match": 0.873,
+   "questions": 4.3,
+   "confirms": 0,
+   "fit": 3.1,
+   "naturalness": 4.1,
+   "efficiency": 4.7,
+   "seconds": 40.57
+  },
+  "random": {
+   "episodes": 10,
+   "errors": 0,
+   "recommended": 10,
+   "rank_pct_mean": 4.034,
+   "rank_pct_median": 1.859,
+   "rank_pct_mean_no_text": 4.281,
+   "rank_pct_median_no_text": 1.178,
+   "attribute_match": 0.908,
+   "questions": 3.6,
+   "confirms": 1.2,
+   "fit": 3.4,
+   "naturalness": 4,
+   "efficiency": 4.2,
+   "seconds": 117.6
+  }
+ },
+ "episodes": [
+  {
+   "scenario_id": "c4-15205",
+   "system": "ig",
+   "target_id": "B0BR8VH914",
+   "recommended": [
+    "B0C8CHWL12",
+    "B0BVP24RPQ",
+    "B09QPX69DW"
+   ],
+   "rank_pct": 4.322,
+   "target_rank": 200,
+   "questions": 3,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Fit is poor because the top recommendations are bone‑conduction/open‑ear devices while the shopper specifically wanted an on‑ear style and strong long‑haul connectivity; price and sweat resistance match. Tone felt natural and friendly, and the bot asked only relevant, concise questions."
+   },
+   "seconds": 65.5,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for a comfortable Bluetooth headset for long drives."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice, wireless is set and you need a mic for long drives. When you’re on a long drive, do you want something that mostly blocks outside noise, something that still lets road sounds through so you stay aware, or something that barely presses on your ear for minimal fatigue?"
+    },
+    {
+     "role": "user",
+     "content": "Barely presses on my ear so it stays comfy for hours and I can still hear road noises — I don’t want full noise cancellation while driving."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you want a comfy on‑ear that doesn’t do full ANC so you can still hear the road. Rough budget: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$20–$60 — aiming closer to the $40–60 sweet spot but definitely not over $60."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — aiming for about $40–60 then. When you wear them on drives, do they ever get rained on, sweaty, or dusty?"
+    },
+    {
+     "role": "user",
+     "content": "Sometimes get a bit sweaty on brisk walks and they might see light rain or dust now and then, so they should be reasonably water/sweat resistant and sturdy."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Water/sweat resistance: Needed in mind.\nQuick recap: Connection: Wireless, Mic: Needed, Fit: On-ear, Noise cancelling (ANC): Not needed, Price: $20–60, Water/sweat resistance: Needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That all sounds right — nothing’s changed, go ahead with those requirements."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n41 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 3.565
+   }
+  },
+  {
+   "scenario_id": "c4-15205",
+   "system": "llm",
+   "target_id": "B0BR8VH914",
+   "recommended": [
+    "B0BNW1LSG2",
+    "B07Z5YV3MT",
+    "B0BRL5KJ96"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 5,
+   "confirms": 0,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations include a solid on-ear pick (JVC HA-S23W) that matches budget, battery and form-factor needs, but the other two are in-ear earbuds that conflict with the shopper’s explicit on-ear preference. Chat flow was clear and conversational, and the bot asked the right focused questions without unnecessary repetition."
+   },
+   "seconds": 47.6,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for a comfortable Bluetooth headset for long drives."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prefer over-ear headphones (bigger, more comfortable for long wear) or true wireless earbuds (small, less heat) for your drives?"
+    },
+    {
+     "role": "user",
+     "content": "Neither — I prefer wireless on-ear headsets that sit securely without pressing my ears, comfy for long drives and stable enough for walks."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your budget (rough range in USD)?"
+    },
+    {
+     "role": "user",
+     "content": "About $40–$60, definitely not over $60."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want active noise cancellation (block road noise), a transparency/ambient mode (let in traffic sounds), or neither?"
+    },
+    {
+     "role": "user",
+     "content": "I want a transparency/ambient mode so I can hear traffic and stay safe while still using the headset for calls."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — what's the minimum battery life per charge you'd like (including any case/extra battery if relevant)?"
+    },
+    {
+     "role": "user",
+     "content": "Minimum 10 hours per charge so it easily lasts a long commute or a long drive; 12+ hours would be ideal."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prioritize call/microphone quality (clear voice for hands‑free) over music sound quality, or the other way around?"
+    },
+    {
+     "role": "user",
+     "content": "I prioritize call/mic quality over music — people need to hear me loud and clear on long drives."
+    },
+    {
+     "role": "assistant",
+     "content": "Bluetooth on-ear headset ambient/transparency mode 12+ hour battery excellent mic for calls secure fit under $60\n1. JVC HA-S23W Wireless Headphones - On Ear Bluetooth Headphones, Foldabl\n2. SoundPEATS T2 Hybrid Active Noise Cancelling Wireless Earbuds, ANC Ear\n3. Runner 60 Wireless Sport Earbuds for Running 80 Hour Long Battery Life"
+    }
+   ],
+   "extra": {
+    "search_query": "Bluetooth on-ear headset ambient/transparency mode 12+ hour battery excellent mic for calls secure fit under $60",
+    "target_in_candidates": false
+   }
+  },
+  {
+   "scenario_id": "c4-15205",
+   "system": "random",
+   "target_id": "B0BR8VH914",
+   "recommended": [
+    "B09F9L3KYT",
+    "B0B3JDDJG5",
+    "B0C8HWD3FN"
+   ],
+   "rank_pct": 6.914,
+   "target_rank": 320,
+   "questions": 3,
+   "confirms": 1,
+   "attribute_match": 0.75,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "Recommendations match the key hidden preferences (open‑ear bone‑conduction, wireless, mic, sweat resistance, and price) so they’re quite suitable, though the assistant didn’t ask about battery life or long‑haul Bluetooth reliability which are important for long drives. The tone was conversational and questions were efficient and relevant, but the assistant’s brief repetition of phrasing made it slightly mechanical."
+   },
+   "seconds": 134.8,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for a comfortable Bluetooth headset for long drives."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice, so wireless Bluetooth for long drives and you want a mic on it. Do you ever wear it in the rain or when you're sweating/using it outside where it could get dusty?"
+    },
+    {
+     "role": "user",
+     "content": "Yeah—I'll sweat in them on walks and light workouts and I don’t mind using them in light rain or dusty outdoor stuff, so basic sweat/water resistance (not full waterproof) would be good."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so basic sweat/water resistance is needed. When you’re driving long stretches, do you want something that tucks into your ear and blocks outside noise, cushioned cups that sit around your ear for long comfort, or something that leaves your ear open so you can hear the road and surroundings?"
+    },
+    {
+     "role": "user",
+     "content": "Leave the ear open so I can hear the road and surroundings—security and comfort matter, but I don’t want full noise isolation while driving."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you want an open‑ear (bone‑conduction style) that keeps your ears open for safety. What's your budget: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$20–$60 — around $40–60 if possible, but definitely not over $60."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Price: $40–60 in mind.\nQuick recap: Connection: Wireless, Mic: Needed, Water/sweat resistance: Needed, Fit: Open-ear (bone conduction etc.), Noise cancelling (ANC): Not needed, Price: $40–60. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That sounds right — keep it wireless, open‑ear/bone‑conduction, with a good mic and basic sweat/water resistance, around $40–60."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n5 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 6.115
+   }
+  },
+  {
+   "scenario_id": "c4-1859",
+   "system": "ig",
+   "target_id": "B09C1F6F4K",
+   "recommended": [
+    "B0BLXJW1LX",
+    "B09TFM1SFQ",
+    "B0C7K451Y1"
+   ],
+   "rank_pct": 0.627,
+   "target_rank": 29,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations match the key constraints (wireless in-ear, ANC, mic, IPX4+, price) so fit is strong though battery life and case/color details weren’t provided. Tone was friendly and natural. The bot asked only relevant questions and confirmed preferences, so very efficient."
+   },
+   "seconds": 84.6,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless earbuds that sound better than AirPods but won’t cost as much."
+    },
+    {
+     "role": "assistant",
+     "content": "Sweet, so you want wireless in-ear earbuds that sound better than AirPods but cost less. What price range are you aiming for: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "60+, ideally around $60–$80 (no more than $100)."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice, so you're aiming for around $60–$80. Do you mainly use earbuds on noisy commutes/planes or mostly at home/quiet spots?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly noisy places — commuting, gym sessions, and occasional flights, so solid ANC is important."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you need solid ANC for noisy commutes, gym sessions, and flights. Quick question: will you be using them a lot while sweating or in the rain?"
+    },
+    {
+     "role": "user",
+     "content": "Yes — I use them for workouts and sweat a lot, and sometimes get caught in light rain, so I’d want at least basic sweat/water resistance (IPX4 or better)."
+    },
+    {
+     "role": "assistant",
+     "content": "Sweet — so you need sweat/water resistance (IPX4+). Do you take calls or use voice chat with them while commuting or working out?"
+    },
+    {
+     "role": "user",
+     "content": "Yes — I take calls frequently while commuting and during workouts, so a reliable mic that handles wind and sweat is important."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Mic: Needed in mind.\nQuick recap: Connection: Wireless, Fit: In-ear, Price: $60–80, Noise cancelling (ANC): Needed, Water/sweat resistance: Needed, Mic: Needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Go with this — nothing changed. I’d also prefer a sleek black finish and a lightweight protective case, plus battery life that fits charging the case about once a week."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n11 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.519
+   }
+  },
+  {
+   "scenario_id": "c4-1859",
+   "system": "llm",
+   "target_id": "B09C1F6F4K",
+   "recommended": [
+    "B09QXRC471",
+    "B082NBLZQQ",
+    "B09NNH8R8X"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 5,
+   "confirms": 0,
+   "attribute_match": 0.8,
+   "judge": {
+    "fit": 3,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations match core requirements (true wireless, ANC, mics, IPX5) and fit the budget, but the picks are very low-priced so it's unclear they offer the strong ANC, battery life, and protective case the shopper emphasized. The assistant’s questions were clear and conversational, and it asked just the right details to make targeted suggestions."
+   },
+   "seconds": 40.1,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless earbuds that sound better than AirPods but won’t cost as much."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your max budget (approx, in USD)?"
+    },
+    {
+     "role": "user",
+     "content": "About $60–$80 ideally, but I can stretch up to $100 max."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want active noise cancellation (ANC) or would you rather prioritize sound quality and battery life without ANC?"
+    },
+    {
+     "role": "user",
+     "content": "I want active noise cancellation — strong ANC is a priority for gym and commuting, but I still need decent battery life and a reliable mic."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prefer bass-heavy, punchy sound (good for workouts) or a more balanced/neutral/detail-focused sound?"
+    },
+    {
+     "role": "user",
+     "content": "I prefer bass-heavy, punchy sound for workouts, but it should still be clear enough for calls and music detail when I want it."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you need strong sweat/water resistance and a very secure fit for intense workouts (e.g., IPX5+ or ear-hooks/winged tips), or is a regular in-ear fit fine?"
+    },
+    {
+     "role": "user",
+     "content": "I need good sweat/water resistance and a very secure fit for intense workouts—ideally IPX5+ or ear-wings/secure tips so they won’t fall out during cardio."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want fully wireless earbuds (no wires at all) or would you be okay with a neckband-style Bluetooth earbud for better battery and fit?"
+    },
+    {
+     "role": "user",
+     "content": "Fully wireless only — I hate dealing with cables during workouts and daily use."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless earbuds ANC bass-heavy secure fit IPX5+ good mic for workouts under $100\n1. Motorola Moto Buds-S ANC - True Wireless Bluetooth Earbuds with Microp\n2. SuperEQ Q2 Pro Hybrid Wireless Active Noise Cancelling Earbuds, Blueto\n3. HTC True Wireless Earbuds Plus - ANC, Active Noise Cancellation IPX5 W"
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless earbuds ANC bass-heavy secure fit IPX5+ good mic for workouts under $100",
+    "target_in_candidates": false
+   }
+  },
+  {
+   "scenario_id": "c4-1859",
+   "system": "random",
+   "target_id": "B09C1F6F4K",
+   "recommended": [
+    "B0B99PPD7B",
+    "B0C7K451Y1",
+    "B09TFM1SFQ"
+   ],
+   "rank_pct": 1.037,
+   "target_rank": 48,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 5,
+    "efficiency": 5,
+    "comment": "Recommendations match core preferences (wireless in‑ear, ANC, sweat resistance, reliable mic, within $60–$100). Missing explicit details on battery life and case color/options, which the shopper cared about, so not a perfect match."
+   },
+   "seconds": 80.9,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless earbuds that sound better than AirPods but won’t cost as much."
+    },
+    {
+     "role": "assistant",
+     "content": "Hey — wireless in-ear earbuds, got it. Budget: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "60+ — aiming for around $60–$80 (max $100)."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice, so you're aiming around $60–$80 (up to $100). Will you be wearing them for sweaty workouts or outdoor runs, or mostly for commuting/using at a desk?"
+    },
+    {
+     "role": "user",
+     "content": "Both — I’ll use them for sweaty gym workouts and outdoor runs, plus commuting and some desk time. I need them to handle sweat and stay secure while moving."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so they need to handle sweat and stay secure while moving. Do you plan to take phone calls or talk through them while running or commuting?"
+    },
+    {
+     "role": "user",
+     "content": "Yes — I take calls frequently while running and commuting, so a reliable microphone is important."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you need a reliable mic for calls while running and commuting. When you're out running or on the commute, do you want them to block out surrounding noise so you can focus, or let in outside sounds so you can stay aware?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly block out noise so I can focus, but I'd like a quick transparency/ambient mode option for when I need to hear traffic or announcements."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Noise cancelling (ANC): Needed in mind.\nQuick recap: Connection: Wireless, Fit: In-ear, Price: $60–100, Water/sweat resistance: Needed, Mic: Needed, Noise cancelling (ANC): Needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "All good — nothing changed; also prefer a sleek black finish and a lightweight protective case (bonus if the case has an easy-to-spot color option)."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n26 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.929
+   }
+  },
+  {
+   "scenario_id": "c4-19122",
+   "system": "ig",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B07ZWJR9GD",
+    "B0C5H9XMS8",
+    "B0852HR3MW"
+   ],
+   "rank_pct": 3.025,
+   "target_rank": 140,
+   "questions": 3,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations generally match the shopper’s core constraints (true wireless, price, mic, sweat resistance, charging case) though product descriptions don’t explicitly confirm comfort/secure fit. The chat tone was friendly and clarification-focused, and the bot asked only useful questions to narrow choices."
+   },
+   "seconds": 102.6,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for bluetooth earbuds that are comfortable and come with a charging case."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — wireless in-ear earbuds, got it. What's your budget: under $20, around $20–$60, or $60 and up?"
+    },
+    {
+     "role": "user",
+     "content": "Around $20–$60 — ideally more like $15–25 and definitely under $30."
+    },
+    {
+     "role": "assistant",
+     "content": "Sweet, aiming for about $15–25, got it. Do you plan to use them a lot on noisy commutes/gyms or mostly at home/in quiet spots?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly for workouts and commuting — gyms and noisy commutes, but also for watching videos when I’m out or between tasks."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — gyms and noisy commutes, so active noise cancelling and sweat resistance would be good. Will you be using them to take calls/talk a lot, or mostly just for listening and videos?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly occasional calls — I need a clear built-in mic, but I don’t care about ANC; sweat/water resistance is important."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Mic: Needed, Noise cancelling (ANC): Doesn't matter in mind.\nQuick recap: Connection: Wireless, Fit: In-ear, Price: $15–25, Noise cancelling (ANC): Doesn't matter, Water/sweat resistance: Needed, Mic: Needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That looks right — go with that, and make sure they’re truly wireless with a compact charging case, easy Bluetooth pairing, solid sound + clear mic, and sweat/water resistance."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n246 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 1.491
+   }
+  },
+  {
+   "scenario_id": "c4-19122",
+   "system": "llm",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B09JSLH3H1",
+    "B0BX6N7VG5",
+    "B0C747Q3K1"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 3,
+   "confirms": 0,
+   "attribute_match": 0.8333333333333334,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations mostly match the hidden preferences (true wireless in-ear, sweat resistance, charging case, and price range), with the JLab pick especially good. Minor issues: one listing had incorrect/unclear features and another is slightly over the ideal $15–25 target. Conversation tone was natural and the bot asked the right focused questions."
+   },
+   "seconds": 35.7,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for bluetooth earbuds that are comfortable and come with a charging case."
+    },
+    {
+     "role": "assistant",
+     "content": "Great—one quick question: what’s your budget range (under $50, $50–$150, $150–$300, or no limit)?"
+    },
+    {
+     "role": "user",
+     "content": "Under $50—ideally around $15–25."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you need them to be sweat/water-resistant for workouts, or is casual everyday use (at home/commuting) fine?"
+    },
+    {
+     "role": "user",
+     "content": "Yes—I need them to be sweat/water-resistant for workouts, not just casual use."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prefer stability features like ear-hooks/wingtips for workouts, or are regular in-ear/stay-put buds okay?"
+    },
+    {
+     "role": "user",
+     "content": "Regular in-ear/stay-put buds are fine — I prefer a snug seal that stays comfortable during runs without hooks or wings."
+    },
+    {
+     "role": "assistant",
+     "content": "wireless Bluetooth earbuds sweat-resistant snug in-ear with charging case $15–$25\n1. JLab Go Air Pop True Wireless Bluetooth Earbuds + Charging Case | Rose\n2. TUOTUER Wireless Earbuds Bluetooth 50H Playtime IPX4 Rating Sweat Wate\n3. yobola Wireless Earbuds, Bluetooth Earbuds in Ear Deep Bass HiFi Stere"
+    }
+   ],
+   "extra": {
+    "search_query": "wireless Bluetooth earbuds sweat-resistant snug in-ear with charging case $15–$25",
+    "target_in_candidates": false
+   }
+  },
+  {
+   "scenario_id": "c4-19122",
+   "system": "random",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B07ZWJR9GD",
+    "B0C68LS4MX",
+    "B08F9MR75J"
+   ],
+   "rank_pct": 3.22,
+   "target_rank": 149,
+   "questions": 3,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 5,
+    "efficiency": 5,
+    "comment": "Recommendations match most hard constraints (price, sweat resistance, in‑ear, mic) but key specifics the shopper cared about — truly wireless/size of the compact case, proven comfort/fit and call‑mic clarity — are unclear from the picks. The assistant’s tone and question flow were natural and it asked the right focused questions without repetition."
+   },
+   "seconds": 75.5,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for bluetooth earbuds that are comfortable and come with a charging case."
+    },
+    {
+     "role": "assistant",
+     "content": "Sweet — wireless in-ear earbuds with a charging case, got it. Will you be using them for sweaty workouts or in the rain, or mostly just at home/while commuting?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly for sweaty workouts and commuting — I need sweat/rain resistance so they don’t fall apart during runs or rainy rides. I’ll also use them for videos and occasional calls."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you want sweat/rain‑resistant earbuds with a mic for sweaty runs and commuting. Rough budget: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$20–$60 — I’m aiming for about $15–$25 but can stretch up to $30 if it means better fit and mic quality."
+    },
+    {
+     "role": "assistant",
+     "content": "Ah, so you're aiming for about $15–30, got it. When you're on sweaty runs or commuting, do you want them to block out background noise so you can focus, or let in outside sound so you're aware of traffic?"
+    },
+    {
+     "role": "user",
+     "content": "I prefer staying aware of traffic — don’t want full active noise cancelling; a good seal for music is fine but not isolation that blocks outside sound completely."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Noise cancelling (ANC): Not needed in mind.\nQuick recap: Connection: Wireless, Fit: In-ear, Water/sweat resistance: Needed, Mic: Needed, Price: $15–30, Noise cancelling (ANC): Not needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That sounds right — go with that. Just make sure the case is compact and they pair easily."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n194 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 1.34
+   }
+  },
+  {
+   "scenario_id": "c4-219",
+   "system": "ig",
+   "target_id": "B0BW3ZQJXY",
+   "recommended": [
+    "B09HVHMFDC",
+    "B0BNC1QBH6",
+    "B079MSMRDF"
+   ],
+   "rank_pct": 0.475,
+   "target_rank": 22,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations match the shopper’s key constraints (wireless, on‑ear, comfortable/lightweight, built‑in mic, $50–80). Mic quality and noise rejection aren’t clearly stated for all picks, so I held back from a perfect score. The chat felt friendly and asked the right targeted questions without unnecessary repetition."
+   },
+   "seconds": 86.7,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for a wireless headset for my laptop for work."
+    },
+    {
+     "role": "assistant",
+     "content": "Hey—so wireless is the plan, and sounds like you need something with a mic. Do you want something tiny you can pop in and forget, or something that sits over your ears for all-day comfort while you work?"
+    },
+    {
+     "role": "user",
+     "content": "I'd prefer something that sits over the ears for all-day comfort — a lightweight on-ear style I can wear for multihour work shifts, and it needs a solid built-in mic."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you want a lightweight on‑ear headset for multihour laptop work with a solid built‑in mic. What's your budget: under $20, $20–$60, or $60 and up?"
+    },
+    {
+     "role": "user",
+     "content": "60 and up — I’m aiming for about $50–$70 (max $80)."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you’re aiming for about $50–$80. When you work, is it usually a noisy office/cafe or a quiet home setup?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly a quiet home setup — occasional background noise from roommates/kids but usually pretty quiet."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you mostly work at home and don’t need active noise cancelling. Do you keep the headset mainly at your desk, or do you carry it around/take it outside or use it near kids/chores where it might get wet or dirty?"
+    },
+    {
+     "role": "user",
+     "content": "Mainly keep it at my desk — I’ll rarely carry it around the house and won’t be using it outdoors, and it won’t get wet though it might see the occasional grubby hands from kids."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Water/sweat resistance: Not needed in mind.\nQuick recap: Connection: Wireless, Mic: Needed, Fit: On-ear, Price: $50–80, Noise cancelling (ANC): Not needed, Water/sweat resistance: Not needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Yep, that’s right — nothing changed. Prioritize a lightweight wireless on‑ear with a clear built‑in mic and comfy fit for multihour desk use, $50–$80."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n15 products fit what you said equally well, so I ordered them by how close they are to what you described.\nSome product listings don't mention Water/sweat resistance, so I couldn't check that.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.346
+   }
+  },
+  {
+   "scenario_id": "c4-219",
+   "system": "llm",
+   "target_id": "B0BW3ZQJXY",
+   "recommended": [
+    "B09N769WKV",
+    "B0CF1RZ9PW",
+    "B09WN758N2"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 4,
+   "confirms": 0,
+   "attribute_match": 0.75,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations miss key hidden preferences: the top pick is over-ear (not on-ear) and mic/USB‑dongle certification details are unclear, so they don’t reliably meet the buyer’s priorities. The assistant’s tone and question flow were natural and it asked only the needed targeted questions."
+   },
+   "seconds": 38.1,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for a wireless headset for my laptop for work."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want a headset optimized primarily for calls (reliable wireless connection, strong mic/boom or ANC, Teams/Zoom certified) or a general-purpose pair that’s also good for music and casual use?"
+    },
+    {
+     "role": "user",
+     "content": "Primarily optimized for calls — reliable wireless and a strong mic (preferably boom or good noise rejection) are my top priorities, though it should still sound decent for music and casual gaming."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you need a dedicated USB dongle/USB-C receiver (for the most reliable PC connection and certified call support) or is plain Bluetooth fine?"
+    },
+    {
+     "role": "user",
+     "content": "I’d prefer a dedicated USB dongle/USB-C receiver — I want the most reliable PC connection and stronger mic/certified call support even if it’s still wireless."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prefer a full over-ear headset, an on-ear style, or a single-ear (mono) headset for calls?"
+    },
+    {
+     "role": "user",
+     "content": "On-ear style — I want something light that sits on my ears without pinching so I can wear it comfortably for long shifts."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your budget (approx range in USD) for the headset?"
+    },
+    {
+     "role": "user",
+     "content": "Around $50–$70 ideally, but I can stretch up to $80 max."
+    },
+    {
+     "role": "assistant",
+     "content": "on-ear wireless headset USB dongle noise-cancelling boom mic Teams/Zoom certified lightweight under 80 dollars\n1. COOSII P80C Bluetooth Headphones Wireless with Dual Microphone with V5\n2. LEVN Bluetooth 5.0 Headset, Wireless Headset with Microphone (AI Noise\n3. Bluetooth Headset with Microphone, Wireless Headphones with Noise Canc"
+    }
+   ],
+   "extra": {
+    "search_query": "on-ear wireless headset USB dongle noise-cancelling boom mic Teams/Zoom certified lightweight under 80 dollars",
+    "target_in_candidates": true
+   }
+  },
+  {
+   "scenario_id": "c4-219",
+   "system": "random",
+   "target_id": "B0BW3ZQJXY",
+   "recommended": [
+    "B09HVHMFDC",
+    "B00HX0RTKO",
+    "B07PXGDCZJ"
+   ],
+   "rank_pct": 0.389,
+   "target_rank": 18,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "Recommendations mostly match key constraints (wireless, price, on-ear) and #1 is reasonable, but #2 is clearly a kids’ model (wrong audience/fit) and #3 is actually over-ear — so overall fit is only moderate. The chatbot’s tone was friendly and conversational, though it repeated the price preference a couple times. It asked useful clarifying questions without being overly long, aside from one redundant recap."
+   },
+   "seconds": 112.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for a wireless headset for my laptop for work."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice, so you want a wireless headset for work. About what price — under $20, $20–$60, or $60 and up?"
+    },
+    {
+     "role": "user",
+     "content": "$60 and up — I’m aiming for something around $50–$70, but can stretch into the $60+ category for a good mic and comfy fit."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you're aiming for around $50–$70, can stretch into $60+ for a good mic and comfy fit. Think you'll mostly wear it at your desk, or out commuting/walking where sweat or rain could be an issue?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly at my desk and at home for gaming — I won’t be commuting or sweating in it, so weather resistance isn’t a big concern."
+    },
+    {
+     "role": "assistant",
+     "content": "Cool — so water/sweat resistance isn’t needed. Is your place usually quiet when you game/work, or is there a lot of background noise?"
+    },
+    {
+     "role": "user",
+     "content": "Usually pretty quiet at home — mostly calm, though sometimes there's occasional background noise like the TV or family in another room."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so it's mostly calm at home with just occasional TV or family noise. When you wear them for long gaming/work sessions at your desk, would you rather tiny buds that sit in your ear, lighter pads that rest on the ear, or big cushy cups that fully enclose your ears?"
+    },
+    {
+     "role": "user",
+     "content": "Lighter pads that rest on the ear — I want something lightweight and breathable for long sessions, not big over-ears or in-ear buds."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Fit: On-ear in mind.\nQuick recap: Connection: Wireless, Mic: Needed, Price: $50–70, Water/sweat resistance: Not needed, Noise cancelling (ANC): Not needed, Fit: On-ear. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Yep, that’s right — wireless on-ear, good mic, comfy for long wear, $50–70, no ANC or water resistance needed."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n13 products fit what you said equally well, so I ordered them by how close they are to what you described.\nSome product listings don't mention Water/sweat resistance, so I couldn't check that.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.303
+   }
+  },
+  {
+   "scenario_id": "c4-2622",
+   "system": "ig",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B0BLLCVJQZ",
+    "B0BQ3P4NDX",
+    "B0B5PL6HV9"
+   ],
+   "rank_pct": 2.463,
+   "target_rank": 114,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 3,
+    "efficiency": 5,
+    "comment": "Recommendations match the core technical requirements (truly wireless, mic, sweat resistance, and within budget), but they don’t address the shopper’s emphasis on reliable customer service/brand support or long‑term durability. The chatbot’s tone felt a bit repetitive with the “Nice — …” phrasing, though the dialog efficiently gathered the needed details."
+   },
+   "seconds": 85.6,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "I'm looking for earbuds to use during workouts and everyday listening."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so in-ear earbuds and you’ll want water/sweat resistance. Roughly what price range are you thinking: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "Under $20 if possible, though I can stretch up to around $25 if it means noticeably better quality."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so about $25 max. For workouts, do you want to move totally without any cord to your phone, or do you usually keep your phone nearby and don’t mind a cord?"
+    },
+    {
+     "role": "user",
+     "content": "Totally wireless — I want truly cord-free buds for runs and gym sessions so nothing tugs while I move."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — totally cord‑free so nothing tugs while you move. When running or at the gym, do you want to stay aware of traffic/people around you, or would you rather block out outside noise?"
+    },
+    {
+     "role": "user",
+     "content": "I prefer to stay aware of traffic/people while running—don’t need ANC, just enough ambient sound to stay safe."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you want to stay aware of traffic and people while running. Do you ever take calls or reply by voice while wearing them, or just listen?"
+    },
+    {
+     "role": "user",
+     "content": "Yes—I take calls and reply by voice during workouts, so a reliable built‑in mic is important."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Mic: Needed in mind.\nQuick recap: Fit: In-ear, Water/sweat resistance: Needed, Price: up to $25, Connection: Wireless, Noise cancelling (ANC): Not needed, Mic: Needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That all looks right — nothing’s changed, go ahead with those specs."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n165 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 1.037
+   }
+  },
+  {
+   "scenario_id": "c4-2622",
+   "system": "llm",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B07F6PJBGN",
+    "B0BYGXF4TN",
+    "B07PZF3QLP"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 3,
+   "confirms": 0,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations align well with the shopper’s core needs (true wireless, secure fit, sweat resistance, microphone, and the $10–25 budget). The list doesn’t address brand reliability/customer service or explicitly confirm IPX ratings and long-term durability, so I withheld a perfect score."
+   },
+   "seconds": 31.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "I'm looking for earbuds to use during workouts and everyday listening."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want true wireless (completely cable-free) earbuds or are wired/neckband-style earbuds okay?"
+    },
+    {
+     "role": "user",
+     "content": "I want true wireless earbuds—completely cable-free—neckbands or wired styles aren’t okay for my runs and workouts."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your budget (pick a range): under $50, $50–150, $150–300, or $300+?"
+    },
+    {
+     "role": "user",
+     "content": "Under $50 — I’m aiming for something in the $10–25 range that’s durable and reliable for daily workouts."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you need a very secure fit (ear fins/wings or ear hooks) for intense runs, or are standard in-ear tips fine?"
+    },
+    {
+     "role": "user",
+     "content": "I need a very secure fit—ear fins or wings (or hooks) are preferred so they stay put during intense runs and workouts."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless earbuds sweatproof IPX4+ ear fins wings secure fit under $25\n1. Jaybird RUN True Wireless Headphones for Running, Secure Fit, Sweat-Pr\n2. JLab Fit 2.0 Bluetooth Enabled Wireless Sports Earbuds | Bluetooth 4.1\n3. Altec Lansing MZX635 True Wireless Earbuds, True Connect Truly Wireles"
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless earbuds sweatproof IPX4+ ear fins wings secure fit under $25",
+    "target_in_candidates": false
+   }
+  },
+  {
+   "scenario_id": "c4-2622",
+   "system": "random",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B0B5PL6HV9",
+    "B0BLLCVJQZ",
+    "B07PP4JXXS"
+   ],
+   "rank_pct": 1.945,
+   "target_rank": 90,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 0.8333333333333334,
+   "judge": {
+    "fit": 3,
+    "naturalness": 3,
+    "efficiency": 4,
+    "comment": "Recommendations mostly match requirements (in-ear, mic, sweat resistance, price), but #1 is ambiguous about being truly wireless and none of the picks or commentary address customer-service/durability preference. Tone was friendly but a bit repetitive; the bot asked the right questions efficiently."
+   },
+   "seconds": 209.7,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "I'm looking for earbuds to use during workouts and everyday listening."
+    },
+    {
+     "role": "assistant",
+     "content": "Hey — in-ear, and sounds like you’ll want them sweat-resistant for workouts. Do you take calls or use voice apps while exercising, or mostly just listen?"
+    },
+    {
+     "role": "user",
+     "content": "I use them every day for workouts and casual listening and I do take calls/use voice apps while exercising, so a built-in mic is a must — plus they need to be sweat-resistant."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — built-in mic and sweat-resistant for workouts, gotcha. When you work out, do you prefer no cables getting in the way even if you have to charge them, or something that never needs charging so you don’t worry about battery?"
+    },
+    {
+     "role": "user",
+     "content": "I prefer truly wireless in-ear buds — I don't want cables getting in the way during runs or gym sessions, even if that means having to charge them."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — truly wireless so no cables getting in the way, got it. When you’re running or at the gym, do you want to still hear traffic and people around you or would you rather tune that out?"
+    },
+    {
+     "role": "user",
+     "content": "I want to still hear traffic and people around me for safety, so I don’t need active noise cancellation—ambient awareness is fine."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — you want to still hear traffic and people, so ANC isn't needed. What's your budget: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$20–$60 — I’m aiming around $10–25, so that range fits best."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Price: $10–25 in mind.\nQuick recap: Fit: In-ear, Water/sweat resistance: Needed, Mic: Needed, Connection: Wireless, Noise cancelling (ANC): Not needed, Price: $10–25. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That looks right — no changes; just add that good customer service and long-term durability matter to me as well."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n149 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.951
+   }
+  },
+  {
+   "scenario_id": "c4-3095",
+   "system": "ig",
+   "target_id": "B09DB8XK9Y",
+   "recommended": [
+    "B0BNJNLDQX",
+    "B0BRL5KJ96",
+    "B077378YSS"
+   ],
+   "rank_pct": 0.173,
+   "target_rank": 8,
+   "questions": 3,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Fit is poor because the recommendations lack clear evidence they provide a secure, small‑tip in‑ear fit and wind‑resistant mics for running; the items are generic and don’t justify the runner‑specific needs. The chatbot’s tone and flow were natural and it summarized well, and it asked the right targeted questions efficiently."
+   },
+   "seconds": 154.6,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless in‑ear earbuds that won't bounce out while I run."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — wireless in‑ear for running, so sweat resistance sounds needed. Budget: under $20, $20–60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$20–60 — ideally around $40–60, and they should be sweat/water resistant."
+    },
+    {
+     "role": "assistant",
+     "content": "So you're aiming for about $40–60. When you run, is it usually on noisy streets with traffic and people or on quieter trails where you need to hear what's around?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly noisy streets with traffic and people, so I need earbuds that get loud and clear enough to hear music over traffic while still letting me stay aware of my surroundings."
+    },
+    {
+     "role": "assistant",
+     "content": "So ANC isn't needed since you want to stay aware of traffic. Do you ever take calls or talk on the phone while you're running?"
+    },
+    {
+     "role": "user",
+     "content": "Yes — I take calls while running, so I need earbuds with a reliable built‑in mic that keeps my voice clear even with wind and movement."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Mic: Needed in mind.\nQuick recap: Connection: Wireless, Fit: In-ear, Water/sweat resistance: Needed, Price: $40–60, Noise cancelling (ANC): Not needed, Mic: Needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That sounds right — go with those specs. One extra thing: I have relatively small ear canals, so they must come with small and secure silicone tips (I already use the largest inserts that still fit me)."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n80 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.324
+   }
+  },
+  {
+   "scenario_id": "c4-3095",
+   "system": "llm",
+   "target_id": "B09DB8XK9Y",
+   "recommended": [
+    "B0BJ4DB69X",
+    "B0B9HR3T4B",
+    "B0945XDDS7"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 4,
+   "confirms": 0,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "Recommendations partially match (waterproof, budget-friendly, mics) but miss key preferences: user wanted true wireless and explicit small‑ear tip/secure‑fit info and transparency/pass‑through. Conversation tone was natural and questions efficient, though one recommended model (earhook) contradicts the true‑wireless requirement."
+   },
+   "seconds": 44.8,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless in‑ear earbuds that won't bounce out while I run."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want true wireless (completely cable-free) earbuds, or are you okay with earbuds that have a neckband/ear hooks for extra security?"
+    },
+    {
+     "role": "user",
+     "content": "True wireless only — completely cable‑free. They still need to stay put during runs, though, so they should have a secure fit for small ear canals."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your budget (rough range in USD or your local currency)?"
+    },
+    {
+     "role": "user",
+     "content": "About $40–$60 USD."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want active noise cancellation (ANC), or would you prefer an ambient/transparency mode so you can hear traffic while you run?"
+    },
+    {
+     "role": "user",
+     "content": "I don’t need ANC — in fact I’d prefer an ambient/transparency mode (or at least good pass‑through/mic pickup) so I can hear traffic and stay safe while running."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want a high waterproof/sweat rating (like IPX6–IPX7) for heavy sweating and rain, or is basic sweat resistance (IPX4) enough?"
+    },
+    {
+     "role": "user",
+     "content": "I’d prefer a high rating (IPX6–IPX7) so they survive heavy sweating and running in the rain."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless earbuds secure fit for small ears wing/ear‑stabilizers IPX6–IPX7 transparency/pass‑through mode good mic for running under $60\n1. iLuv myPods Small Ear Wireless Earbuds, Bluetooth 5.3, Microphone, 21 \n2. iLuv myBuds Fit Sports Wireless Earbuds, Secure Earhooks, Bluetooth, M\n3. SOUL S-FIT True Wireless Earbuds - Waterproof, Shock-Resistant Earphon"
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless earbuds secure fit for small ears wing/ear‑stabilizers IPX6–IPX7 transparency/pass‑through mode good mic for running under $60",
+    "target_in_candidates": true
+   }
+  },
+  {
+   "scenario_id": "c4-3095",
+   "system": "random",
+   "target_id": "B09DB8XK9Y",
+   "recommended": [
+    "B09DB8XK9Y",
+    "B0BC82D47P",
+    "B077378YSS"
+   ],
+   "rank_pct": 0.022,
+   "target_rank": 1,
+   "questions": 3,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 5,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "Recommendations match the shopper’s priorities very well (small‑ear focused model #1, sweat resistance, mic, right price). The chat felt friendly and clarifying, though it repeated the calls question once. It asked a minimal set of useful questions to reach good picks without unnecessary detail."
+   },
+   "seconds": 71.7,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless in‑ear earbuds that won't bounce out while I run."
+    },
+    {
+     "role": "assistant",
+     "content": "Hey — wireless in‑ear for running, so sweat‑resistance is a must. Do you take calls or talk to your phone while you run, or just listen?"
+    },
+    {
+     "role": "user",
+     "content": "I do take calls and talk to my phone while I run, so a reliable mic is important to me. I mostly need earbuds that stay put, are sweat‑resistant, and have clear, loud sound."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — you take calls while running, so a reliable mic is needed. When you run, do you want the earbuds to block out traffic/road noise or let you stay aware of your surroundings?"
+    },
+    {
+     "role": "user",
+     "content": "I want to stay aware of my surroundings — no active noise cancelling; I just need loud, clear sound but still be able to hear traffic."
+    },
+    {
+     "role": "assistant",
+     "content": "Okay — no ANC; you want to hear traffic. Budget: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$20–$60 — ideally around $40–$60."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Price: $40–60 in mind.\nQuick recap: Connection: Wireless, Fit: In-ear, Water/sweat resistance: Needed, Mic: Needed, Noise cancelling (ANC): Not needed, Price: $40–60. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "All good — nothing changed. Just remember I have relatively small ear canals and prefer the largest silicone tips that still fit for a snug seal."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n80 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.324
+   }
+  },
+  {
+   "scenario_id": "c4-3295",
+   "system": "ig",
+   "target_id": "B0B38WLYJ7",
+   "recommended": [
+    "B077MGVZZ4",
+    "B0BNJNLDQX",
+    "B09DB8XK9Y"
+   ],
+   "rank_pct": 1.577,
+   "target_rank": 73,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 5,
+    "efficiency": 5,
+    "comment": "The bot asked the right targeted questions and narrowed choices well, but the top picks don’t strongly address key hidden preferences (rose-pink aesthetic, clear mention of stable small-ear fit, easy charging case/usability, and the shopper’s preferred $30–$40 sweet spot). Overall reasonable but could better match those specifics."
+   },
+   "seconds": 75.1,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for comfortable, good-looking earbuds that actually stay in my small ears."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice, so in-ear earbuds that fit small ears and feel comfy. Roughly what’s your budget — under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "Definitely in the $20–$60 range — I’m most comfortable around $30–$40 but could stretch up to $60 for a really good deal."
+    },
+    {
+     "role": "assistant",
+     "content": "Sweet, so you're aiming for around $30–$60. Do you mostly use them on the go or sitting at home?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly on the go — I use them for workouts, walks, and commuting, so they need to stay put and handle sweat."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — they need to handle sweat and actually stay put in your small ears. When you’re commuting or on walks, do you want them to mostly block out outside noise or let you stay aware of traffic and people?"
+    },
+    {
+     "role": "user",
+     "content": "I want to stay aware of traffic and people — so not full noise cancelling, just a bit of passive isolation without shutting out the world."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you want to hear traffic, not full noise cancelling. Do you take calls on the go or just listen?"
+    },
+    {
+     "role": "user",
+     "content": "Yeah, I take calls on the go — need a reliable built-in mic for commuting and the occasional call during workouts."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Mic: Needed in mind.\nQuick recap: Fit: In-ear, Price: $30–60, Connection: Wireless, Water/sweat resistance: Needed, Noise cancelling (ANC): Not needed, Mic: Needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Yep, that all sounds right — nothing changed, go ahead with those specs."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n169 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.13
+   }
+  },
+  {
+   "scenario_id": "c4-3295",
+   "system": "llm",
+   "target_id": "B0B38WLYJ7",
+   "recommended": [
+    "B0BJ4DB69X",
+    "B09C91JMFG",
+    "B09RYHL2HC"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 5,
+   "confirms": 0,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 5,
+    "efficiency": 4,
+    "comment": "Recommendations largely match key preferences (true wireless, small-ear focus, IPX4+ and within budget), with the top pick especially strong; however listings lack confirmation of foam tips and color/aesthetic options. The chatbot's questioning flowed naturally and was efficient, though the product list was a bit repetitive and missing some detail on comfort/fit features."
+   },
+   "seconds": 42.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for comfortable, good-looking earbuds that actually stay in my small ears."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want true wireless (completely cord-free) earbuds, or would you prefer wired/neckband-style earbuds?"
+    },
+    {
+     "role": "user",
+     "content": "Definitely true wireless—completely cord-free. I hate dealing with cables and need them to stay put in my small ears during workouts."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your budget (or a price range) for these true wireless earbuds?"
+    },
+    {
+     "role": "user",
+     "content": "I’m price-conscious — ideally $30–40, but I could stretch up to $60 for a really great value."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you need sweat/water resistance (e.g., IPX4 or higher) for workouts?"
+    },
+    {
+     "role": "user",
+     "content": "Yes—definitely need sweat/water resistance for workouts, at least IPX4 or higher."
+    },
+    {
+     "role": "assistant",
+     "content": "Which matters most to you: active noise cancelling (ANC), call/mic quality for calls, or secure fit + sound for workouts?"
+    },
+    {
+     "role": "user",
+     "content": "Secure fit and good sound for workouts are the top priority — they need to stay put in my small ears and sound great while I move. Call/mic quality is important but secondary, and ANC isn’t a must."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prefer earbuds with ear fins/wings/hooks for extra grip, or foam (memory foam) tips—or either is fine?"
+    },
+    {
+     "role": "user",
+     "content": "I’d prefer foam (memory foam) tips since they seal better in small ears and feel more comfortable for long workouts, though I’m okay with fins if they’re very low-profile."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless earbuds memory foam tips small ears secure fit IPX4+ workout good sound under $60\n1. iLuv myPods Small Ear Wireless Earbuds, Bluetooth 5.3, Microphone, 21 \n2. PHILIPS T2236 True Wireless Headphones with IPX4 Water Resistance and \n3. PHILIPS T2206 True Wireless Headphones with IPX4 Water Resistance and "
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless earbuds memory foam tips small ears secure fit IPX4+ workout good sound under $60",
+    "target_in_candidates": false
+   }
+  },
+  {
+   "scenario_id": "c4-3295",
+   "system": "random",
+   "target_id": "B0B38WLYJ7",
+   "recommended": [
+    "B0C87Y22S8",
+    "B09V71BPJK",
+    "B09QM2BYCP"
+   ],
+   "rank_pct": 2.852,
+   "target_rank": 132,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 0.8333333333333334,
+   "judge": {
+    "fit": 3,
+    "naturalness": 3,
+    "efficiency": 4,
+    "comment": "Recommendations match core specs (price, wireless in-ear, ANC, mic, sweat resistance) but lack evidence they’ll fit small ears, stay put, or come in the rose‑pink/attractive design the shopper values. Chat felt friendly but a bit repetitive, and the bot asked relevant questions efficiently without unnecessary ones."
+   },
+   "seconds": 145.0,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for comfortable, good-looking earbuds that actually stay in my small ears."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you want in-ear earbuds that actually stay in your small ears. Which price range works for you: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$20–$60 — ideally around $30–40, but I can stretch up to $60 if it’s a standout pair."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so about $30–40 is your sweet spot. When you wear them, are you usually on noisy buses/trains/streets or mostly at home/quiet spots?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly noisy — I use them on public transit, streets, and at the gym, so background noise is common."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — active noise cancelling and sweat/water resistance would be good for transit and gym. Do you often need to take calls or use voice chat while wearing them?"
+    },
+    {
+     "role": "user",
+     "content": "Yes — I take calls often and need a dependable built-in mic for clear voice pickup during workouts and on the go."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you need a dependable built-in mic for clear calls during workouts and on the go. Do you mind having to charge the buds and skip a cable, or would you rather plug them straight into your phone so you never deal with batteries?"
+    },
+    {
+     "role": "user",
+     "content": "I don’t want cables — I’m happy to charge wireless buds so I get freedom while active. Just want easy pairing and a reliable charging case/battery so it’s not a hassle."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Connection: Wireless in mind.\nQuick recap: Fit: In-ear, Price: $30–40, Noise cancelling (ANC): Needed, Water/sweat resistance: Needed, Mic: Needed, Connection: Wireless. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That’s right — keep all that (in-ear, wireless, ANC, sweat resistance, good mic) and no changes."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n12 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 1.966
+   }
+  },
+  {
+   "scenario_id": "c4-5123",
+   "system": "ig",
+   "target_id": "B0BPT4JYXW",
+   "recommended": [
+    "B0BJDNMHJ5",
+    "B08VRLZGMF",
+    "B09F3H9RRY"
+   ],
+   "rank_pct": 10.933,
+   "target_rank": 506,
+   "questions": 2,
+   "confirms": 2,
+   "attribute_match": 0.6666666666666666,
+   "judge": {
+    "fit": 4,
+    "naturalness": 5,
+    "efficiency": 5,
+    "comment": "Recommendations match the shopper’s openness to open-ear/bone-conduction and cover sweat resistance and mic needs, but the list lacks explicit battery-life and fit/stability details for #1 which the shopper prioritized. The chat flow was friendly and clear, and the agent asked the key constraints efficiently."
+   },
+   "seconds": 96.9,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "I need lightweight running headphones that won’t fall out and are easy to carry."
+    },
+    {
+     "role": "assistant",
+     "content": "Ah, so you're after lightweight wireless in-ear headphones with sweat resistance. Budget—under $20, $20–60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$60+ — I want something durable and stable for long sweaty runs with solid battery life and a built-in mic."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you’re set on $60+ earbuds with a built-in mic for long sweaty runs. When you run, do you need to stay aware of traffic/people, or do you want to block outside noise to focus?"
+    },
+    {
+     "role": "user",
+     "content": "I need to stay aware of traffic and people — I prefer being able to hear my surroundings rather than full noise cancellation."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Noise cancelling (ANC): Not needed in mind.\nQuick recap: Fit: In-ear, Connection: Wireless, Water/sweat resistance: Needed, Price: $60+, Mic: Needed, Noise cancelling (ANC): Not needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That’s right — stick with that; also open to open/conduction styles as long as they’re stable, lightweight, and sweat-resistant."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Fit: In-ear or Open-ear (bone conduction etc.) in mind.\nQuick recap: Fit: In-ear or Open-ear (bone conduction etc.), Connection: Wireless, Water/sweat resistance: Needed, Price: $60+, Mic: Needed, Noise cancelling (ANC): Not needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Looks good — go with that; prioritize secure/stable fit, good IP sweat rating, long battery life, and a reliable mic for calls."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n86 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 16.357
+   }
+  },
+  {
+   "scenario_id": "c4-5123",
+   "system": "llm",
+   "target_id": "B0BPT4JYXW",
+   "recommended": [
+    "B094DZMY2Q",
+    "B07J4QRB8L",
+    "B07GZBMZP8"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 5,
+   "confirms": 0,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations generally match the shopper’s priorities (earhook/stable option first, sweat resistance, long battery), though two Jaybird picks aren’t clearly earhook/winged and one is dated—so not perfect. The chatbot asked the right focused questions and used them to narrow to an appropriate budget and style."
+   },
+   "seconds": 39.2,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "I need lightweight running headphones that won’t fall out and are easy to carry."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prefer fully wireless true wireless earbuds, earhooks/winged sport earbuds, or open-ear bone-conduction headphones?"
+    },
+    {
+     "role": "user",
+     "content": "I’d prefer earhooks/winged sport earbuds for the best stability during runs, but I’m also open to open‑ear bone‑conduction if they’re lightweight, sweat‑resistant, and stay put."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your budget (rough range in USD)?"
+    },
+    {
+     "role": "user",
+     "content": "I’m looking to spend around $100–$250."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prioritize situational awareness (hearing traffic/ambient sounds) over music isolation and sound quality?"
+    },
+    {
+     "role": "user",
+     "content": "Yes—I prioritize situational awareness for safety on runs, but I still want decent sound quality rather than terrible audio."
+    },
+    {
+     "role": "assistant",
+     "content": "Would you rather maximize situational awareness even if music quality is a bit lower (bone‑conduction), or keep better music quality with still reasonable awareness (earhook/winged)?"
+    },
+    {
+     "role": "user",
+     "content": "I’d rather keep better music quality with reasonable situational awareness—so earhook/winged sport earbuds are my first choice (bone‑conduction only if they’re super comfortable and stay put)."
+    },
+    {
+     "role": "assistant",
+     "content": "How long are your typical runs (approx. minutes/hours), and do you need very long battery life (8+ hours) or is ~6–8 hours fine?"
+    },
+    {
+     "role": "user",
+     "content": "My usual runs are about 45–90 minutes (occasionally up to 2 hours), and I prefer 8+ hours battery so I don’t have to worry if I forget to turn them off."
+    },
+    {
+     "role": "assistant",
+     "content": "earhook winged sport earbuds lightweight sweatproof IPX7 stable for running 8+ hour battery good sound under $250\n1. TREBLAB X3-Pro - Wireless Earbuds with Earhooks - 45H Playtime, aptX, \n2. Jaybird Tarah Pro Wireless Bluetooth In-Ear Headphones with Microphone\n3. Jaybird X4 Wireless Bluetooth Headphones for Sport, Fitness and Runnin"
+    }
+   ],
+   "extra": {
+    "search_query": "earhook winged sport earbuds lightweight sweatproof IPX7 stable for running 8+ hour battery good sound under $250",
+    "target_in_candidates": false
+   }
+  },
+  {
+   "scenario_id": "c4-5123",
+   "system": "random",
+   "target_id": "B0BPT4JYXW",
+   "recommended": [
+    "B0BJDNMHJ5",
+    "B08VRLZGMF",
+    "B09F3H9RRY"
+   ],
+   "rank_pct": 20.83,
+   "target_rank": 964,
+   "questions": 5,
+   "confirms": 1,
+   "attribute_match": 0.6666666666666666,
+   "judge": {
+    "fit": 4,
+    "naturalness": 5,
+    "efficiency": 5,
+    "comment": "Recommendations mostly match the runner’s preferences (open/bone‑conduction, sweatproof, true wireless, mic, $60+), though stability details aren’t explicit. The conversation felt natural and the bot asked targeted, non‑redundant questions."
+   },
+   "seconds": 190.1,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "I need lightweight running headphones that won’t fall out and are easy to carry."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you want in‑ear ones that won’t fall out and are sweatproof. When you run, do you usually stash your phone on you (pocket/belt) or leave it behind?"
+    },
+    {
+     "role": "user",
+     "content": "I usually stash my phone on me—usually in my pocket or a small running belt."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you keep your phone on you in a pocket or small running belt. When you run, do you want to stay aware of traffic/people around you or tune them out and just hear your music?"
+    },
+    {
+     "role": "user",
+     "content": "I prefer to stay aware of traffic and people around me, so I lean toward open or bone‑conduction styles that don’t block everything out."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — open/bone‑conduction so you stay aware and don’t want ANC. Do you ever take calls or talk through them while running, or just listen to music/podcasts?"
+    },
+    {
+     "role": "user",
+     "content": "Yeah, I take occasional calls while running, so a built‑in mic that stays clear during movement is a must."
+    },
+    {
+     "role": "assistant",
+     "content": "Gotcha — so you need a built‑in mic that stays clear while you move. Rough budget: under $20, about $20–$60, or $60 and up?"
+    },
+    {
+     "role": "user",
+     "content": "About $60 and up — willing to spend more for something durable, sweatproof, and with good battery life."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you’re fine spending $60+ for something durable, sweatproof, and with long battery. Quick one: when you run, do you want no cords at all for total freedom, or a cable so the pieces stay physically connected?"
+    },
+    {
+     "role": "user",
+     "content": "No cords at all — I want true wireless for total freedom while I run."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Connection: Wireless in mind.\nQuick recap: Fit: Open-ear (bone conduction etc.), Water/sweat resistance: Needed, Noise cancelling (ANC): Not needed, Mic: Needed, Price: $60+, Connection: Wireless. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Yep, that’s right — open/bone‑conduction, sweatproof, wireless true‑wireless, built‑in mic, $60+, no ANC. Go ahead with that."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n7 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 28.241
+   }
+  },
+  {
+   "scenario_id": "c4-5173",
+   "system": "ig",
+   "target_id": "B09M85WPFM",
+   "recommended": [
+    "B0C828DZXX",
+    "B07YD2XPF3",
+    "B0B7P9R373"
+   ],
+   "rank_pct": 0.13,
+   "target_rank": 6,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "Recommendations miss key preferences: #1 is bone-conduction/open-ear (not on-ear) and unlikely to deliver the rich, punchy music sound you want; #2 (adidas RPT-01) is the best fit for gym/on-ear/sweat resistance; #3 (Sennheiser RS 120-W) looks like TV/listening headphones and isn’t suitable for active use. The chat flow itself was friendly and asked the right questions, but the product choices don’t reliably address sound quality, style, long battery life, or simple power controls."
+   },
+   "seconds": 86.5,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless headphones I can wear to the gym and on walks."
+    },
+    {
+     "role": "assistant",
+     "content": "Hey! Wireless is a must, and sounds like you want water/sweat resistance. Roughly what's your budget—under $20, $20–60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "Definitely $60+ — and yes, sweat/water resistance matters for gym use."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — so you've got $60+ to spend. For gym and walks, do you want them to tuck into your ear, sit on/over your ear, or leave your ear more open?"
+    },
+    {
+     "role": "user",
+     "content": "Sit on the ear — on-ear wireless headphones are what I prefer."
+    },
+    {
+     "role": "assistant",
+     "content": "On-ear's the move, got it — fits gym and walks. Do you want them to block outside noise so it's just your music, or let in sounds so you're aware of traffic?"
+    },
+    {
+     "role": "user",
+     "content": "Let some sound in — I want to stay aware of traffic and surroundings, so ambient awareness is fine and I don’t need active noise cancelling."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — you want ambient awareness, so you don't need active noise cancelling. When you're walking or at the gym, do you take calls or use voice controls a lot, or mostly just listen to music?"
+    },
+    {
+     "role": "user",
+     "content": "Mostly just music — I only take the occasional call, so great sound is the priority, not mic/chat features."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Mic: Not needed in mind.\nQuick recap: Connection: Wireless, Water/sweat resistance: Needed, Price: $60+, Fit: On-ear, Noise cancelling (ANC): Not needed, Mic: Not needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Go with it — nothing’s changed. Just keep in mind I also prefer long battery life and simple power controls rather than fiddly knobs."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\nSome product listings don't mention Mic, Water/sweat resistance, so I couldn't check that.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 0.065
+   }
+  },
+  {
+   "scenario_id": "c4-5173",
+   "system": "llm",
+   "target_id": "B09M85WPFM",
+   "recommended": [
+    "B0BCQ3TW3Y",
+    "B08HYXQQNR",
+    "B08LMMWY91"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 5,
+   "confirms": 0,
+   "attribute_match": 0.75,
+   "judge": {
+    "fit": 1,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "Recommendations poorly match the shopper’s preferences: they asked for wireless on-ear headphones with transparency mode, 24+ hour battery, IPX4 sweat resistance, punchy sound, and simple power controls. The three picks include over-ear and in-ear models, mislabel ANC needs, and don’t clearly meet transparency, battery, or sweat-resistance requirements. The conversation tone was reasonably natural, and the bot asked the right targeted questions without unnecessary repetition, but the final product choices didn’t align."
+   },
+   "seconds": 42.3,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless headphones I can wear to the gym and on walks."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prefer true wireless earbuds (in-ear) or over-ear/on-ear headphones?"
+    },
+    {
+     "role": "user",
+     "content": "I prefer wireless on-ear headphones — easy to slip on for short outings and lightweight for the gym/walks. I also want richer, punchier sound than typical tiny in-ear buds."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your budget (give a price range or max)?"
+    },
+    {
+     "role": "user",
+     "content": "I'm aiming for around $100–$250 — willing to spend more if the battery life and sound quality are clearly worth it."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want active noise cancellation (ANC) for quieter workouts, or would you prefer ambient/safety features (transparency mode or pass-through) so you can hear surroundings on walks?"
+    },
+    {
+     "role": "user",
+     "content": "I don’t need ANC — I prefer ambient/safety features (transparency/pass-through) so I can hear traffic and surroundings on walks."
+    },
+    {
+     "role": "assistant",
+     "content": "What's the minimum battery life per charge you want (in hours)?"
+    },
+    {
+     "role": "user",
+     "content": "Minimum 20 hours per charge — ideally 24+ so I don’t have to charge often."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you need sweat/water resistance (like IPX4 or higher) for workouts, or is a non-rated pair okay?"
+    },
+    {
+     "role": "user",
+     "content": "Yes — I need sweat/water resistance for workouts, at least IPX4 or better."
+    },
+    {
+     "role": "assistant",
+     "content": "wireless on-ear headphones transparency/pass-through mode 24+ hour battery IPX4 sweat-resistant punchy bass $100–$250\n1. Avantree Duet - Dual Wireless Headphones for TV Watching with Transmit\n2. 233621 Hush Active Noise Cancelling Headphones with Microphone [100 Hr\n3. JLab Epic ANC Earbuds | Active Noise Canceling | Be Aware Audio | Blue"
+    }
+   ],
+   "extra": {
+    "search_query": "wireless on-ear headphones transparency/pass-through mode 24+ hour battery IPX4 sweat-resistant punchy bass $100–$250",
+    "target_in_candidates": false
+   }
+  },
+  {
+   "scenario_id": "c4-5173",
+   "system": "random",
+   "target_id": "B09M85WPFM",
+   "recommended": [
+    "B0C691CH99",
+    "B07DQ184X7",
+    "B0B5FYNZSJ"
+   ],
+   "rank_pct": 1.361,
+   "target_rank": 63,
+   "questions": 4,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "The bot asked the right clarifying questions and prioritized key needs, but the top recommendations are bone-conduction/open-ear models (not the headband on-ear style the shopper requested) and don’t address battery life, standout color, or simple power controls—so fit to the hidden preferences is poor."
+   },
+   "seconds": 77.0,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for wireless headphones I can wear to the gym and on walks."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice, wireless and sweatproof then. At the gym, do you prefer tiny buds tucked into your ear, a headband-style that sits over your ears, or something that leaves your ear canal open?"
+    },
+    {
+     "role": "user",
+     "content": "Headband-style on-ear headphones — I prefer something that sits over the ears (wireless and sweatproof) rather than tiny in-ear buds or open-ear."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice — headband-style on-ear that sits over your ears. What's your budget: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$60+ — I want good, punchy sound, standout color, and long battery life so I’m willing to spend more."
+    },
+    {
+     "role": "assistant",
+     "content": "Sweet — you want punchy sound, a standout color, and long battery life. When you wear them walking or at the gym, do you take phone calls or use voice chat?"
+    },
+    {
+     "role": "user",
+     "content": "Yeah, I take calls occasionally on walks and at the gym — not heavy talk time, but mic quality should be decent and controls easy to use."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you need a decent mic for occasional calls on walks and at the gym. When you’re out walking or working out, do you want to hear outside sounds like traffic and people, or would you rather most outside noise be cut out?"
+    },
+    {
+     "role": "user",
+     "content": "I want to hear outside sounds — ambient awareness is fine, I don’t need heavy noise cancelling."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Noise cancelling (ANC): Not needed in mind.\nQuick recap: Connection: Wireless, Water/sweat resistance: Needed, Fit: On-ear, Price: $60+, Mic: Needed, Noise cancelling (ANC): Not needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Looks good — that’s exactly what I want. One more thing: prefer simple, easy-to-use power controls (not a fiddly knob)."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n13 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 1.016
+   }
+  },
+  {
+   "scenario_id": "c4-6486",
+   "system": "ig",
+   "target_id": "B08K2S5B88",
+   "recommended": [
+    "B0C1B774YQ",
+    "B0BLMTGL9H",
+    "B0C281ZXVZ"
+   ],
+   "rank_pct": 3.003,
+   "target_rank": 139,
+   "questions": 3,
+   "confirms": 1,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 5,
+    "efficiency": 5,
+    "comment": "The assistant asked the right, relevant questions and summarized naturally/clearly, but the recommendations miss the shopper’s key preference for over‑the‑head headphones (they’re earbuds/ear‑hooks), so fit is poor despite matching other specs."
+   },
+   "seconds": 57.8,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for over-the-head Bluetooth headphones I can use at the gym."
+    },
+    {
+     "role": "assistant",
+     "content": "Cool — over-ear Bluetooth for the gym, so sounds like you’ll want them to handle sweat. Roughly what’s your budget: under $20, $20–$60, or $60+?"
+    },
+    {
+     "role": "user",
+     "content": "$20–$60 — want something affordable but not the absolute cheapest so it’s reliable and can handle gym sweat."
+    },
+    {
+     "role": "assistant",
+     "content": "Sweet, $20–$60 and sweat-proof for gym use makes sense. At the gym, do you want to still hear coaches/announcements and people, or would you rather tune everything out while you work out?"
+    },
+    {
+     "role": "user",
+     "content": "I’d prefer to still hear coaches/announcements and nearby people a bit — don’t want total isolation while I’m lifting or spotting."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it — you want to hear coaches and people, so ANC’s not needed. Do you take calls while working out?"
+    },
+    {
+     "role": "user",
+     "content": "Yeah, occasionally take calls or use voice assistant between sets, so a decent built-in mic is important but I’m not on calls nonstop."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Mic: Needed in mind.\nQuick recap: Fit: Over-ear, Connection: Wireless, Water/sweat resistance: Needed, Price: $20-60, Noise cancelling (ANC): Not needed, Mic: Needed. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Yep, that’s right — stick with those specs and you’re good to go."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n61 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 2.636
+   }
+  },
+  {
+   "scenario_id": "c4-6486",
+   "system": "llm",
+   "target_id": "B08K2S5B88",
+   "recommended": [
+    "B0C7V6PQ5D",
+    "B0C5XB5P4B",
+    "B01AKSJUH0"
+   ],
+   "rank_pct": null,
+   "target_rank": null,
+   "questions": 4,
+   "confirms": 0,
+   "attribute_match": 0.6,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 5,
+    "comment": "Recommendations poorly matched key preferences (two items contradict the over-ear requirement and one lists ANC despite user saying they don’t want it). The chat flow was natural and asked the right targeted questions without unnecessary repetition."
+   },
+   "seconds": 44.1,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for over-the-head Bluetooth headphones I can use at the gym."
+    },
+    {
+     "role": "assistant",
+     "content": "What's your budget (approximate maximum you're willing to spend)?"
+    },
+    {
+     "role": "user",
+     "content": "Around $60–80 max."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you want active noise cancelling (ANC) for blocking gym noise, or would you prefer to be able to hear your surroundings (ambient/awareness mode)?"
+    },
+    {
+     "role": "user",
+     "content": "I don’t need ANC — I’d rather be able to hear my surroundings (awareness mode or no heavy isolation)."
+    },
+    {
+     "role": "assistant",
+     "content": "Is sweat/water resistance (IPX4 or higher) and a secure, stay-put fit important for your workouts?"
+    },
+    {
+     "role": "user",
+     "content": "Secure, stay-put fit is important for workouts; sweat resistance would be nice but not required—IPX4 isn’t a must."
+    },
+    {
+     "role": "assistant",
+     "content": "Do you prefer over-ear (full ear cups that cover the ears) or on-ear (smaller pads that sit on the ears) for comfort while working out?"
+    },
+    {
+     "role": "user",
+     "content": "Over-ear full ear cups — they’re more comfortable for my gym sessions, as long as they’re lightweight and stay put."
+    },
+    {
+     "role": "assistant",
+     "content": "over-ear Bluetooth headphones lightweight secure fit sweat-resistant no ANC awareness mode under $80\n1. Srhythm NC25 Wireless Headphones Bluetooth 5.3,Lightweight Noise Cance\n2. V8 Wireless Bluetooth Headphones Over Ear, 80 Hours Playtime Wireless \n3. Soundbot SB221 HD Wireless Bluetooth 4.0 Sports-Active Headphones for "
+    }
+   ],
+   "extra": {
+    "search_query": "over-ear Bluetooth headphones lightweight secure fit sweat-resistant no ANC awareness mode under $80",
+    "target_in_candidates": false
+   }
+  },
+  {
+   "scenario_id": "c4-6486",
+   "system": "random",
+   "target_id": "B08K2S5B88",
+   "recommended": [
+    "B09BPN2Q2N",
+    "B0BLMTGL9H",
+    "B08VZ2X1H9"
+   ],
+   "rank_pct": 1.772,
+   "target_rank": 82,
+   "questions": 2,
+   "confirms": 3,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 3,
+    "efficiency": 2,
+    "comment": "Recommendations match core constraints (wireless, over-head, mic, budget) but lack clear confirmation of lightweight/foldable design and secure gym fit; one pick (HP 500) seems more office-focused. The chatbot felt somewhat natural but repeated many recap questions, making the interaction less efficient."
+   },
+   "seconds": 78.9,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "Looking for over-the-head Bluetooth headphones I can use at the gym."
+    },
+    {
+     "role": "assistant",
+     "content": "Nice, wireless over-ear for the gym—got it. When you work out, is the gym usually loud with machines and people, or pretty quiet and chill?"
+    },
+    {
+     "role": "user",
+     "content": "Usually moderately noisy — machines and people chatting, but not deafening; I don’t need heavy ANC, just enough isolation to focus and take a quick call."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it—moderate gym noise, so light ANC/isolation should be enough. Quick one—what price range are you thinking: under $20, $20–$60, or $60 and up?"
+    },
+    {
+     "role": "user",
+     "content": "$20–$60 — I want a budget, reliable wireless over-ear that’s lightweight and stays put for workouts."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Price: $20-60 in mind.\nQuick recap: Connection: Wireless, Fit: Over-ear, Water/sweat resistance: Needed, Noise cancelling (ANC): Needed, Mic: Needed, Price: $20-60. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "Change a couple things: ANC isn’t necessary—light isolation is fine—and sweat resistance is preferred (not strict), otherwise keep wireless over-ear with a mic in the $20–$60 range."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Noise cancelling (ANC): Not needed in mind.\nQuick recap: Connection: Wireless, Fit: Over-ear, Water/sweat resistance: Needed, Noise cancelling (ANC): Not needed, Mic: Needed, Price: $20-60. Should I go with this, or has anything changed?"
+    },
+    {
+     "role": "user",
+     "content": "That’s right — wireless over-ear with a mic in $20–$60, ANC not needed; sweat resistance is a preference but not a must."
+    },
+    {
+     "role": "assistant",
+     "content": "Got it, I'll keep Water/sweat resistance: Doesn't matter in mind.\nLast check: Connection: Wireless, Fit: Over-ear, Water/sweat resistance: Doesn't matter, Noise cancelling (ANC): Not needed, Mic: Needed, Price: $20-60. Shall I go with this?"
+    },
+    {
+     "role": "user",
+     "content": "Yes — go with that. Just keep them lightweight, foldable, and with simple onboard controls so they stay put and are easy to use between sets."
+    },
+    {
+     "role": "assistant",
+     "content": "Great, here's what I picked with those conditions.\n201 products fit what you said equally well, so I ordered them by how close they are to what you described.\nAnything else to consider or change? (e.g. something cheaper, not #1)"
+    }
+   ],
+   "extra": {
+    "rank_pct_no_text": 1.621
+   }
+  }
+ ]
+}
