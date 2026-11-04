@@ -1,0 +1,2247 @@
+{
+ "id": 3,
+ "created_at_utc": "2026-10-30 19:32:09",
+ "status": "done",
+ "config": {
+  "systems": [
+   "ig",
+   "random",
+   "llm"
+  ],
+  "scenario_ids": [
+   "c4-19122",
+   "c4-3095",
+   "c4-219",
+   "c4-6486",
+   "c4-5173",
+   "c4-5123",
+   "c4-3295",
+   "c4-2622",
+   "c4-15205",
+   "c4-1859"
+  ]
+ },
+ "summary": {
+  "ig": {
+   "episodes": 10,
+   "errors": 0,
+   "recommended": 10,
+   "rank_pct_mean": 8.565,
+   "rank_pct_median": 5.79,
+   "rank_pct_mean_no_text": null,
+   "rank_pct_median_no_text": null,
+   "attribute_match": 0.83,
+   "questions": 5.2,
+   "fit": 2,
+   "naturalness": 3.3,
+   "efficiency": 2.4,
+   "seconds": 80.0
+  },
+  "llm": {
+   "episodes": 10,
+   "errors": 0,
+   "recommended": 10,
+   "rank_pct_mean": null,
+   "rank_pct_median": null,
+   "rank_pct_mean_no_text": null,
+   "rank_pct_median_no_text": null,
+   "attribute_match": 0.806,
+   "questions": 4.6,
+   "fit": 2.6,
+   "naturalness": 3.5,
+   "efficiency": 2.9,
+   "seconds": 42.19
+  },
+  "random": {
+   "episodes": 10,
+   "errors": 0,
+   "recommended": 10,
+   "rank_pct_mean": 3.14,
+   "rank_pct_median": 2.15,
+   "rank_pct_mean_no_text": null,
+   "rank_pct_median_no_text": null,
+   "attribute_match": 0.858,
+   "questions": 5,
+   "fit": 2.4,
+   "naturalness": 3.5,
+   "efficiency": 2.6,
+   "seconds": 80.07
+  }
+ },
+ "episodes": [
+  {
+   "scenario_id": "c4-15205",
+   "system": "ig",
+   "target_id": "B0BR8VH914",
+   "recommended": [
+    "B07PGR1KF9",
+    "B07QS1ZZJM",
+    "B0C8NTQS7Y"
+   ],
+   "target_rank": 199,
+   "questions": 5,
+   "attribute_match": 0.8,
+   "judge": {
+    "fit": 2,
+    "naturalness": 5,
+    "efficiency": 4,
+    "comment": "챗봇은 착용감(온이어), 마이크, 무선 등 핵심 선호를 잘 파악하고 질문도 자연스럽게 이어갔음. 다만 추천 목록은 모두 ANC 제품 위주이고 가격표시가 달러($59.99 등)라 사용자의 '약 5만 원 안팎' 예산(약 $40 이하)에 맞추지 못함. 또한 사용자가 주변 소리는 들리길 원한다는 점을 반영해 ANC 대신 저음만 줄여주는 설계나 투명모드/외부소리 허용 기능을 권했어야 함. 제품 수가 비슷하고 중복 정보가 많은 것도 아쉬움."
+   },
+   "seconds": 81.9,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운전할 때 편하게 쓸 블루투스 헤드셋 보고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 운전할 때 편하게 쓰려고 무선에 마이크 있는 걸 찾는구나. 혹시 운전하면서 길 소리나 말소리도 들려야 해서 한쪽만 빼 쓰는 게 나아, 귀를 완전히 덮어서 소리를 막는 게 나아, 아니면 귀 속에 쏙 넣는 게 편해?"
+    },
+    {
+     "role": "user",
+     "content": "운전할 때 주변 소리 듣고 싶으면 귀를 완전히 덮는 건 소리 차단돼서 별로고, 귀 속에 넣는 건 더 막혀. 한쪽만 쓰는 것도 가능하지만 난 착용감 때문에 온이어(귀에 얹는) 타입이 제일 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "온이어가 제일 편하구나, 그럼 착용감 좋고 오래 쓰는 걸 선호하겠네. 혹시 한 번 사면 오래 쓰려고 좋은 걸 살래, 아니면 잃어버리거나 흠집나도 부담 적게 자주 바꾸는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "한번 사면 오래 쓰려고 좋은 걸 살래. 다만 가격은 대략 5만 원 안팎으로 가성비 좋은 걸 원해."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 한 번 사면 오래 쓰고 가성비 따지는구나, 5만 원 안팎에 내구성 좋은 걸 원하겠네. 운전할 땐 엔진이나 바람 소리 같은 건 막아주는 게 좋을까, 아니면 길 위 다른 차랑 사람 소리는 그대로 들리는 게 좋아?"
+    },
+    {
+     "role": "user",
+     "content": "길 위 사람 소리랑 차 소리는 들려야 해서 완전 차음형은 싫고, 저음(엔진·바람)만 좀 줄여주는 정도가 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "운전 위주라 차 안에서 주로 쓸 거면 물·먼지 걱정까지는 필요 없겠네. 혹시 비 오는 날 창문 열고 운전하거나 기기 밖에 자주 놔두는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "비 오는 날 창문 열고 운전하거나 기기를 차 밖에 자주 놔두는지는 잘 모르겠구나. 보통 비 맞거나 밖에 노출되는 일이 자주 있어, 아니면 대부분 차 안에 넣어두고 잘 안 나와?"
+    },
+    {
+     "role": "user",
+     "content": "대부분 차 안에 넣어두고 잘 안 나와."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 방수·방진: 불필요.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 5개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n방수·방진은(는) 일부 상품 정보에 없어서 확인 못 했어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 4.3
+  },
+  {
+   "scenario_id": "c4-15205",
+   "system": "llm",
+   "target_id": "B0BR8VH914",
+   "recommended": [
+    "B09V26K3JK",
+    "B0BFDLXDBP",
+    "B0B7L5J1QV"
+   ],
+   "target_rank": null,
+   "questions": 5,
+   "attribute_match": 0.8,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 3,
+    "comment": "적합성: 2점. 사용자는 오픈형(귀에 살짝 닿는) 넥밴드 타입, 온이어(또는 오픈형) 착용감, 양쪽 착용, 끊김 없는 연결, 좋은 마이크, ~5만 원대라는 요구를 명확히 제시했습니다. 추천된 3개 모두 인이어 타입(nearly in-ear) 넥밴드 제품으로 보이며 ‘오픈형/온이어’ 선호와 맞지 않고 제품 설명도 주변 소리 투과성·통화 음질, 착용감(온이어)에 대한 정보가 부족합니다. 가격대·넥밴드·마이크 조건은 대체로 맞을 수 있으나 핵심 선호를 충족하지 못해 낮게 평가했습니다.\n자연스러움: 4점. 챗봇의 질문 흐름은 논리적이고 사용자의 상황(운전 중 주변 소리, 통화 품질, 착용감, 예산, 폼팩터)을 잘 파악하려는 방향으로 진행됐습니다. 다만 마지막 추천 요약(키워드형 나열)과 상품 목록 제시 방식이 다소 기계적이고 정돈이 부족해 완전히 자연스럽지는 않습니다.\n효율성: 3점. 필요한 핵심 질문은 빠짐없이 물어봤고 불필요한 반복은 없었습니다. 그러나 최종 추천이 사용자의 구체적 선호(오픈형/온이어)를 반영하지 못해 효율성이 저하됐습니다 — 질문은 효율적이었으나 결과가 기대에 부합하지 않았습니다."
+   },
+   "seconds": 48.5,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운전할 때 편하게 쓸 블루투스 헤드셋 보고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "운전할 때 주변 소리(차, 사이렌 등) 잘 들리게 하는 게 중요해? 아니면 통화·음질 우선으로 소음 차단되는 걸 원해?"
+    },
+    {
+     "role": "user",
+     "content": "운전할 땐 사이렌이나 차 소리 바로 들려야 해서 주변 소리 잘 들리는 게 더 좋아. 다만 통화 음성·음질은 중요하니까 완전 차음형은 별로야."
+    },
+    {
+     "role": "assistant",
+     "content": "한쪽 귀만 쓰는 모노(싱글) 블루투스 헤드셋이 좋아? 아니면 양쪽 착용 가능한 오픈형(또는 골전도) 이어폰/헤드셋을 원해?"
+    },
+    {
+     "role": "user",
+     "content": "양쪽 착용 가능한 오픈형(또는 골전도)이 좋아. 주변 소리 잘 들리고 통화할 때도 안정적일 것 같아."
+    },
+    {
+     "role": "assistant",
+     "content": "예산은 어느 정도 생각해? (대충 가격대만: ~5만원 / ~10만원 / ~20만원 / 더 높음)"
+    },
+    {
+     "role": "user",
+     "content": "~5만원 안팎으로 가성비 좋은 제품 원해."
+    },
+    {
+     "role": "assistant",
+     "content": "골전도 쪽이 좋아? 아니면 오픈형 이어폰(귀에 살짝 닿지만 개방감 있는 타입) 중 어떤 쪽 선호해?"
+    },
+    {
+     "role": "user",
+     "content": "오픈형 이어폰(귀에 살짝 닿지만 개방감 있는 타입)이 좋아, 주변 소리 잘 들리고 착용감도 나에겐 더 맞을 것 같아."
+    },
+    {
+     "role": "assistant",
+     "content": "트루 와이어리스(선 없는 완전 무선)로 할래, 아니면 넥밴드·이어후크처럼 착용감·배터리가 안정적인 타입을 원해?"
+    },
+    {
+     "role": "user",
+     "content": "넥밴드·이어후크 같은 착용감·배터리 안정적인 타입이 좋아. 운전할 때 끊김 없고 배터리 오래가는 게 더 안심돼."
+    },
+    {
+     "role": "assistant",
+     "content": "neckband open-fit earbuds open-ear good call quality long battery stable Bluetooth ambient sound under $50\n1. Neckband Bluetooth Headphones 5.2, Around the Neck Bluetooth Headphone\n2. Neckband Bluetooth Headphones, Wireless Neckband Headset Retractable w\n3. Rythflo Bluetooth Headphones,V5.2 Wireless Bluetooth Earbuds w/Mic in-"
+    }
+   ],
+   "extra": {
+    "search_query": "neckband open-fit earbuds open-ear good call quality long battery stable Bluetooth ambient sound under $50",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-15205",
+   "system": "random",
+   "target_id": "B0BR8VH914",
+   "recommended": [
+    "B0C8CH21JM",
+    "B0CGN8RG66",
+    "B0C4NMZZQW"
+   ],
+   "target_rank": 58,
+   "questions": 5,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "챗봇이 사용자의 주요 조건(운전 중 주변 소리 허용, 온이어 선호, 방수·방진 고려, 저렴한 가격 등)은 잘 물어보고 반영했음. 다만 추천 목록이 제품 명칭(예: 'Earbuds')과 착용 방식(온이어 헤드폰)을 일치시키지 못해 사용자의 '머리 위에 얹어 쓰는 온이어' 선호를 충족하는지 불명확함. 또한 마이크 성능과 무선 연결 안정성에 대한 구체 정보(코덱, 블루투스 버전, 멀티포인트 등)가 빠져 있어 통화·연결 안정성 요구를 충분히 보장하지 못함. 이 점만 보완하면 추천의 적합도가 크게 올라감."
+   },
+   "seconds": 85.3,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운전할 때 편하게 쓸 블루투스 헤드셋 보고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 운전할 때 편하게 쓰려고 무선 헤드셋 보는구나, 그러면 차 안에서만 쓰면 방수·방진은 필요 없겠네. 혹시 비 맞거나 먼지 많은 바깥에서도 쓸 일이 있어?"
+    },
+    {
+     "role": "user",
+     "content": "응, 가벼운 운동할 때 밖에서 쓰기도 해서 비나 먼지에 노출될 가능성 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 비랑 먼지 견디는 걸로 골라야겠다. 운전할 땐 주변 소리 잘 들려야 해, 아니면 차단돼야 해?"
+    },
+    {
+     "role": "user",
+     "content": "운전할 때는 주변 소리 잘 들려야 해, 안전 때문에 차단되면 안 돼."
+    },
+    {
+     "role": "assistant",
+     "content": "운전할 땐 주변 소리 잘 들려야 하니까 ANC는 필요 없겠네. 혹시 이어에 쏙 넣는 타입이 좋아, 아니면 머리 위에 얹어 쓰는 게 좋아?"
+    },
+    {
+     "role": "user",
+     "content": "머리 위에 얹어 쓰는 게 좋아, 착용감 좋고 온이어 타입 선호해. ANC는 필요 없어."
+    },
+    {
+     "role": "assistant",
+     "content": "온이어에 통화 잘 되고 비·먼지 버티는 가벼운 걸 찾는구나. 혹시 하루에 보통 얼마나 오래 쓰고, 잃어버리거나 망가질까 걱정돼?"
+    },
+    {
+     "role": "user",
+     "content": "하루에 보통 몇 시간 쓸지는 잘 모르겠어. 잃어버리거나 망가질까는 걱정돼."
+    },
+    {
+     "role": "assistant",
+     "content": "잃어버릴까 걱정한다 했으니, 부담 적은 걸 원하겠네. 혹시 잃어버리거나 망가졌을 때 바로 새로 사도 괜찮아, 아니면 아깝고 오래 쓰고 싶어?"
+    },
+    {
+     "role": "user",
+     "content": "바로 새로 사도 괜찮아, 비싸지 않은 가성비 좋은 걸로 사고 싶어. 오래 쓰면 좋겠지만 잃어버릴까봐 부담 적은 게 더 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 가격대: $20~60.\n더 물어봐도 후보가 크게 안 줄어서, 지금 조건으로 골라 봤어.\n말해 준 조건으로는 31개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 1.253
+  },
+  {
+   "scenario_id": "c4-1859",
+   "system": "ig",
+   "target_id": "B09C1F6F4K",
+   "recommended": [
+    "B0CFYCGPVM",
+    "B0CK78QNCX",
+    "B0C87Y22S8"
+   ],
+   "target_rank": 572,
+   "questions": 4,
+   "attribute_match": 0.8333333333333334,
+   "judge": {
+    "fit": 1,
+    "naturalness": 4,
+    "efficiency": 2,
+    "comment": "챗봇은 사용시간·예산·운동·방수·통화 요구 등 핵심 조건들을 적절히 질문해 숨겨진 선호를 잘 파악했음(자주 하는 야외 러닝, 방수, 통화 마이크, 1~3시간/일·케이스로 일주일 등). 말투와 대화 흐름도 자연스럽고 친근함. 다만 추천 목록이 사용자의 기대(에어팟보다 더 나은 음질, 효과적인 ANC, 신뢰할 수 있는 통화 마이크, 안정적인 착용감, 검증된 방수·케이스 배터리 성능, 최대 약 7만원대)와 거의 맞지 않음. 제시된 제품들은 가격이 낮고 브랜드·성능 근거가 불명확하며 운동용 착용 안정성·마이크 성능·실제 ANC 성능에 관한 구체한 정보가 없어 실사용자 요구를 충족시키지 못함. 질문 단계는 효율적이었으나, 추천 단계에서 품질 검증·우선순위 반영이 부족해 효율성이 떨어짐."
+   },
+   "seconds": 66.2,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "에어팟보다 음질 좋고 노캔 잘되는 무선 이어버드 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 에어팟보다 음질 좋고 노캔 잘되는 무선 인이어 찾는구나, 그럼 성능에 좀 투자하려는 거네. 혹시 평소에 하루에 몇 시간 정도 쓰는 편이야, 출퇴근·비행처럼 매일 오래 쓰는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "보통 하루 1~3시간 정도 써, 출퇴근이나 운동 위주라 매일 오래 쓰진 않아. 케이스로 한 번 충전해 일주일 버티면 좋겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "운동 위주라 케이스 충전으로 일주일 버티면 딱일 것 같네. 혹시 이어폰 살 때 보통 얼마까지 쓰는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "보통 7만 원 안팎까지 생각해, 성능에 좀 투자하려는 편이야. 검은색 깔끔한 디자인 선호하고 케이스 색상 옵션 있으면 더 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 7만 원 안팎에 깔끔한 검은색 선호구나. 혹시 운동할 땐 주로 헬스장 같은 실내에서만 써, 아니면 비 맞거나 땀 많이 나는 야외 러닝도 자주 해?"
+    },
+    {
+     "role": "user",
+     "content": "야외 러닝도 자주 해, 땀 많이 나거나 약간 비 맞아도 되는 방수는 있으면 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "야외 러닝 자주 하고 땀·비 걱정까지 있으니 운동 중에도 전화 받을 일 있으면 통화 잘되는 제품이 좋겠네. 혹시 운동할 때 이어폰으로 전화 받거나 음성메시지 자주 보내?"
+    },
+    {
+     "role": "user",
+     "content": "가끔 운동 중에 통화하거나 음성메시지 보내, 그래서 통화용 마이크 성능 좋은 게 중요해."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 마이크: 필요.\n더 물어봐도 후보가 크게 안 줄어서, 지금 조건으로 골라 봤어.\n말해 준 조건으로는 21개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 12.36
+  },
+  {
+   "scenario_id": "c4-1859",
+   "system": "llm",
+   "target_id": "B09C1F6F4K",
+   "recommended": [
+    "B09D2VM367",
+    "B08C5HFL69",
+    "B0BR2BKYBK"
+   ],
+   "target_rank": null,
+   "questions": 4,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 3,
+    "efficiency": 2,
+    "comment": "추천이 사용자 선호를 충분히 반영하지 못함. 운동용으로 ‘착용 안정성(활동 중 빠지지 않음)’과 통화용 마이크 성능, 한 번 충전으로 일주일을 버티는 배터리(케이스 포함)를 중시한다고 했는데, 제시된 항목들이 이 조건을 명확히 충족하지 않음. 예: Galaxy Buds Live는 오픈형(운동 시 착용 안정성 낮음)이고 가격이 예산(약 $50~60 / 7만 원 안팎)을 조금 넘음. MANKIW 같은 저가형은 음질·마이크·ANC 성능과 착용 안정성에 대한 신뢰성이 낮음. 챗봇의 질문 흐름은 기본적인 선호(예산, 우선순위, 기기 종류)를 잘 물어 자연스럽지만, 추천 후 항목 설명이 부정확하거나 누락(배터리 지속시간, 방수·핏 정보, 색상 옵션 등)을 보완하지 않아 효율성이 떨어짐. 개선: 운동용에 맞춘 ‘핏’(실리콘 훅/윙 포함)과 IP 등급, 실제 ANC 성능 비교, 통화 마이크 리뷰, 케이스로 며칠 충전 가능한지 명시해 추천 1순위로 제시할 것."
+   },
+   "seconds": 37.0,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "에어팟보다 음질 좋고 노캔 잘되는 무선 이어버드 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "예산 어느 정도 생각해? (대략 한국 원화 / 달러 중 하나로 알려줘)"
+    },
+    {
+     "role": "user",
+     "content": "대략 7만원 안팎 생각하고 있어. 달러로는 대략 50~60달러 정도면 될 것 같아."
+    },
+    {
+     "role": "assistant",
+     "content": "ANC(노캔) 성능을 최우선으로 할래, 아니면 음질(사운드)이 최우선이야?"
+    },
+    {
+     "role": "user",
+     "content": "ANC를 최우선으로 할게. 다만 음질은 에어팟보다 좋아야 해."
+    },
+    {
+     "role": "assistant",
+     "content": "주로 안드로이드 써? 아이폰(아이패드/맥) 써?"
+    },
+    {
+     "role": "user",
+     "content": "아이폰을 주로 써. 아이폰 즉시 연결 안 돼도 괜찮아."
+    },
+    {
+     "role": "assistant",
+     "content": "음색은 베이스 강한 펀한 사운드 좋아해, 아니면 중립·해상력 좋은 소리(밸런스/디테일) 좋아해?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어. 다만 음질은 에어팟보다 좋아야 해."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless earbuds active noise cancelling better sound than AirPods under $60 iPhone compatible\n1. LG TONE-FP5 TONE Free True Wireless Bluetooth Earbuds FP5 - Active Noi\n2. Samsung Galaxy Buds-Live Active Noise-Cancelling Wireless Bluetooth 5.\n3. Hybrid Active Noise Cancelling Wireless Earbuds, in Ear Bluetooth 5.3 "
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless earbuds active noise cancelling better sound than AirPods under $60 iPhone compatible",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-1859",
+   "system": "random",
+   "target_id": "B09C1F6F4K",
+   "recommended": [
+    "B0CFYCGPVM",
+    "B0CK78QNCX",
+    "B0BKZ5K1WP"
+   ],
+   "target_rank": 125,
+   "questions": 3,
+   "attribute_match": 0.8333333333333334,
+   "judge": {
+    "fit": 2,
+    "naturalness": 3,
+    "efficiency": 2,
+    "comment": "추천된 상품들이 금액대(약 7만 원)와 ‘에어팟보다 음질 좋고 효과적인 노캔, 통화용 마이크 성능, 운동 중 고정력, 케이스 색상 옵션, 1주일 무충전 사용(하루 1–3시간 기준)’ 같은 핵심 숨겨진 선호를 충족하지 못합니다. 제품들이 저가 브랜드·모델로 보이고 상세한 스펙(실제 ANC 성능, 마이크 품질, 착용 안정성, 케이스 보호성/색상, 배터리 지속시간 검증)이 부족해 신뢰하기 어렵습니다. 대화 흐름은 비교적 자연스러웠으나 가격 우선순위를 잘못 해석한 점과 불필요하게 후보 수가 많다고만 알린 뒤 품질 확인 없이 저가 모델을 내놓은 점에서 효율성이 떨어집니다. 개선 제안: 신뢰되는 브랜드(예: Jabra, Sony, Anker Soundcore 등)에서 ANC·마이크·착용감·배터리 정보가 명확한 모델로 3~5개 수준의 후보를 제시하고, 가격 범위(약 7만 원), 검은색/기타 케이스색 옵션, 방수 등급(IP) 등을 우선 필터링해 주세요."
+   },
+   "seconds": 55.1,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "에어팟보다 음질 좋고 노캔 잘되는 무선 이어버드 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오케이, 그럼 무선 인이어에 노캔 잘되고 음질 좋은 걸 원하구나. 혹시 주로 어디서 어떤 상황에서 쓸 거야?"
+    },
+    {
+     "role": "user",
+     "content": "주로 출퇴근할 때랑 운동하면서 쓸 거야. 활동 중에도 잘 빠지지 않고 안정적으로 붙어있어야 해."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 출퇴근이랑 운동 둘 다면 땀·충격에도 견디는 게 필요하겠구나. 혹시 이어폰 보통 오래 쓰는 편이야, 한 번 사면 몇 년 쓰는 스타일이야, 아니면 자주 바꾸는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "오케이, 가격은 신경 안 써도 되겠다. 혹시 출퇴근이나 운동 중에 전화 받거나 음성으로 얘기할 일 자주 있어?"
+    },
+    {
+     "role": "user",
+     "content": "응, 출퇴근이나 운동 중에 전화나 음성통화 할 일이 꽤 있어서 마이크 성능이 좋은 게 중요해."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 마이크: 필요.\n더 물어봐도 후보가 크게 안 줄어서, 지금 조건으로 골라 봤어.\n말해 준 조건으로는 63개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 2.701
+  },
+  {
+   "scenario_id": "c4-19122",
+   "system": "ig",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B0BX2XGPYZ",
+    "B0C6QK341D",
+    "B0C3R3CYM1"
+   ],
+   "target_rank": 47,
+   "questions": 4,
+   "attribute_match": 0.8571428571428571,
+   "judge": {
+    "fit": 3,
+    "naturalness": 5,
+    "efficiency": 4,
+    "comment": "전반적으로 조건(운동용 방수·충격, 휴대용 케이스, ANC 불필요, 가격대 제한)에 맞는 제품들을 골라왔으나 부족한 점이 있음. 추천 제품들이 방수 등급(IPX7 등)과 가격 범주를 어느 정도 충족하지만(표기된 가격이 USD라 환율·통화 단위 혼동 가능), 착용감(귀에 잘 맞고 편한지), 블루투스 페어링의 쉬움, 통화 음질(마이크 성능)과 음질에 대한 구체적 정보가 제품 설명에 없어 숨겨진 선호를 충분히 만족한다고 보기 어렵습니다. 챗봇은 대화 흐름과 질문 선택이 자연스럽고 효율적이었으나, 최종 추천에 페어링 쉬움·마이크 통화 품질·착용감 등 핵심 요소의 근거를 제시하지 않아 신뢰도를 더 높일 수 있었을 것 같습니다."
+   },
+   "seconds": 65.2,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동용으로 쓸 무선 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오 운동할 때 쓸 거면 땀이나 충격에 강한 게 필요하겠다. 혹시 운동할 때 거의 매일 오래 쓰는 편이야, 아니면 가끔 쓰거나 잃어버려도 부담 없는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "거의 매일 오래 써서 땀·비·충격에 강했으면 좋겠고 휴대용 케이스는 꼭 필요해. 잃어버려도 큰 부담은 아닌 편이지만 가능한 오래 쓰고 싶어."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 매일 오래 쓰니까 땀·비·충격도 견디고 케이스도 튼튼한 걸 원하겠네. 혹시 가격은 부담 적게 가서 싸게 살래, 중간 정도로 투자할래, 아니면 성능·내구 위해 좀 더 쓸 생각이야?"
+    },
+    {
+     "role": "user",
+     "content": "가격은 2만 원 안쪽으로 생각하고 있어서 부담 적게 가는 싸고 가성비 좋은 걸 원해."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 2만원 안쪽이면 가성비 위주로 골라야겠네. 혹시 운동할 때 차 소리나 사람들 소음 신경 써서 주변 소리 들려야 해, 아니면 음악에만 집중하고 싶어?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 ANC는 신경 안 써도 되겠네. 혹시 운동할 때 이어폰으로 전화 받거나 상대랑 통화 자주 해?"
+    },
+    {
+     "role": "user",
+     "content": "응, 운동하면서 통화 자주 해. 통화 잘 들리고 말소리 잘 전달되는 마이크 꼭 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 마이크: 필요.\n더 물어봐도 후보가 크게 안 줄어서, 지금 조건으로 골라 봤어.\n말해 준 조건으로는 171개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 1.016
+  },
+  {
+   "scenario_id": "c4-19122",
+   "system": "llm",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B0B725V18J",
+    "B07VPR9YDQ",
+    "B07PZF3QLP"
+   ],
+   "target_rank": null,
+   "questions": 4,
+   "attribute_match": 0.8571428571428571,
+   "judge": {
+    "fit": 3,
+    "naturalness": 3,
+    "efficiency": 3,
+    "comment": "적절히 사용자의 선호(이어훅/윙팁, TWS, IPX4, 저가대)를 확인하고 그에 맞는 스포츠형 모델들을 제시한 점은 좋습니다. 다만 추천 목록의 가격이 달러 기준으로 표기되어 있고(사용자는 2만 원 이하를 원함), 제품 상세에 마이크 성능·페어링 용이성·착용감 관련 정보가 빠져 있어(제품 설명에 없는 정보는 감점하지 않는다고 해도, 사용자가 특히 중요시한 항목임) 적합성 판단에 한계가 있습니다. 대화 흐름은 질문 위주로 자연스럽지만, 마지막 응답에 영어 키워드 문구가 섞여 있고 제품별 비교(장단점, IP 등급·케이스 유무·마이크 성능 등)가 부족해 효율성이 떨어집니다. 다음엔 가격 단위(원) 맞추기와 마이크·페어링·착용감 관련 핵심 비교를 포함하면 더 좋겠습니다."
+   },
+   "seconds": 37.8,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동용으로 쓸 무선 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "예산 얼마까지 쓸 생각이야? (원 단위 또는 대략 구간 알려줘)"
+    },
+    {
+     "role": "user",
+     "content": "2만원 안쪽으로 생각하고 있어. 대략 만 5천원~2만원 사이였으면 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "운동 중 격한 움직임에도 잘 안 빠지게 이어훅/윙팁 같은 고정형 이어폰을 원해, 아니면 일반 무선 진동형(심플한 이어버드)으로 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "이어훅/윙팁 같은 고정형이 좋아. 격한 움직임에도 잘 안 빠지고 안정적이면 편할 것 같아."
+    },
+    {
+     "role": "assistant",
+     "content": "완전 무선(TWS) 이어폰 원해, 아니면 목걸이형(넥밴드)이나 케이블 연결형도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "완전 무선(TWS) 원해. 휴대성 좋고 케이블 없어서 운동할 때 편하니까."
+    },
+    {
+     "role": "assistant",
+     "content": "땀이나 비에 자주 노출돼? IPX4(땀·가벼운 빗물) 정도면 괜찮아, 더 높은 방수(IPX7) 원해?"
+    },
+    {
+     "role": "user",
+     "content": "IPX4 정도면 괜찮아. 땀이나 가벼운 빗물 정도는 견뎌주면 돼."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless earbuds sports earhooks wingtip IPX4 budget under $20\n1. iJoy Wireless Running Headphones with Charging Case + Removable Earhoo\n2. BoomPods Boombuds Go True Wireless - Best Sports Earbuds, Bluetooth, P\n3. Altec Lansing MZX635 True Wireless Earbuds, True Connect Truly Wireles"
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless earbuds sports earhooks wingtip IPX4 budget under $20",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-19122",
+   "system": "random",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B0C6QK341D",
+    "B0C3R3CYM1",
+    "B0C6ZHNQK2"
+   ],
+   "target_rank": 26,
+   "questions": 4,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 4,
+    "efficiency": 3,
+    "comment": "챗봇이 사용자의 주요 요구(운동용, 방수, 가격대, 통화용 마이크, ANC 불필요)를 잘 물어보고 반영한 점은 좋습니다. 다만 추천 목록이 제품별로 상세한 정보(실제 방수 등급, 착용감, 페어링의 간편성, 마이크 음질 등)를 제시하지 않아 숨겨진 선호(편안한 착용감, 쉬운 페어링, 통화 품질)를 충분히 충족한다고 보기 어렵습니다. 또한 추천 항목들이 거의 중복형태로 나열돼 있어 구체적 비교나 1위 선택 이유가 부족합니다."
+   },
+   "seconds": 67.5,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동용으로 쓸 무선 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 무선 인이어로 운동용이구나! 혹시 주로 실내에서만 운동해, 아니면 땀 많이 나는 야외에서도 자주 써?"
+    },
+    {
+     "role": "user",
+     "content": "야외에서 땀 많이 흘릴 때도 자주 써, 땀이나 비에 좀 강했으면 좋겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "야외에서 땀 많이 흘린다니까 방수되는 걸 중심으로 봐야겠다. 혹시 운동 중에 전화 받거나 통화는 자주 해?"
+    },
+    {
+     "role": "user",
+     "content": "응, 운동 중에 전화 받는 편이라 통화 잘 되고 말소리도 잘 전달되는 마이크가 꼭 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "통화 잘 되는 마이크가 꼭 필요하구나, 그러면 운동할 땐 주변 소리가 들려야 안전하겠다. 혹시 운동할 때 차 소리나 사람 소리도 잘 들리는 게 좋아?"
+    },
+    {
+     "role": "user",
+     "content": "응, 주변 소리도 잘 들리는 게 좋아, 안전 때문에—액티브 노이즈 캔슬링은 별로 필요 없어."
+    },
+    {
+     "role": "assistant",
+     "content": "액티브 노캔은 별로 안 필요하구나, 주변 소리 잘 들려야겠다. 혹시 비싸도 오래 쓸 거야, 아니면 가성비로 자주 바꾸는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "가성비로 자주 바꾸는 편이야, 가격은 2만 원 안쪽으로 생각하고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 가격대: $20 미만.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 79개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 0.562
+  },
+  {
+   "scenario_id": "c4-219",
+   "system": "ig",
+   "target_id": "B0BW3ZQJXY",
+   "recommended": [
+    "B06W5DMVJB",
+    "B075NR47FN",
+    "B07CDZD8B7"
+   ],
+   "target_rank": 1561,
+   "questions": 4,
+   "attribute_match": 0.6,
+   "judge": {
+    "fit": 2,
+    "naturalness": 3,
+    "efficiency": 2,
+    "comment": "추천된 제품들은 온이어·무선·마이크 조건은 충족하지만 사용자의 핵심 선호(가성비·리뷰가 좋고 6만 원 안쪽의 합리적 가격대)를 전혀 반영하지 않았습니다. 챗봇이 금액대(사용자는 6만 원 안쪽 원함)를 잘못 해석하거나 반대로 조건을 설정(‘$60 이상’으로 표기)해 충족하지 못한 점이 크므로 적합도는 낮습니다. 대화 흐름은 비교적 자연스럽지만 금액에 대한 잘못된 추론과 불필요한 질문 반복(예: 실외 사용 여부 등)으로 효율성도 낮습니다."
+   },
+   "seconds": 65.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "노트북에서 쓸 무선 헤드셋 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "무선에 노트북에서 주로 쓰는구나, 그럼 귀를 완전히 덮는 타입이 오래 쓰기 편하겠다. 혹시 하루에 오래 앉아서 쓰거나 화상회의가 잦아?"
+    },
+    {
+     "role": "user",
+     "content": "아니, 난 온이어 타입이 더 좋아. 하루 종일 착용하고 화상회의도 자주 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "온이어에 하루종일 끼고 화상회의도 잦으니까 착용감 좋고 내구성 있는 게 낫겠다. 혹시 이거 자주 바꿔쓸 생각이야, 아니면 오래 써서 좀 더 좋은 걸로 살 생각이야?"
+    },
+    {
+     "role": "user",
+     "content": "오래 써서 내구성 좋고 편한 걸로 살 생각이야. 리뷰 좋고 가성비 좋은 모델이면 만족해."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 그럼 60달러 이상으로 오래 쓰는 튼튼한 걸로 사는구나. 근데 주로 집처럼 조용한 데서만 써, 아니면 카페나 사무실처럼 시끄러운 곳에서도 자주 써?"
+    },
+    {
+     "role": "user",
+     "content": "주로 집처럼 조용한 데서만 써."
+    },
+    {
+     "role": "assistant",
+     "content": "집에서만 쓴다니까 비나 땀 걱정은 별로 없겠다. 혹시 밖에 들고 다니거나 운동하면서 쓸 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 방수·방진: 상관없음.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 27개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 33.729
+  },
+  {
+   "scenario_id": "c4-219",
+   "system": "llm",
+   "target_id": "B0BW3ZQJXY",
+   "recommended": [
+    "B09C2P1JQL",
+    "B08M5DFXBY",
+    "B0CKPZ8FVJ"
+   ],
+   "target_rank": null,
+   "questions": 5,
+   "attribute_match": 0.6,
+   "judge": {
+    "fit": 2,
+    "naturalness": 3,
+    "efficiency": 3,
+    "comment": "추천 적합성 낮음: 사용자는 온이어(귀 덮는) 타입과 ‘붐 마이크’, 하루 종일 착용해도 편한 넉넉한 착용감, 그리고 6만 원 안쪽(원화) 가성비 좋은 제품을 원했음. 제시된 1·2번은 인이어·모노형(한쪽) 제품이고 3번은 온이어지만 ‘아이용’으로 표기되어 목적(업무용, 성인용 편안한 착용감, 붐 마이크)에 부합하지 않음. 가격 표기도 달러 기준이라 사용자의 예산(원화 6만원)과 맞지 않을 가능성이 큼.\n대화 자연스러움: 챗봇은 용도·연결 방식·마이크 종류·예산 등 핵심 질문을 잘 물어 흐름은 자연스러웠음. 다만 마지막 추천 목록이 영어 검색어·상품명 나열식으로 갑자기 제시되어 설명이 부족하고 약간 어색함.\n효율성: 필요한 정보(용도, 블루투스, 붐 마이크, 예산 등)를 효과적으로 수집해 추천에 필요한 전제는 확보했음. 하지만 그 정보에 맞는 적절한 제품을 추천하지 못해 효율이 떨어짐. 앞으로는 예산 단위(원 vs 달러) 확인과 사용자의 선호(모노 vs 스테레오, 착용감 강조)를 반영한 대체 옵션 제시가 필요함."
+   },
+   "seconds": 50.7,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "노트북에서 쓸 무선 헤드셋 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "주로 화상회의·통화용이야, 음악·영화·게임용이야, 아니면 둘다?"
+    },
+    {
+     "role": "user",
+     "content": "주로 화상회의랑 통화용이야. 가끔 음악 듣긴 해도 메인은 업무용이야."
+    },
+    {
+     "role": "assistant",
+     "content": "노트북에선 블루투스 연결을 원해? 아니면 USB 동글/무선 전용(더 안정적이고 지연 적음)을 선호해?"
+    },
+    {
+     "role": "user",
+     "content": "블루투스 연결을 원해—선 없이 쓰고 싶어."
+    },
+    {
+     "role": "assistant",
+     "content": "마이크는 붐(입 가까이) 있는 헤드셋을 원해, 아니면 일체형(통상 헤드폰처럼) 마이크도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "붐 마이크가 좋아. 목소리가 또렷하게 전달돼야 해서 입 가까운 게 더 낫다고 생각해."
+    },
+    {
+     "role": "assistant",
+     "content": "예산(원 단위 대략) 어느 정도 생각해?"
+    },
+    {
+     "role": "user",
+     "content": "대략 6만원 안쪽 생각하고 있어. 가성비 좋고 리뷰 평 좋은 제품이면 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "업무중 왼쪽/오른쪽 한쪽만 쓰는 모노(한쪽 이어컵) 타입을 원해, 아니면 양쪽 다 덮는 스테레오를 원해?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "bluetooth headset boom microphone for calls laptop noise cancelling under 60 dollars\n1. MOTOROLA Boom 3+ in-Ear Wireless Mono Headset - Black\n2. MOTOROLA MOBILE ACCESSORIES Boom 3 in-Ear Wireless Mono Alexa Enabled \n3. LEVN Wireless Headset with Microphone for PC, Bluetooth Headset with M"
+    }
+   ],
+   "extra": {
+    "search_query": "bluetooth headset boom microphone for calls laptop noise cancelling under 60 dollars",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-219",
+   "system": "random",
+   "target_id": "B0BW3ZQJXY",
+   "recommended": [
+    "B07NXDPLJ9",
+    "B0BR3NC79H",
+    "B0C746TY77"
+   ],
+   "target_rank": 4,
+   "questions": 6,
+   "attribute_match": 0.4,
+   "judge": {
+    "fit": 2,
+    "naturalness": 3,
+    "efficiency": 2,
+    "comment": "추천 결과가 사용자의 숨겨진 선호를 잘 반영하지 못합니다. 사용자는 온이어 타입(귀에 잘 맞는 착용감), 하루종일 착용해도 편한 디자인, 마이크 성능(화상회의에서 목소리 또렷함), 무선·가격 6만원 이하, 리뷰가 좋은 가성비 제품을 원했는데 추천 목록은 다음과 같은 문제들이 있습니다: 1) 1위는 고가(약 $539) 오버이어 Bose로 예산을 크게 초과하고 착용 방식도 다릅니다. 2) 2위는 인이어 TWS로 착용 방식이 다르며 마이크 성능/리뷰 정보가 불충분합니다. 3) 3위는 예산(>$60) 초과에 착용 방식도 요청사항과 다릅니다. 대화 흐름은 비교적 자연스럽지만 동일한 “잘 모르겠어” 응답에 대해 챗봇이 같은 질문을 여러 번 반복해 비효율적이고 불필요한 문답이 많았습니다. 추천을 더 맞추려면 온이어 무선 헤드셋 중 가성비 모델(6만원 내외)과 마이크 성능·사용자 리뷰가 좋은 제품을 제안해야 합니다."
+   },
+   "seconds": 93.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "노트북에서 쓸 무선 헤드셋 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "오 무선이면 편하겠다, 그럼 주로 실내에서 쓸 테니 방수는 불필요하겠네. 혹시 노트북은 주로 집 책상에서만 써?"
+    },
+    {
+     "role": "user",
+     "content": "응, 거의 집 책상에서만 써. 가끔 자리 옮기긴 해도 주 사용 환경은 재택 근무 책상이야."
+    },
+    {
+     "role": "assistant",
+     "content": "집 책상 위주로 쓴다니 주로 듣는 용도일 것 같네. 혹시 근무하면서 화상회의나 전화로 네 목소리 직접 전달할 일이 자주 있어?"
+    },
+    {
+     "role": "user",
+     "content": "응, 화상회의랑 전화 통화 자주 있어. 목소리가 또렷하게 전달돼야 해서 마이크 성능 중요한 편이야."
+    },
+    {
+     "role": "assistant",
+     "content": "아, 화상회의 때문에 목소리 전달이 중요하구나. 혹시 집에서 일할 때 창문 소음이나 가족 소리 같은 주변 소음이 자주 거슬려?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 잘 모르겠구나. 화상회의 자주라 오래 쓸 것 같으니 내구성 좋은 쪽이 낫겠다. 혹시 한 번 사면 몇 년은 쓰는 편이야, 아니면 자주 바꾸는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 주변 소음이 자주 있는지 잘 모르겠구나, 그래서 소음 차단이 필요한지는 아직 불확실하네. 혹시 화상회의 중에 밖 소리나 가족 소음 때문에 네 목소리가 잘 안 들리거나 자주 끊기는 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 주변 소음이나 내구성은 잘 모르겠구나. 근데 보통은 싼 거 자주 바꾸는 편이야, 아니면 한 번 살 때 조금 더 투자해서 오래 쓰는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 1210개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n방수·방진은(는) 일부 상품 정보에 없어서 확인 못 했어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 0.086
+  },
+  {
+   "scenario_id": "c4-2622",
+   "system": "ig",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B0C7ZQKMX7",
+    "B094WXSFB4",
+    "B0BLXJW1LX"
+   ],
+   "target_rank": 295,
+   "questions": 5,
+   "attribute_match": 0.7142857142857143,
+   "judge": {
+    "fit": 1,
+    "naturalness": 3,
+    "efficiency": 1,
+    "comment": "추천이 숨겨진 선호를 거의 반영하지 못함.\n- 가격: 사용자는 2만원 안쪽(저렴)을 원했으나 챗봇은 $60 이상이라고 가정하고 그에 맞는 제품만 제시함. 가격 조건 무시로 큰 감점.\n- 착용감/형태: 사용자는 '선 없는', '가벼운', '선 없는 이어폰(선 없는=무선), 선 없는형'과 '선 없는 선 없는(선 없는)' 등을 원했는데 추천 제품들은 형태 표기가 혼재하고 1위는 보행(본컨덕션) 등 사용자 요구와 맞지 않을 수 있음.\n- 방수/IPX5: 사용자가 IPX5를 원한다고 명확히 했는데 추천 항목에 IPX5 명시가 없고 방수 수준 반영 불확실함.\n- 마이크: 이는 반영됐으나 통화 성능이나 마이크 품질 관련 정보도 제시되지 않음.\n- ANC: 사용자는 ANC 불필요하다고 했는데 2,3위는 노이즈캔슬링을 포함해 불필요한 기능을 추천함.\n- 브랜드·고객서비스: 장기간 한 브랜드를 믿고 쓰고 싶다는 선호(고객서비스 친절·신속)를 전혀 반영하지 않음.\n대화 흐름 및 응답 스타일 관련:\n- 장점: 대화형 질문으로 요구를 확인하려 한 점은 자연스러움.\n- 단점: 사용자 발언(오래 쓰는 편)으로부터 잘못된 가격 추정($60 이상)으로 이어진 불필요하고 해로운 가정(비효율). 장소·소음 관련 질문을 여러 번 반복적으로 물어본 점도 비효율적.\n요약: 요구의 핵심(저렴한 가격, IPX5, 마이크, 가벼운 무선·선 없는, 브랜드 신뢰)을 제대로 반영한 추천이 필요함."
+   },
+   "seconds": 76.5,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동할 때 매일 쓸 무선 이어폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 매일 운동할 때 쓴다니 땀·충격에 강한 튼튼한 걸로 가는 게 좋겠네. 혹시 이어폰은 한 번 사면 오래 쓰는 편이야, 아니면 몇 달마다 바꾸는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "오래 쓰는 편이야. 한 브랜드 믿고 오래 쓰고 싶어."
+    },
+    {
+     "role": "assistant",
+     "content": "오, $60 이상 투자해서 한 브랜드로 오래 쓰려는구나. 운동할 땐 주로 실내 헬스장이나 집에서 쓰는 편이야, 아니면 밖에서 달리거나 자전거 탈 때 써?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아 아직 잘 모르겠구나. 운동할 때 차 소리나 사람 소리 같은 주변 소음은 거의 안 듣고 내 음악만 듣고 싶은 편이야, 아니면 주변 소리 조금 들려야 더 안전해?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아 아직 장소가 정해지지 않았구나, 가끔 밖에서 뛸 수도 있겠네. 혹시 운동할 때 비맞거나 먼지 많은 야외에서 뛸 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "있을 수도 있어서 땀이나 비 신경 쓰니까 IPX5 정도 있으면 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 땀·비 신경 쓰는 거니까 IPX5 정도 있는 걸로 가자. 혹시 운동할 때 전화 받거나 러닝하면서 통화할 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "응, 마이크 꼭 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 마이크: 필요.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 102개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 6.374
+  },
+  {
+   "scenario_id": "c4-2622",
+   "system": "llm",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B0BSG5RJ2T",
+    "B07T7KVXJH",
+    "B0BXMW5TXB"
+   ],
+   "target_rank": null,
+   "questions": 4,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 3,
+    "efficiency": 2,
+    "comment": "추천은 예산(2만원 미만)과 마이크 필요성, 운동용(땀 대비 방수) 같은 주요 선호는 반영했지만, 핵심 요구사항 몇 가지를 제대로 충족하지 못합니다. 사용자는 완전 무선(TWS) + 이어훅/윙 타입 고정 핏 + 가능하면 IPX5 이상을 원했는데, 추천 제품들은 IPX4가 대다수로 방수 수준이 낮고(사용자 선호보다 낮음), 제품 목록에 유선(Betron B650)이 포함되어 있어 TWS 요구를 위반합니다. 또한 동일한 iJoy 제품이 중복되어 나열된 점과 브랜드 신뢰/고객서비스에 대한 정보가 전혀 제공되지 않은 점도 감점 요인입니다. 대화 흐름은 필요한 질문을 잘 했으나 최종 추천의 정확성과 정교함이 부족합니다."
+   },
+   "seconds": 41.0,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동할 때 매일 쓸 무선 이어폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "예산대가 어느 정도야? (만원 단위로 알려줘)"
+    },
+    {
+     "role": "user",
+     "content": "2만원 안쪽이야, 만원 단위로는 2만원 미만이야."
+    },
+    {
+     "role": "assistant",
+     "content": "완전 무선(TWS) 완전 분리형 이어폰 원해, 아니면 넥밴드/목걸이형도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "완전 무선(TWS) 완전 분리형이 좋아, 운동할 때 선 없고 가벼운 게 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "운동 종류가 달리기/고강도야? 이어훅/윙 같은 고정형 핏(빠지지 않게) 꼭 원해, 아니면 일반 실리콘 팁만으로 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "이어훅/윙 같은 고정형 핏이 꼭 필요해, 운동 중에도 빠지지 않아야 해."
+    },
+    {
+     "role": "assistant",
+     "content": "통화도 자주 해? 마이크로 통화할 필요 있어?"
+    },
+    {
+     "role": "user",
+     "content": "응, 마이크 꼭 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless earbuds earhooks wing tips sports microphone sweatproof IPX4+ under 20000 KRW\n1. iJoy Headphones Wireless Bluetooth- Wireless Sports Earbuds IPX4 Sweat\n2. iJoy Bluetooth Wireless Sport Earbuds IPX4 Sweatproof Sport Headphones\n3. Betron B650 in Ear Headphones with Microphone - Bass Driven Sound, Alu"
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless earbuds earhooks wing tips sports microphone sweatproof IPX4+ under 20000 KRW",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-2622",
+   "system": "random",
+   "target_id": "B09PRC3WC5",
+   "recommended": [
+    "B0BX2XGPYZ",
+    "B0C6QK341D",
+    "B0C3R3CYM1"
+   ],
+   "target_rank": 47,
+   "questions": 4,
+   "attribute_match": 0.8571428571428571,
+   "judge": {
+    "fit": 3,
+    "naturalness": 5,
+    "efficiency": 4,
+    "comment": "핵심 조건(무선·저가·마이크·방수)은 대부분 충족하지만, 사용자는 ‘한 브랜드를 오래 믿고 싶고 고객서비스가 좋은 브랜드’를 선호한다고 밝혔음. 추천 상품들은 저가의 이름 없는 모델 위주라 브랜드 신뢰도와 사후 서비스 측면에서 정보가 부족해 선호를 완전히 충족하지 못함. 또한 사용자가 ‘선 없는(완전 무선)’과 ‘가벼운, 이어 훅/핀 없음’도 원했는데 착용 방식은 인이어로 되어 있으나 착용 세부(핀 유무, 무게) 정보가 없어 그 부분도 불확실함. 챗봇은 대화 흐름과 질문이 자연스럽고 대부분 효율적이었으나, 브랜드·AS 관련 추가 확인을 한 번 더 해서 추천을 좁혔으면 더 효율적이었을 것임."
+   },
+   "seconds": 65.6,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동할 때 매일 쓸 무선 이어폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "오 반가워, 매일 운동용이면 땀·충격에 강한 걸로 골라야겠다. 잃어버려도 아깝지 않은 싼 걸 원해, 아니면 오래 쓰는 튼튼한 걸 원해?"
+    },
+    {
+     "role": "user",
+     "content": "가격은 2만원 안쪽으로 저렴했으면 하고, 그래도 한 브랜드를 오래 믿고 쓰고 싶어."
+    },
+    {
+     "role": "assistant",
+     "content": "싸게 사길 원하면서도 한 브랜드 오래 쓰고 싶구나. 혹시 운동할 때 음악 들으면서 통화하거나 음성으로 안내받는 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "응, 운동 중 통화하거나 음성 안내 받을 일이 있어서 마이크는 꼭 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "통화랑 음성 안내 때문에 마이크는 꼭 있어야겠네. 혹시 운동은 주로 실내 헬스장에서만 해?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "ANC는 신경 안 쓰네. 운동할 때 주로 실외에서 비 맞거나 땀에 흠뻑 젖을 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "있을 수 있어서 땀이나 비 걱정 덜하게 IPX5 정도 있으면 좋겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 방수·방진: 필요.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 171개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 1.016
+  },
+  {
+   "scenario_id": "c4-3095",
+   "system": "ig",
+   "target_id": "B09DB8XK9Y",
+   "recommended": [
+    "B0C8HG9Q6J",
+    "B0CDRTMCRG",
+    "B0CF975HX7"
+   ],
+   "target_rank": 93,
+   "questions": 6,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 2,
+    "efficiency": 1,
+    "comment": "추천 상품은 무선 인이어, 마이크·방수 조건, 가격대(미화 기준) 등 사용자의 필수 조건을 대부분 반영해 부분적으로 적합합니다. 다만 '달릴 때 빠지지 않는 꽉 끼는 착용감'과 '음량이 크고 소리가 또렷함'에 대한 명시적 정보가 제품 설명에 없어 숨겨진 선호를 충분히 충족했다고 보기 어렵습니다. 대화 흐름은 챗봇이 사용자의 반복된 '잘 모르겠어' 답변에 대해 같은 질문을 여러 번 반복해 자연스럽지 못했고(자연스러움 2), 불필요한 반복으로 효율성은 낮습니다(효율 1). 전반적으로 조건 반영은 괜찮지만 착용감·음질 관련 근거가 부족하고 대화 방식 개선이 필요합니다."
+   },
+   "seconds": 83.8,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "달릴 때 귀에서 튀어나오지 않는 이어폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "달릴 때 귀에서 안 빠지는 인이어가 필요하구나. 혹시 매일 착용해서 오래 쓸 생각이야, 아니면 막 쓰다가 잃어버릴까 봐 부담 적게 사고 싶어?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "흠, 잘 모르겠다고? 잃어버려도 괜찮으면 부담 적은 걸 사는 게 나을 것 같아. 혹시 달릴 때 매번 착용해서 오래 쓸 생각이야, 아니면 가끔 쓰다 잃어버려도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 아직 잘 모르겠구나. 달릴 때 보통 휴대폰을 팔에 차거나 손에 들고 뛰어, 아니면 주머니에 넣어?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아직 잘 모르겠구나, 정한 건 없네. 달릴 때 옷이나 팔에 줄이 걸리는 거 신경 써?"
+    },
+    {
+     "role": "user",
+     "content": "신경 써. 선 없는 완전 무선 인이어가 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "무선 인이어가 편하겠네, 선 걸리는 거 신경 쓰이겠다. 혹시 달릴 때 지나가는 차 소리나 사람 소리가 거슬려?"
+    },
+    {
+     "role": "user",
+     "content": "거슬리지 않아. 액티브 노이즈 캔슬링은 필요 없어."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 시끄러운 소리 막는 건 필요 없겠네. 혹시 땀 엄청 흘리거나 비 오는 날에도 이어폰 그대로 쓰는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "응, 땀 엄청 흘려도 비 올 때도 그냥 쓰는 편이야. 방수·방진 기능은 꼭 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 방수·방진: 필요.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 364개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 2.01
+  },
+  {
+   "scenario_id": "c4-3095",
+   "system": "llm",
+   "target_id": "B09DB8XK9Y",
+   "recommended": [
+    "B0B725V18J",
+    "B09VYGLLWH",
+    "B0B9HR3T4B"
+   ],
+   "target_rank": null,
+   "questions": 5,
+   "attribute_match": 0.7142857142857143,
+   "judge": {
+    "fit": 4,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "추천 상품들은 사용자의 주요 선호(완전 무선, 인이어 + 이어후크/윙팁형 스포츠 착용감, 마이크 포함, 방수 표기 있는 제품 포함, 6만원 내외 예산, ANC 불필요)를 전반적으로 잘 반영하고 있음. 특히 iLuv myBuds Fit은 IPX7로 방수 기준을 충족해 안전성 측면에서 적절함. 감점 사유: 제품별로 ‘음량이 크고 소리가 또렷함’에 대한 명확한 근거(스펙이나 사용자 리뷰 인용)가 부족하고, iJoy의 방수/방진 여부가 불명확함. 또한 주변음(앰비언트) 기능 지원 여부가 각 제품 설명에 충분히 명시되지 않아 안전 관련 요구를 완전히 보장하지 못함."
+   },
+   "seconds": 35.7,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "달릴 때 귀에서 튀어나오지 않는 이어폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "완전 무선(완전 케이블 없음) 이어폰 원해, 아니면 넥밴드/케이블 있어도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "완전 무선 이어폰을 원해. 선 있는 건 싫어."
+    },
+    {
+     "role": "assistant",
+     "content": "이어훅/윙팁(귀에 걸치는 안정형) 있는 스포츠형을 원해, 아니면 작고 깔끔한 일반형으로 밀착되는 걸 원해?"
+    },
+    {
+     "role": "user",
+     "content": "이어훅/윙팁 있는 스포츠형을 원해. 달리기해도 안 빠지게 꽉 잡아줘."
+    },
+    {
+     "role": "assistant",
+     "content": "예산 어느 정도 생각하고 있어? (대략 금액 범위만 알려줘 — 예: 50, 100, 200달러/원화)"
+    },
+    {
+     "role": "user",
+     "content": "6만 원 안쪽으로 생각하고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "달리기할 때 차량·사람 소리 들려야 해서 주변음(앰비언트) 기능 필요해, 아니면 완전 차음(소음 차단) 상관없어?"
+    },
+    {
+     "role": "user",
+     "content": "앰비언트 기능 필요해. 달리기할 때 차량·사람 소리 들려야 안전하니까."
+    },
+    {
+     "role": "assistant",
+     "content": "한 번 충전에 재생시간 얼마나 원해? (예: 4-6시간, 6-8시간, 8시간 이상)"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless sports earbuds wingtip earhook ambient mode running secure fit under 60000 KRW\n1. iJoy Wireless Running Headphones with Charging Case + Removable Earhoo\n2. JLab Go Air Sport - Wireless Workout Earbuds Featuring C3 Clear Callin\n3. iLuv myBuds Fit Sports Wireless Earbuds, Secure Earhooks, Bluetooth, M"
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless sports earbuds wingtip earhook ambient mode running secure fit under 60000 KRW",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-3095",
+   "system": "random",
+   "target_id": "B09DB8XK9Y",
+   "recommended": [
+    "B0C8HG9Q6J",
+    "B0CDRTMCRG",
+    "B0CF975HX7"
+   ],
+   "target_rank": 86,
+   "questions": 6,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 4,
+    "efficiency": 3,
+    "comment": "추천은 무선·인이어·마이크·방수 조건을 반영했고 가격대에도 맞춰져 있어 기본 요건은 충족함. 다만 ‘달리면서 빠지지 않는 꽉 끼는 착용감’과 ‘음량이 크고 소리가 또렷함’ 같은 핵심 숨겨진 선호도는 제품 설명에 명확히 드러나지 않아 정확히 충족한다고 보기 어렵다(제품들이 '운동용'으로 표기되긴 하나 착용 안정성이나 음질에 대한 구체 정보 부족). 대화 흐름은 자연스러웠으나 경로·주당 횟수 등 불필요하게 여러 번 물어본 부분이 있어 효율성은 보통 수준임. 개선하려면 추천 제품에 대해 ‘이어팁 크기/훅 유무, IP 등급, 드라이버 크기/음압(음량) 정보, 착용 안정성에 대한 리뷰 요약’을 제시하거나, 착용감과 음질을 보증하는 브랜드·모델(러닝 전용 커널형 혹은 스포츠 훅 포함 모델)을 1위로 추천하는 것이 좋겠다."
+   },
+   "seconds": 90.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "달릴 때 귀에서 튀어나오지 않는 이어폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "오키, 그러면 달릴 때 귀에서 안 빠지는 게 최우선이겠네. 달리면서 전화 받거나 운동 중 음성으로 누군가랑 소통할 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "응, 달리면서 전화 받거나 음성으로 소통할 일이 있어서 마이크는 꼭 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "전화도 받아야 하고 달릴 땐 주변 소리 들어야 하니까 소음 차단은 불필요하겠다. 혹시 주로 차 많은 도로에서 달려, 아니면 공원·산책로야?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 경로는 아직 잘 모르겠네. 혹시 일주일에 몇 번 정도, 한 번에 보통 얼마나 오래 달려?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "경로랑 날씨가 아직 애매하구나. 혹시 비 오는 날이나 땀 엄청 나는 날에도 달려?"
+    },
+    {
+     "role": "user",
+     "content": "응, 비 오거나 땀 많이 흘려도 달리니까 방수·방진 기능은 꼭 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "아, 비오거나 땀 흘려도 쓸 거구나. 소음 줄여서 주변 소리 거의 안 들려도 괜찮아, 아니면 차 소리나 사람 소리 잘 들려야 해?"
+    },
+    {
+     "role": "user",
+     "content": "차 소리랑 사람 소리 잘 들려야 해, 소음 차단은 필요 없어."
+    },
+    {
+     "role": "assistant",
+     "content": "소음 차단은 필요 없구나, 주변 소리 잘 들어야겠네. 혹시 달릴 때 핸드폰을 주머니나 암밴드에 넣어두는데 선이 몸에 걸리는 건 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "아니, 몸에 걸리는 선은 싫어—선 없는 완전 무선 이어폰이 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 연결 방식: 무선.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 313개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 1.858
+  },
+  {
+   "scenario_id": "c4-3295",
+   "system": "ig",
+   "target_id": "B0B38WLYJ7",
+   "recommended": [
+    "B0C3C6S3H5",
+    "B0C6KM9VRT",
+    "B09JSLH3H1"
+   ],
+   "target_rank": 491,
+   "questions": 5,
+   "attribute_match": 0.8571428571428571,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 4,
+    "comment": "추천 상품들이 무선·인이어·저가라는 점에서 예산·기본 요구를 일부 반영하긴 했지만, 숨겨진 선호(작은 귀에도 오래 착용해도 빠지지 않는 편안한 핏, ‘디자인 예쁜’ 제품, 충전 케이스 보유 명시, 음질·통화용 마이크 성능 보증, 방진·방수 등급 명확화)가 충분히 반영되지 않았습니다. 예: JLab Go Air Pop은 충전 케이스·IPX4 표기가 있어 근접하지만 IPX4는 가벼운 땀·빗 정도만 보장하고 ‘작은 귀에 잘 맞음’이나 통화 음질·마이크 성능에 대한 근거 제시가 없습니다. 첫째(Neckband류) 제품은 충전 케이스 여부가 불명이고 디자인·착용감 관련 설명이 부족합니다. 추천 근거와 각 제품의 핏·케이스 유무·방수 등급·마이크/음질 정보가 더 명확해야 했습니다."
+   },
+   "seconds": 89.2,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "디자인 예쁘고 착용감 좋은 무선 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 디자인 예쁘고 착용감 좋은 무선 인이어를 찾는구나. 근데 보통 출퇴근·운동처럼 매일 거의 계속 쓸 편이야, 아니면 외출할 때만 가끔 쓸 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "출퇴근이랑 운동할 때 매일 거의 계속 쓰는 편이에요. 장시간 착용해도 편하고 빠지지 않아야 해요."
+    },
+    {
+     "role": "assistant",
+     "content": "매일 출퇴근이랑 운동에 장시간 쓰니까 착용감 최우선에 디자인도 포기 못하겠네. 혹시 가격은 싸게 가성비 위주로 살래, 아니면 편하게 오래 쓰려고 조금 더 투자할래?"
+    },
+    {
+     "role": "user",
+     "content": "가성비 위주로 갈게요. 대략 4만원대까지 생각하고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 4만원대 가성비로 간다니까 실용적이고 소음 잘 막아주는 걸로 골라야겠다. 혹시 출퇴근길이나 운동할 때 주변이 엄청 시끄러워서 소리 차단이 필요해?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어. 소음 차단은 필수는 아니야."
+    },
+    {
+     "role": "assistant",
+     "content": "노캔은 필요 없다고 했으니까 가볍고 통기성 좋은 걸로 골라야겠네. 혹시 운동하면서 땀 엄청 흘리거나 비 맞을 일 자주 있어?"
+    },
+    {
+     "role": "user",
+     "content": "자주 땀 많이 흘리고 가끔 비 맞을 수도 있어서 방수·방진 되는 제품을 선호해요."
+    },
+    {
+     "role": "assistant",
+     "content": "땀·비 다 견디는 방수·방진을 원하겠네. 혹시 출퇴근이나 운동할 때 전화 받거나 통화 자주 해?"
+    },
+    {
+     "role": "user",
+     "content": "네, 통화 자주 해요. 통화용 마이크는 꼭 있어야 해요."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 마이크: 필요.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 79개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 10.609
+  },
+  {
+   "scenario_id": "c4-3295",
+   "system": "llm",
+   "target_id": "B0B38WLYJ7",
+   "recommended": [
+    "B09BZ3SM6N",
+    "B0BC38F1DL",
+    "B08GZJ2NBZ"
+   ],
+   "target_rank": null,
+   "questions": 4,
+   "attribute_match": 0.8571428571428571,
+   "judge": {
+    "fit": 3,
+    "naturalness": 3,
+    "efficiency": 3,
+    "comment": "추천 품목 중 Anker Soundcore Life Dot 2는 예산, 충전 케이스, 음질·통화 성능, 운동용(방수성 여부 가능성) 면에서 사용자 숨겨진 선호와 비교적 잘 맞음. 다만 SONTINH·KENKUO는 브랜드·제품 상세(정확한 착용감 사이즈, IP 등급, 마이크 성능, 케이스 유무 등)가 불명확해 보이며, 추천 설명에서 왜 1순위인지 근거가 부족함. 챗봇 대화는 필요한 질문들(예산, 착용형태, ANC 선호 등)을 적절히 물었으나 마지막 응답의 형식이 기계적이고 제품 근거 제시가 부족함. 개선: 각 제품별로 IP 등급·케이스 포함 여부·무게·팁(사이즈) 옵션·마이크 성능 근거를 덧붙여 1순위 이유를 명확히 제시하면 점수가 올라감."
+   },
+   "seconds": 33.1,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "디자인 예쁘고 착용감 좋은 무선 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "예산은 어느 정도 생각하고 있어? (만원 단위로 알려줘)"
+    },
+    {
+     "role": "user",
+     "content": "4만원대까지 생각하고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "액티브 노이즈캔슬링(ANC)이나 주변음 모드 같은 기능 원해?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "커널형(귓속에 들어가는 밀폐형) 좋아해, 아니면 오픈형(귀 안에 걸치는 형태, 에어팟 같은) 좋아해?"
+    },
+    {
+     "role": "user",
+     "content": "커널형(인이어) 좋아해. 귀가 작은 편이라 인이어여도 오래 착용해도 빠지지 않고 편해야 해."
+    },
+    {
+     "role": "assistant",
+     "content": "음색은 베이스 강조되는 둥근 소리 좋아해, 아니면 균형 잡힌 중립 음색 좋아해?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "true wireless in-ear earbuds small ears comfortable secure fit stylish under 50 dollars\n1. SONTINH CoolBuds2 True Wireless Bluetooth Earbuds for Small Ears | Mor\n2. KENKUO True Wireless Earbuds only 3g Light Weight, Bluetooth 5.2 Small\n3. Anker Soundcore Life Dot 2 True Wireless Earbuds, 100 Hour Playtime, 8"
+    }
+   ],
+   "extra": {
+    "search_query": "true wireless in-ear earbuds small ears comfortable secure fit stylish under 50 dollars",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-3295",
+   "system": "random",
+   "target_id": "B0B38WLYJ7",
+   "recommended": [
+    "B0CFYCGPVM",
+    "B0CK78QNCX",
+    "B0C87Y22S8"
+   ],
+   "target_rank": 230,
+   "questions": 4,
+   "attribute_match": 0.8571428571428571,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 3,
+    "comment": "추천 제품들이 가격대와 기본 무선·마이크·ANC 조건은 맞추려 했으나 사용자의 핵심 선호 대부분을 충족시키지 못함. 예컨대 앰비언트(외부소리 허용) 기능, 방수·방진 등급(IP 등급), 충전 케이스 유무, ‘귀가 작은 편’에 맞춘 착용감(작은 팁 제공 또는 귀에 잘 고정되는 디자인), 디자인(외관) 정보가 명시되어 있지 않음. 추천 항목들이 거의 동일한 제품 설명과 가격대의 저가형 항목으로 중복되어 있어 1순위가 숨겨진 선호를 잘 반영한다고 보기 어려움. 대화 흐름은 전반적으로 자연스럽고 사용자 의도를 잘 파악하려는 질문들이 있었으나, 최종 추천에서는 사용자 요구에 더 구체적으로 맞춘 제품(예: IPX4~IPX7 표기, 앰비언트/웨어러블 모드, 충전 케이스 명시, 소형 팁 제공 브랜드 등)을 제시했어야 효율적이었음."
+   },
+   "seconds": 81.0,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "디자인 예쁘고 착용감 좋은 무선 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "디자인 예쁘고 착용감 중시라니 주로 외출하거나 출퇴근할 때 쓰려는 거구나. 혹시 주로 어디서 어떤 상황에서 쓰려 해?"
+    },
+    {
+     "role": "user",
+     "content": "주로 출퇴근할 때랑 운동할 때 무선으로 편하게 쓰려고 해. 귀가 작은 편이라 인이어라도 오래 착용해도 빠지지 않고 편해야 해."
+    },
+    {
+     "role": "assistant",
+     "content": "출퇴근이랑 운동 둘 다라면 소음 막아주는 기능 있으면 좋겠네. 혹시 운동할 땐 차 소리나 주변 소리도 들려야 안전하다고 생각해?"
+    },
+    {
+     "role": "user",
+     "content": "운동할 때는 차 소리나 주변 소리가 들리면 안전해서 외부 소리 들리는 모드(앰비언트)가 있으면 좋아. 통근 때는 소음 차단도 괜찮아."
+    },
+    {
+     "role": "assistant",
+     "content": "앰비언트도 원하고 통근땐 노이즈 차단도 필요하구나. 운동은 주로 실내 헬스장이야, 아니면 야외 러닝이 더 많아?"
+    },
+    {
+     "role": "user",
+     "content": "야외 러닝이 더 많아. 그래서 앰비언트 모드랑 땀·빗물 걱정 없는 방수 기능이 있으면 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "야외 러닝 많다니 땀·빗물 걱정 없는 걸로 골라야겠다. 혹시 잃어버리거나 망가져도 부담돼서 한 번 좋은 걸 오래 쓰고 싶은 편이야, 아니면 부담 적은 걸로 주기적으로 바꿔도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "가성비라 가격 부담 적은 걸로 주기적으로 바꿔도 괜찮아. 오래 쓰면 좋지만 예산 때문에 부담 적은 선택을 선호해."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 가격대: $20~60.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 22개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 4.97
+  },
+  {
+   "scenario_id": "c4-5123",
+   "system": "ig",
+   "target_id": "B0BPT4JYXW",
+   "recommended": [
+    "B0C8HG9Q6J",
+    "B0CDRTMCRG",
+    "B0CF975HX7"
+   ],
+   "target_rank": 241,
+   "questions": 7,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 2,
+    "efficiency": 2,
+    "comment": "적합성: 추천된 제품들은 무선 운동형 이어폰이라는 점에서 일부 요구(무선, 운동용, 가격대)에 맞지만, 사용자가 명시적으로 원한 골전도 타입은 전혀 반영되지 않았고 ‘흘러내리지 않는 착용감’이라는 핵심 선호도(고정력 높은 착용 방식)도 제품 설명에서 확인되지 않습니다. 휴대성·방수·배터리 등 세부조건에 대한 명확한 매칭 정보도 부족합니다. \n자연스러움: 챗봇의 말투 자체는 친근하려 했으나 질문이 반복적이고 다소 어색하게 이어져 대화 흐름이 자연스럽지 못합니다. 동일한 질문을 여러 번 변형해 묻는 부분이 눈에 띕니다.\n효율성: 중요한 몇 가지(무선 선호, 주변 소리 허용 등)는 파악했지만, 사용자가 여러 번 ‘잘 모르겠어’라고 답했을 때 챗봇이 다른 방식으로 선택지를 제시하거나 우선순위를 정해 좁히지 못하고 질문을 반복한 점에서 비효율적입니다. 추천 결과도 숨겨진 핵심(골전도, 확실한 고정력)을 반영하지 못해 불필요한 재질문 없이 바로 더 적합한 제안을 할 수 있었을 것입니다."
+   },
+   "seconds": 98.0,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "러닝할 때 흘러내리지 않는, 가볍고 휴대하기 편한 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "반갑다! 그럼 땀에도 끄떡없고 가볍고 흘러내리지 않는 걸 원하겠네. 혹시 운동용 이어폰 하나 오래 아껴 쓰는 편이야, 아니면 잃어버리거나 자주 바꿔도 되는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 잘 모르겠구나. 운동할 때 이어폰을 잃어버리거나 망가져도 자주 바꿔도 괜찮아, 아니면 하나를 오래 써?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 아직 한 이어폰 오래 쓰는 스타일은 아닌가 보네. 혹시 러닝할 때 휴대폰은 몸에 지니고 달려?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아직 선 있는 거랑 없는 거 중에 정해진 건 없구나. 달릴 땐 선이 몸에 걸리는 거 귀찮아, 아니면 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "엄청 귀찮아, 무선이 편해."
+    },
+    {
+     "role": "assistant",
+     "content": "무선이 편하구나. 혹시 달릴 때 차 소리나 주변 사람 소리는 들리게 하는 게 나아, 아니면 음악만 들리게 완전히 차단되는 게 좋아?"
+    },
+    {
+     "role": "user",
+     "content": "주변 소리 들리는 게 좋아, 완전 차단되는 건 별로야. 방음보다는 안전하게 주변을 들을 수 있는 게 중요해."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 주변 소리 들리게 안전하게 달리는 게 더 중요하네. 혹시 달릴 때 전화 받거나 러닝 앱에 말로 조작하진 않아?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아 아직 그건 모르는구나. 혹시 달리면서 바로 전화 받거나 러닝 앱을 말로 조작하곤 해?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 364개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 5.207
+  },
+  {
+   "scenario_id": "c4-5123",
+   "system": "llm",
+   "target_id": "B0BPT4JYXW",
+   "recommended": [
+    "B0C9S59G23",
+    "B0C2CSTDVH",
+    "B09ZKMWCPD"
+   ],
+   "target_rank": null,
+   "questions": 5,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 3,
+    "naturalness": 4,
+    "efficiency": 3,
+    "comment": "적합성: 제품들이 골전도(혹은 오픈 이어) 옵션을 포함하고 가격대도 사용자 희망(약 5만 원)과 대체로 맞아 1위 추천이 완전히 틀리지는 않음. 다만 제품 설명에 ‘인이어’ 등 착용 방식이 잘못 기재되거나 착용감·휴대성·배터리 성능에 대한 구체 정보가 부족해(또는 모호해) 사용자의 핵심 요구(흘러내리지 않는 확실한 착용감, 작고 튼튼한 휴대성, 충분한 배터리)는 명확히 충족되는지 판단하기 어려움. 따라서 완전한 적합도는 중간 수준으로 평가함. \n자연스러움: 질문-응답 흐름은 대체로 자연스럽고 사용자의 선호를 차근차근 확인함(골전도 여부, 방수 등). 다만 골전도 의사를 여러 번 확인하는 등 약간 중복된 부분이 있어 깔끔함이 완전하진 않음. \n효율성: 필수 정보(착용 형태, 방수 등)를 빠르게 확인한 점은 좋음. 그러나 마지막 추천 항목들에 착용 방식 표기가 부정확하거나(인이어로 표기된 골전도 제품 등) 제품별 비교 포인트(무게·배터리 시간·케이스 크기·핏 타입 등)가 부족해 사용자가 바로 결정하기엔 추가 확인이 필요함."
+   },
+   "seconds": 44.3,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "러닝할 때 흘러내리지 않는, 가볍고 휴대하기 편한 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "완전 무선 이어폰(true wireless)으로 줄 없이 쓰길 원해, 아니면 넥밴드/유선도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "무선이면 좋아. 골전도 타입을 직접 써보고 싶어서 완전 무선(true wireless)보단 귀에 착 붙거나 이어훅/넥밴드형 같은 착용감 확실한 무선이 더 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "골전도(오픈 이어)로 꼭 해보고 싶은 거야, 아니면 귀에 막는 이어후크/넥밴드 타입 중 착용감 좋은 거면 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "직접 골전도 타입을 꼭 써보고 싶어. 그래도 착용감 확실한 이어훅/넥밴드도 괜찮아."
+    },
+    {
+     "role": "assistant",
+     "content": "예산 어느 정도 생각해? (대략 원화나 달러로 알려줘)"
+    },
+    {
+     "role": "user",
+     "content": "대략 5만 원 안팎까지 생각하고 있어. 다른 건 상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "주로 실외 도로(차/자전거 다니는 곳)에서 달려서 주변 소리(교통) 잘 들려야 해?"
+    },
+    {
+     "role": "user",
+     "content": "응, 주변 소리 잘 들려야 해. 소음 차단 기능은 별로 중요하지 않아서 골전도(오픈 이어) 제품을 꼭 써보고 싶어."
+    },
+    {
+     "role": "assistant",
+     "content": "땀·비에 강한 방수(IP 등급) 꼭 필요해? 아니면 가벼운 생활 방수만 되어도 돼?"
+    },
+    {
+     "role": "user",
+     "content": "필요해. 땀·비에 강한 제품을 원해서 최소 IPX5 이상이면 안심하고 쓸 수 있을 것 같아."
+    },
+    {
+     "role": "assistant",
+     "content": "bone conduction headphones open-ear running lightweight IPX5+ secure fit under 50 dollars\n1. Moiunbead Premium Bone Conduction Open-Ear Open-Ear Bluetooth Bone Con\n2. MONODEAL Bone Conduction Headphones Bluetooth Open Ear Headphones Wire\n3. DACOM Open Ear Headphones Wireless Air Conduction Sports Bluetooth Hea"
+    }
+   ],
+   "extra": {
+    "search_query": "bone conduction headphones open-ear running lightweight IPX5+ secure fit under 50 dollars",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-5123",
+   "system": "random",
+   "target_id": "B0BPT4JYXW",
+   "recommended": [
+    "B0C8HG9Q6J",
+    "B0CDRTMCRG",
+    "B0CF975HX7"
+   ],
+   "target_rank": 241,
+   "questions": 5,
+   "attribute_match": 1.0,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 2,
+    "comment": "추천이 사용자 요구사항(특히 골전도 타입을 직접 써보고 싶다는 점과 ‘귀에서 흘러내리지 않음’/착용감에 대한 강한 선호)을 제대로 반영하지 않았습니다. 제시된 3개 상품은 모두 일반 인이어 TWS로 골전도 제품이 전혀 포함되어 있지 않고, 착용감(귀에 흘러내리지 않음) 검증 정보나 방수 등급(IP 등급), 내구성, 충전 케이스 크기·휴대성, 마이크 성능·배터리 지속시간 같은 핵심 세부사항이 부족해 적합도가 낮습니다. 대화 흐름은 비교적 자연스럽고 친근했으나(평점 높은 이유), 질문이 몇 번 중복되고(예: 무선 관련 확인 반복) 사용자가 명확히 밝힌 ‘골전도 사용 희망’을 묻지 않거나 반영하지 않은 점에서 효율성이 떨어집니다. 향후 개선점: 골전도 제품 의향 확인 및 골전도 추천 제시, 착용 안정성(핀형/후크형 등)·방수 IP 등급·실제 배터리 시간·케이스 크기·내구성·마이크 품질 정보를 묻고 반영하면 적합성과 효율성이 크게 올라갑니다."
+   },
+   "seconds": 86.2,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "러닝할 때 흘러내리지 않는, 가볍고 휴대하기 편한 이어폰 찾고 있어요."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 운동용이면 땀에 강한 걸로 가야겠네. 혹시 러닝할 때 땀 엄청 흘려?"
+    },
+    {
+     "role": "user",
+     "content": "땀 많이 흘리는 편이라 방수·방진 성능은 꼭 있었으면 해. 특히 조깅할 거라 땀에 강한 제품이 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "땀 많이 흘린다니까 선 없는 게 더 편하겠다. 혹시 달리면서 폰이랑 줄 같이 붙어 다니는 건 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "선 없는 게 더 편해서 폰이랑 줄 같이 붙어 다니는 건 별로 안 좋아. 달릴 때 거슬리고 불편할 것 같아."
+    },
+    {
+     "role": "assistant",
+     "content": "무선이 편하다고 했으니 완전 선 없는 게 딱이겠다. 혹시 달릴 때 차도 많고 소음 심한 길에서 뛰는 편이야, 아니면 한적한 공원이나 트랙에서 주로 달려?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아, 경로는 잘 모르겠구나. 혹시 달리는 도중에 전화 받거나 음성으로 폰 조작하는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "가끔 달리면서 전화 받거나 음성으로 조작할 때가 있어서 마이크 있는 제품이 필요해."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 달리면서 통화도 자주 하니까 마이크 있는 무선 이어폰이 딱이네. 혹시 잃어버려도 부담 없어서 싸게 자주 바꾸는 편이야, 아니면 한 번 사면 오래 쓰려고 투자하는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "비싸게 투자하진 않아서 5만 원 안팎으로 무난한 걸 골라 필요하면 자주 바꾸는 편이야."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 가격대: $20~60.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 343개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 5.207
+  },
+  {
+   "scenario_id": "c4-5173",
+   "system": "ig",
+   "target_id": "B09M85WPFM",
+   "recommended": [
+    "B0CJ5CWZZP",
+    "B09F2YQQ1B",
+    "B0CKW8HHWB"
+   ],
+   "target_rank": 88,
+   "questions": 6,
+   "attribute_match": 0.8,
+   "judge": {
+    "fit": 2,
+    "naturalness": 2,
+    "efficiency": 2,
+    "comment": "추천 상품들이 대부분 오픈 이어/골전도 타입인데 사용자는 ‘온이어(earcup) 타입’을 선호한다고 했습니다. 착용 방식(핵심 선호)을 충족하지 못해 적합도가 낮습니다. 배터리·음질·색상 등의 선호도에 대한 확인이나 제품별 배터리 시간·음질 비교도 부족합니다. 대화 흐름은 반복적으로 ‘잘 모르겠어’ 답변에 같은 질문을 여러 번 해서 자연스럽지 못하고 비효율적입니다. 추천 목록은 가격대는 맞지만 핵심 착용 타입과 스타일·사운드 관련 정보가 부족합니다."
+   },
+   "seconds": 85.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "헬스장이나 산책할 때 쓸 무선 온이어 헤드폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 운동용이면 땀에도 끄덕없고 튼튼한 걸 원하겠네. 혹시 새 거 살 땐 오래 쓰려고 꽤 투자하는 편이야, 아니면 싸게 사서 자주 바꾸는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "보통 오래 쓰려고 꽤 투자하는 편이야. 튼튼하고 배터리 오래가는 제품이면 초반에 좀 더 쓰는 게 낫다고 생각해."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 그럼 초반에 꽤 투자하네 — $60 이상으로 생각하는구나. 헬스장이나 산책할 때 기계음이나 차량 소음 같은 주변 소음이 많이 거슬려?"
+    },
+    {
+     "role": "user",
+     "content": "많이 신경 쓰이지는 않아. 노이즈 캔슬링 없어도 괜찮고 주변 소음 조금 들려도 상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 주변 소음 조금 들려도 괜찮다니까 노캔 없어도 괜찮겠네. 혹시 운동하거나 산책할 때 전화 받거나 목소리로 명령·대화할 일 자주 있어?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아, 잘 모르겠구나. 운동할 때 전화 오면 바로 받아서 통화하는 편이야, 아니면 운동 끝나고 확인하는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "잘 모르겠구나. 운동에 더 집중하는 스타일이면 땀이나 비 견디는 게 필요하겠다. 혹시 운동할 때 땀을 엄청 흘리거나 밖에서 비 맞을 일 자주 있어?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아, 잘 모르겠구나. 운동할 때 땀에 계속 젖거나 비 맞는 일이 많은 편이야, 아니면 주로 실내라 젖을 별로 걱정 안 해도 돼?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 12개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 1.901
+  },
+  {
+   "scenario_id": "c4-5173",
+   "system": "llm",
+   "target_id": "B09M85WPFM",
+   "recommended": [
+    "B0BNVQ9XW8",
+    "B0CC4T69NB",
+    "B0C891NZ76"
+   ],
+   "target_rank": null,
+   "questions": 5,
+   "attribute_match": 0.4,
+   "judge": {
+    "fit": 2,
+    "naturalness": 4,
+    "efficiency": 3,
+    "comment": "추천된 제품들이 사용자의 핵심 선호를 잘 충족하지 못합니다. 사용자는 ‘무선 온이어(on-ear) 헤드폰’, ‘오픈/앰비언트 모드’(외부 소리 허용), IPX4 이상 방수, 20~30시간 배터리, 소리 품질과 스타일 있는 색상, 예산 약 15만원을 명확히 제시했습니다. 그러나 챗봇이 제시한 상위 3개는 대부분 골전도/오픈형 이어클립 제품(온이어가 아니며 착용감·음질 특성이 상이함)이고, 일부 항목에서는 착용 방식(오버이어라 표기)도 잘못 표기되어 있습니다. 가격대는 저가 제품 위주로 소리 품질·스타일성·배터리 지속시간(명확 표기 부족)을 충족하지 못할 가능성이 큽니다. 대화 흐름 자체는 관련 질문들을 적절히 물어 사용자의 요구를 파악하려는 점은 좋았지만, 최종 추천의 정확성과 제품 정보 검증이 부족했습니다."
+   },
+   "seconds": 49.3,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "헬스장이나 산책할 때 쓸 무선 온이어 헤드폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "예산은 얼마까지 생각해?"
+    },
+    {
+     "role": "user",
+     "content": "15만 원대까지 생각하고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "ANC(소음 차단) 원해, 아니면 밖에서 안전하게 바깥 소리 들리는 오픈/앰비언트 모드가 더 중요해?"
+    },
+    {
+     "role": "user",
+     "content": "ANC는 필요 없고, 바깥 소리 들리는 오픈/앰비언트 모드가 더 중요해."
+    },
+    {
+     "role": "assistant",
+     "content": "땀·비 튀김 등 방수·땀에 강한(IPX4 이상) 제품 꼭 필요해, 아니면 없어도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "꼭 필요해—헬스장에서 쓸 거라 땀·비에 강한 IPX4 이상이어야 해."
+    },
+    {
+     "role": "assistant",
+     "content": "한 번 충전으로 몇 시간 이상 가는 걸 원해?"
+    },
+    {
+     "role": "user",
+     "content": "한 번 충전에 최소 20시간 이상 가는 걸 원해. 가능하면 30시간쯤이면 더 좋겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "통화(전화·화상)용 마이크 꼭 필요해?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "wireless on-ear headphones ambient mode open sound IPX4+ sweatproof 20-30h battery sports gym under 150000 KRW\n1. Bone Conduction Headphones Bluetooth 5.2,IP67 Waterproof Open Ear Head\n2. Bone Conduction Headphones,Bluetooth Wireless Open Ear Sport Headphone\n3. Wireless Headphones Bluetooth Ear Clip Earphones, 30H Playtime Open Ea"
+    }
+   ],
+   "extra": {
+    "search_query": "wireless on-ear headphones ambient mode open sound IPX4+ sweatproof 20-30h battery sports gym under 150000 KRW",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-5173",
+   "system": "random",
+   "target_id": "B09M85WPFM",
+   "recommended": [
+    "B0C828DZXX",
+    "B0BD8LJLWN",
+    "B0C42D5T7Z"
+   ],
+   "target_rank": 113,
+   "questions": 6,
+   "attribute_match": 0.8,
+   "judge": {
+    "fit": 2,
+    "naturalness": 2,
+    "efficiency": 2,
+    "comment": "추천 제품들이 사용자의 핵심 선호(무선 온이어, 소리 품질 우수, 긴 배터리, 스타일리시한 색상)에 제대로 부합하지 않습니다. 특히 상위 추천이 골전도(open-ear) 타입이라 사용자가 명시한 '온이어' 선호와 다르고, 제품 설명에 소리 품질·배터리 지속시간·색상 정보가 부족합니다. 대화 흐름은 반복적이고 같은 질문(실내/야외, 망가짐 여부)을 여러 번 되물어 자연스럽지 못하며 효율성이 떨어집니다. 개선점: 초기 한두 문장으로 요약 질문(주로 실내/야외/땀/방수 필요 유무, 배터리 최소 시간, 예산 상한)을 묻고 그에 맞춰 온이어 제품 중 소리 품질/배터리/색상 정보를 명확히 제시하면 좋겠습니다."
+   },
+   "seconds": 84.8,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "헬스장이나 산책할 때 쓸 무선 온이어 헤드폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 헬스장이나 산책할 땐 통화 잘 안 하면 마이크 없어도 괜찮겠네. 혹시 운동 중에 전화 받거나 사람하고 통화할 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "대체로 통화는 잘 안 해. 가끔 오면 받긴 하겠지만 자주 하는 편은 아니야."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 통화 때문에 마이크는 신경 안 써도 되겠네. 혹시 운동할 때 땀 엄청 흘리거나 비맞거나 흙먼지 많은 데서도 자주 써?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 아직 잘 모르겠네. 혹시 운동할 때 주로 실내 헬스장에서만 쓰는 편이야, 아니면 밖에서 비맞거나 흙먼지·땀으로 젖을 일도 자주 있어?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아하, 실내랑 야외 구분은 아직 확실치 않구나. 혹시 땀·먼지로 망가져도 싸게 자주 바꿀래, 아니면 하나 잘 골라 오래 쓸래?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "음, 실내·야외 구분은 아직 애매하니까 주변 소리 들려야 안전할 것 같아. 혹시 운동할 땐 차 소리나 사람 소리 같은 바깥 소리 잘 들려야 안심돼?"
+    },
+    {
+     "role": "user",
+     "content": "맞아, 주변 소리 잘 들려야 안심돼. 특히 차소리나 사람 소리는 항상 잘 들리면 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "노캔은 필요 없겠네, 주변 소리 잘 들려야겠다. 운동할 때 망가져도 싸게 자주 바꿀래, 아니면 하나 제대로 골라 오래 쓸래?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 11개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n마이크은(는) 일부 상품 정보에 없어서 확인 못 했어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 2.442
+  },
+  {
+   "scenario_id": "c4-6486",
+   "system": "ig",
+   "target_id": "B08K2S5B88",
+   "recommended": [
+    "B0CF1LQGBM",
+    "B0C9Y5KZZN",
+    "B0C6XGYQCD"
+   ],
+   "target_rank": 377,
+   "questions": 6,
+   "attribute_match": 0.8333333333333334,
+   "judge": {
+    "fit": 2,
+    "naturalness": 3,
+    "efficiency": 2,
+    "comment": "추천의 정확도가 낮음: 사용자의 핵심 선호(무선 오버이어, 3만원 안쪽, 마이크 포함, 심플한 기능, 아이가 쓰기 편한 착용감·땀에 강함)를 충분히 반영하지 않음. 추천 목록의 제품명이 'Earbuds'(인이어)로 보이거나 착용 방식이 불분명하고, 3번은 가격이 3만 원(약 $25) 기준을 넘음($49.99). 방수·착용감·아동용 적합성에 대한 근거도 제시되지 않아 감점.\n\n말투와 흐름은 비교적 친근하지만 질문이 반복되고 같은 정보를 여러 번 물어봐 자연스러운 대화 흐름이 일부 깨짐. 전체적으로는 대화체여서 자연스러움은 보통 수준.\n\n효율성은 낮음: 사용자가 '잘 모르겠어'라고 여러 번 답했음에도 챗봇이 동일한 범주의 질문을 반복했고, 바로 제약(예: 예산, 마이크 필요)을 반영해 적합한 제품을 추려내지 못함. 제품 정보와 사용자의 우선순위를 더 빨리 맞췄어야 함."
+   },
+   "seconds": 88.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동할 때 쓸 무선 오버이어 헤드폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "오 무선 오버이어로 운동하면 땀에 강하고 튼튼한 게 좋겠다. 한 주에 보통 몇 번이나 해?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "글쎄, 횟수를 잘 모르겠다니 한 번 사서 오래 쓰는 게 나을 것 같네. 그럼 비싸서 오래 쓰는 걸로 갈래, 아니면 싸게 자주 바꿀래?"
+    },
+    {
+     "role": "user",
+     "content": "싸게 자주 바꿀래. 부담 적은 3만 원 안쪽이 좋아."
+    },
+    {
+     "role": "assistant",
+     "content": "오, 그럼 싸게 자주 바꾸는 스타일이구나—3만 원 안쪽이면 되겠다. 혹시 운동할 땐 주로 시끄러운 헬스장이나 지하철 같은 데서 쓰니, 아니면 집이나 한적한 공원에서만 써?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "노캔 상관없다니 노캔 없는 거로도 괜찮겠네. 혹시 운동할 때 땀 엄청 흘리거나 비 올 때도 쓰는 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아, 운동할 때 땀이나 비에 얼마나 노출되는진 잘 모르는구나. 혹시 보통 실내 헬스장에서만 해, 아니면 비 오는 날이나 땀 많이 나는 야외에서도 자주 해?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아직 통화나 음성으로 뭘 쓸지 확실하진 않구나. 혹시 운동할 때 전화 받거나 음성으로 명령하거나 말하는 일 있어?"
+    },
+    {
+     "role": "user",
+     "content": "그래, 통화랑 음성 명령 위해 마이크 있는 모델 원해."
+    },
+    {
+     "role": "assistant",
+     "content": "반영했어: 마이크: 필요.\n말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 130개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 8.146
+  },
+  {
+   "scenario_id": "c4-6486",
+   "system": "llm",
+   "target_id": "B08K2S5B88",
+   "recommended": [
+    "B09LRF6BPF",
+    "B0C33HCSGL",
+    "B0B5TB3G18"
+   ],
+   "target_rank": null,
+   "questions": 5,
+   "attribute_match": 0.8333333333333334,
+   "judge": {
+    "fit": 3,
+    "naturalness": 4,
+    "efficiency": 3,
+    "comment": "챗봇이 사용자의 핵심 선호(무선 오버이어, 3만원 이하, ANC 불필요, 마이크 필요, 착용감·가벼움 우선)를 대체로 잘 파악하고 관련 질문을 적절히 물어본 점은 좋습니다. 다만 추천 목록에서 1위인 KNZ 제품은 조건에 잘 맞지만, 나머지(2·3번)는 골전도 또는 인이어로서 사용자가 명확히 원한 '오버이어' 착용형과 일치하지 않아 적합도가 떨어집니다. 제품 설명이 일부 혼란스럽고(착용 방식 표기 불일치 등) 추천 근거(착용감, 통풍, 아동용 안전성 등)에 대한 구체 언급이 부족해 효율성이 떨어집니다. 흐름 자체는 자연스러웠습니다."
+   },
+   "seconds": 44.5,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동할 때 쓸 무선 오버이어 헤드폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "운동할 때 주변 소리 차단하는 ANC 원해, 아니면 러닝 같은 야외에서 주변 소리 들리는 게 더 나아?"
+    },
+    {
+     "role": "user",
+     "content": "러닝 같은 야외 활동 땐 주변 소리 들리는 게 더 좋아. ANC는 필요 없고 안전상 들리는 게 낫다고 생각해."
+    },
+    {
+     "role": "assistant",
+     "content": "예산 어느 정도 생각하고 있어? (원 단위 대략 알려줘)"
+    },
+    {
+     "role": "user",
+     "content": "3만 원 안쪽으로 부담 없는 제품 원해. 대략 3만원 이하로 생각하고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "땀·비에 견디는 방수·방진(IP 등급) 꼭 필요해, 아니면 없어도 괜찮아?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "배터리 오래 가는 걸 우선할래, 아니면 가볍고 통풍 잘 되어 땀날 때 덜 불편한 걸 우선할래?"
+    },
+    {
+     "role": "user",
+     "content": "가볍고 통풍 잘 되어 땀날 때 덜 불편한 걸 우선할래. 착용감이 더 중요하고 배터리는 보통 수준이면 괜찮아."
+    },
+    {
+     "role": "assistant",
+     "content": "30,000원 안팎에서 중고/리퍼도 괜찮아, 아니면 무조건 새 제품만 원해?"
+    },
+    {
+     "role": "user",
+     "content": "상관없어."
+    },
+    {
+     "role": "assistant",
+     "content": "wireless over-ear sports headphones lightweight breathable sweat-resistant open-back under $30\n1. KNZ EZPZ 5.1 Bluetooth Over Ear Air Conduction Headphones, Sports, Out\n2. PTYOO Bone Conduction Headphones, Open-Ear Bluetooth 5.3 Headphones wi\n3. Kuuhsaaez Premium Bone Conduction Open-Ear Sport Headphones - Sweat Re"
+    }
+   ],
+   "extra": {
+    "search_query": "wireless over-ear sports headphones lightweight breathable sweat-resistant open-back under $30",
+    "target_in_candidates": false
+   },
+   "rank_pct": null
+  },
+  {
+   "scenario_id": "c4-6486",
+   "system": "random",
+   "target_id": "B08K2S5B88",
+   "recommended": [
+    "B0CF1LQGBM",
+    "B0C9Y5KZZN",
+    "B0C6XGYQCD"
+   ],
+   "target_rank": 523,
+   "questions": 7,
+   "attribute_match": 0.8333333333333334,
+   "judge": {
+    "fit": 3,
+    "naturalness": 2,
+    "efficiency": 1,
+    "comment": "추천된 제품들이 무선·마이크·저가 쪽인 점은 숨겨진 선호와 일부 맞지만, 제품 설명이 ‘earbuds’와 ‘over-ear’가 혼용되는 등 착용 방식이 불명확하고 3번은 가격이 예산보다 높아 부합도가 떨어집니다. 또한 아동 착용감(편안함)이나 방수성/내구성 등 중요한 우선조건에 대한 판단 근거가 제시되지 않았습니다. 대화 흐름은 반복적이고 동일한 질문(실내/야외·땀 여부 등)을 여러 번 되풀이해 자연스럽지 않고 비효율적이었습니다. 개선 제안: 착용 방식(진짜 오버이어인지 확인), 예산 상한(약 3만원)과 아동 친화적 착용감 여부를 확실히 묻고 그에 맞는 저가형 오버이어 모델(마이크 포함, 간단 기능, 방수·내구성 표기)을 1~3개로 간결하게 추천하면 좋겠습니다."
+   },
+   "seconds": 91.4,
+   "transcript": [
+    {
+     "role": "user",
+     "content": "운동할 때 쓸 무선 오버이어 헤드폰 찾고 있어."
+    },
+    {
+     "role": "assistant",
+     "content": "오 운동용 무선 오버이어구나, 그러면 주변 소음 막아주는 게 좋겠네. 운동은 주로 실내 헬스장에서 해?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아, 실내·야외 구분도 아직 모르겠구나. 운동할 때 주변 소음 때문에 음악을 크게 틀어야 해, 아니면 주위가 조용한 편이야?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아 아직 실내·야외 안 정했구나, 그래서 물이나 땀에 닿을지 불확실하네. 혹시 운동할 때 땀 엄청 흘리거나 비 오는 날에도 쓸 일이 있어?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아 아직 환경 몰라서, 운동 중에 통화할 일 있으면 음성 전달은 필요하겠네. 혹시 운동하면서 전화받거나 사람하고 얘기해?"
+    },
+    {
+     "role": "user",
+     "content": "응, 운동하면서 전화받거나 음성명령 쓸 일이 있어서 마이크 있는 모델 원해."
+    },
+    {
+     "role": "assistant",
+     "content": "그럼 운동 중 통화랑 음성명령 때문에 마이크 있는 게 필수구나. 이걸 매일 오래 쓸 거야, 아니면 잠깐 쓰고 바꿀 가능성이 높아?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "아직 결정 못 한 거구나. 고장 나도 괜찮아서 싸게 자주 바꿀래, 아니면 한 번 사면 오래 쓰는 튼튼한 걸로 살래?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "그렇구나, 아직 고민 중이구나. 운동할 때 보통 실내에서만 쓰는 편이야, 아니면 땀 엄청 흘리거나 비 올 때도 쓸 것 같아?"
+    },
+    {
+     "role": "user",
+     "content": "잘 모르겠어."
+    },
+    {
+     "role": "assistant",
+     "content": "말해 준 조건으로 골라 봤어.\n말해 준 조건으로는 232개가 똑같이 잘 맞아서, 평점이 좋은 순으로 골랐어.\n더 고려할 점이나 바꾸고 싶은 게 있으면 말해 줘. (예: 더 저렴한 걸로, 1번 말고)"
+    }
+   ],
+   "extra": {},
+   "rank_pct": 11.301
+  }
+ ]
+}
