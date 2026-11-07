@@ -2,6 +2,7 @@
 
     uv run python scripts/run_eval.py headphones --limit 10                 # ig, random, llm
     uv run python scripts/run_eval.py headphones --limit 3 --systems ig llm
+    uv run python scripts/run_eval.py headphones --start 10 --limit 34         # 시나리오 파일의 11번째부터 34개
 """
 
 import argparse
@@ -27,11 +28,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("category")
     parser.add_argument("--limit", type=int, default=10)
+    parser.add_argument("--start", type=int, default=0, help="시나리오 파일에서 이 순번(0부터)부터 limit개")
     parser.add_argument("--systems", nargs="+", default=list(SYSTEMS), choices=SYSTEMS)
     parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args()
 
-    scenarios = load_scenarios(args.category)[: args.limit]
+    scenarios = load_scenarios(args.category)[args.start: args.start + args.limit]
     if not scenarios:
         sys.exit("시나리오 없음. scripts/build_scenarios.py를 먼저 실행한다")
     init_db(settings.db_path)

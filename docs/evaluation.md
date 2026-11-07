@@ -35,12 +35,13 @@
 - 가상 사용자가 정답 상품의 속성을 알고 답하는 이유: 질문에 일관되게 답해야 시스템 간 비교가 공정하다(IG 평가의 표준 방식). 리뷰만 주면 속성 질문에 "잘 모르겠어"가 많아져 결과 분산이 커진다.
 - 가격은 "실제 가격이 들어가는 예산"으로 쓴다(예: $35 → "about $30-40, no more than $50").
 - **영어권 사용자 (2026-10-31):** C4 리뷰·상품 정보·실제 구매자가 모두 영어라, 가상 사용자를 영어로 말하는 Amazon 구매자로 바꿨다. 시나리오 생성·가상 사용자·심판·`llm` 비교군의 프롬프트를 모두 영어로 쓰고, 같은 seed로 시나리오 10개(같은 C4 질의)를 다시 만들었다. 챗봇은 사용자 발화의 언어로 답한다([LLM 파서 8절](llm-parser.md#8-요청-분류와-safety)). 한국어 시나리오는 run 1~5에서 썼다.
-- 결과: `backend/evaluation/scenarios/<id>.jsonl` (git 포함). 지금은 10개(seed 42, 위 조건). 운동용 무선 이어폰이 가장 많고 재택근무·운전용 헤드셋, 오버이어, 골전도도 있다.
+- 결과: `backend/evaluation/scenarios/<id>.jsonl` (git 포함). 위 조건을 만족하는 44개 전부다. 앞 10개(seed 42)는 run 3~13에서 쓴 것으로, 운동용 무선 이어폰이 가장 많고 재택근무·운전용 헤드셋, 오버이어, 골전도도 있다. 뒤 34개는 2026-11-04에 `--extend`로 덧붙였다(기존 10개의 페르소나는 다시 쓰지 않음). 출퇴근·여행·업무용, ANC 이어폰, 오버이어, 아이용, 수면용 헤드밴드까지 범위가 넓다.
 
 ```bash
 cd backend
 uv run python scripts/download_amazon_c4.py
 uv run python scripts/build_scenarios.py headphones --limit 10
+uv run python scripts/build_scenarios.py headphones --extend --limit 34   # 기존 시나리오는 그대로 두고 남은 후보를 덧붙임
 ```
 
 ## 2. 비교하는 시스템
@@ -73,6 +74,7 @@ uv run python scripts/build_scenarios.py headphones --limit 10
 - 가상 사용자·심판·`llm` 비교군은 `OPENAI_MODEL`(기본 `gpt-5-mini` + `low`)을 쓴다.
 - **가상 사용자 규칙:** 물은 것만 1~2문장으로 답한다. 챗봇이 자기에 대해 틀린 짐작("so you want noise cancelling")을 말하면 답하면서 짧게 바로잡는다(2026-11-03, 실제 사용자처럼). 페르소나에 없는 것을 물으면 그 사람의 상황에서 가장 그럴듯하게 답하고, 정말 알 수 없을 때만 "잘 모르겠어"라고 한다(run 3~5에서 "잘 모르겠어"로 질문을 낭비했다). 페르소나에 없는 강한 요구는 지어내지 않는다.
 - **추천 전 확인:** 확인 질문(최대 3번)은 질문 수와 따로 `confirms`로 센다. 대화 최대 길이는 시스템 응답 11번이다.
+- **추천 집중도·속성 일치 확장:** 저장된 run의 추천 목록으로 시스템 간·사용자 간 중복, 같은 시나리오 반복의 일관성, 인기도 편향, 속성별 일치와 우연 기준선 보정(lift)을 계산해 CSV로 남긴다([diversity.md](diversity.md)).
 - **텍스트 정렬 효과:** `ig`·`random`은 동률 정렬에서 텍스트 관련도를 뺀 정답 순위 백분율도 함께 남긴다(`extra.rank_pct_no_text`, 요약의 `rank_pct_mean_no_text`·`rank_pct_median_no_text`). 같은 대화에서 정렬만 다른 비교다([IG 엔진 4절](ig-engine.md#4-추천과-한계-표시)).
 
 ## 4. 실행
@@ -86,6 +88,7 @@ uv run python scripts/build_scenarios.py headphones --limit 10
 cd backend
 uv run python scripts/run_eval.py headphones --limit 10                 # ig, random, llm
 uv run python scripts/run_eval.py headphones --limit 3 --systems ig llm
+uv run python scripts/run_eval.py headphones --start 10 --limit 34      # 시나리오 파일의 11번째부터 34개 (run 14)
 ```
 결과는 SQLite(`eval_runs`, `eval_episodes`, 매뉴얼은 `eval_manual`)에 남고 평가 모드에서도 보인다. 앱 DB(`backend/data/app.db`)는 저장소에 올려 두어 팀원도 평가 모드에서 run 기록을 본다. 의미 있는 run은 run 3부터이고, 지금 구조와 바로 비교할 수 있는 것은 run 8부터다([README 평가 실행 기록](../README.md#평가-실행-기록-run별-코드-변경)). 10 × 3 한 번에 약 12분(대화 하나 ig·random 약 65초, llm 약 33초, 4개 동시).
 
@@ -250,3 +253,157 @@ run 2(조건 없이 뽑은 이전 시나리오 10개)도 같은 경향이었다:
 - 가상 사용자가 정답 상품의 리뷰를 보고 말하므로, 대화와 정답 상품 글의 텍스트 관련도가 실제보다 높게 나올 수 있다(예: "waterproof (IPX5)"처럼 상품 설명의 표현을 그대로 씀).
 - 서버의 `--reload`가 코드 변경으로 재시작되면 실행 중이던 백그라운드 평가가 끊긴다(상태가 `running`으로 남음). 긴 평가는 명령줄로 돌린다.
 - 테스트: [test_evaluation.py](../backend/tests/test_evaluation.py) (가짜 LLM으로 에피소드·API·지표 확인)
+
+
+
+## 7. Literature-Grounded LLM Judge Evaluation Rubric
+
+### 7.1. Scope and Rationale
+
+We evaluate conversational recommendation systems using an LLM Judge that receives three inputs:
+
+1. **Hidden Persona:** The simulated shopper's preferences and requirements.
+2. **Conversation Transcript:** The dialogue between the simulated shopper and the recommendation chatbot.
+3. **Recommended Products:** Product titles, prices, and available catalog attributes.
+
+The LLM Judge independently evaluates three dimensions on a 1–5 integer scale:
+
+- **Naturalness:** The linguistic and conversational quality of the chatbot.
+- **Fit (Recommendation Appropriateness):** How well the recommended products satisfy the shopper's preferences and constraints.
+- **Efficiency:** Whether the chatbot reaches useful recommendations without unnecessary or repetitive questions.
+
+The separation between conversational quality and recommendation effectiveness is motivated by Chen et al. [1]. Explicit evaluation criteria are motivated by G-Eval [2], while Jannach [3] provides broader motivation for evaluating both recommendation outcomes and user interaction quality.
+
+**Important:** The following 1–5 scoring rubrics are designed specifically for this project. They are inspired by the referenced literature but are not directly reproduced or validated scoring scales from these papers.
+
+### 7.2. Naturalness: Chatbot Dialogue Quality (1–5)
+
+**Definition:** Naturalness measures whether the chatbot communicates fluently and maintains a coherent, contextually appropriate conversation.
+
+The evaluation considers:
+
+- **Linguistic Fluency:** Whether the chatbot's sentences are clear, grammatical, and natural.
+- **Contextual Coherence:** Whether responses remain consistent with the conversation history.
+- **Conversational Flow:** Whether questions and responses transition smoothly.
+- **Human-Likeness:** Whether the chatbot sounds conversational rather than like a rigid questionnaire.
+
+| Score | Level | Evaluation Criterion |
+|---|---|---|
+| 5 | Excellent | Consistently fluent, context-aware, and smooth dialogue without noticeably robotic turns. |
+| 4 | Good | Generally natural dialogue with only minor awkward or formulaic expressions. |
+| 3 | Acceptable | Understandable but noticeably scripted, abrupt, or survey-like at times. |
+| 2 | Poor | Frequent awkward wording or weak conversational continuity. |
+| 1 | Very Poor | Persistently unnatural, confusing, or incoherent chatbot language. |
+
+**Scoring Principles:**
+
+- Evaluate the chatbot's language, not the simulated shopper's writing style.
+- Do not reward verbosity or excessive friendliness.
+- Short but contextually appropriate responses may receive high scores.
+- Recommendation accuracy should not affect Naturalness scores.
+
+### 7.3. Fit / Recommendation Appropriateness (1–5)
+
+**Definition:** Fit measures how well the recommended products satisfy the shopper's preferences, explicit constraints, and intended use cases.
+
+The evaluation considers:
+
+- **Preference Alignment:** Whether products match the shopper's expressed preferences.
+- **Constraint Satisfaction:** Whether explicit constraints such as budget, connectivity, and form factor are satisfied.
+- **Use-Case Relevance:** Whether the products are appropriate for the shopper's intended activities.
+- **Recommendation Quality:** Whether the highest-ranked product is suitable and other recommendations provide reasonable alternatives.
+
+| Score | Level | Evaluation Criterion |
+|---|---|---|
+| 5 | Excellent | The top recommendation satisfies all verifiable key constraints, strongly matches the use case, and other recommendations are sensible alternatives. |
+| 4 | Good | Key constraints are satisfied, with only minor preference gaps or uncertainty. |
+| 3 | Acceptable | The recommendation is partly suitable, but one important mismatch or substantial uncertainty remains. |
+| 2 | Poor | Several important mismatches or weak relevance to the shopper's needs. |
+| 1 | Very Poor | Recommendations are largely irrelevant, or no product is recommended. |
+
+**Scoring Principles:**
+
+- Prioritize explicit hard constraints over softer preferences.
+- Give greater importance to the first recommendation while considering all recommended products.
+- If the shopper corrects an earlier preference, prioritize the latest explicit statement.
+- Missing product attributes should be treated as unknown rather than automatically absent or present.
+- Do not invent product specifications.
+- Do not require the chatbot to recommend the exact historically purchased product. Its rank percentile is evaluated separately.
+
+**Conceptual Distinction:**
+
+In Chen et al. [1], linguistic Appropriateness concerns the suitability of language expression. In this project, Recommendation Appropriateness refers to product suitability and is conceptually closer to recommendation-item effectiveness.
+
+These constructs should not be treated as equivalent.
+
+### 7.4. Efficiency and Scoring Procedure
+
+Efficiency retains the existing evaluation dimension: whether the chatbot asks only necessary questions and avoids unnecessary repetition while obtaining sufficient information for useful recommendations.
+
+| Score | Evaluation Criterion |
+|---|---|
+| 5 | No unnecessary or repetitive questions; efficient progression toward recommendations. |
+| 4 | Mostly efficient, with only minor redundancy. |
+| 3 | Some avoidable questions or delays. |
+| 2 | Significant repetition or low-value questions that slow progress. |
+| 1 | Persistent repetition, wasted turns, or inability to progress. |
+
+The LLM Judge evaluates Naturalness, Fit, and Efficiency independently.
+
+The existing `JudgeScores` output schema is preserved:
+
+```python
+class JudgeScores(BaseModel):
+    fit: int
+    naturalness: int
+    efficiency: int
+    comment: str
+```
+
+The `comment` field provides a brief evidence-based explanation of the assigned scores.
+
+The target item's rank percentile and attribute-matching metrics are computed separately from the LLM Judge.
+
+The implementation is located in:
+
+`backend/app/evaluation/judge.py`
+
+### 7.5. Interpretation and Limitations
+
+Several limitations should be considered when interpreting evaluation results.
+
+**1. LLM-as-a-Judge Bias**
+
+LLM-based evaluation can exhibit systematic biases, including preferences related to response style, length, or presentation [4].
+
+**2. Simulated User Bias**
+
+The simulated shopper and LLM Judge may share model-specific preferences. The simulated persona is also constructed using information from the historically purchased product.
+
+**3. Incomplete Product Metadata**
+
+Some catalog attributes are missing or uncertain. The LLM Judge must avoid treating missing attributes as confirmed negative or positive evidence.
+
+**4. Limited Evaluation Scenarios**
+
+Evaluations conducted on only a small number of Amazon-C4 scenarios provide preliminary evidence and should not be used to claim statistically reliable superiority.
+
+**5. Rubric Changes and Comparability**
+
+Because the LLM Judge prompt has been revised, scores obtained using the previous rubric are not directly comparable with scores obtained using the updated rubric.
+
+IG, Random, and LLM baseline systems should therefore be evaluated using the same scenarios and the same updated scoring criteria.
+
+**6. Human Evaluation**
+
+When feasible, human ratings should be collected for a subset of conversations to assess the consistency and validity of LLM Judge scores.
+
+### 7.6. References
+
+[1] Chen, N., Dai, Q., Dong, X., Wu, X.-M., & Dong, Z. (2025). *Evaluating Conversational Recommender Systems with Large Language Models: A User-Centric Evaluation Framework.* arXiv:2501.09493. https://arxiv.org/abs/2501.09493
+
+[2] Liu, Y., Iter, D., Xu, Y., Wang, S., Xu, R., & Zhu, C. (2023). *G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment.* Proceedings of EMNLP 2023, 2511–2522. https://aclanthology.org/2023.emnlp-main.153/
+
+[3] Jannach, D. (2023). *Evaluating Conversational Recommender Systems: A Landscape of Research.* Artificial Intelligence Review. https://doi.org/10.1007/s10462-022-10229-x
+
+[4] Zheng, L., et al. (2023). *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.* arXiv:2306.05685. https://arxiv.org/abs/2306.05685

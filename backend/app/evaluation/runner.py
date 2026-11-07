@@ -72,6 +72,8 @@ def attribute_match(scenario: Scenario, product_attrs: dict[str, str],
     """1위 상품이 정답 상품의 속성과 얼마나 같은가 (정답의 알려진 속성 중 같은 비율).
 
     spec을 주면 지금 정의에 있는 속성만 센다(시나리오에 남은, 정의에서 뺀 속성은 제외).
+
+    @see docs/diversity.md#2-지표-정의
     """
     target = {k: v for k, v in scenario.target_attributes.items() if spec is None or spec.has_attribute(k)}
     if not target:

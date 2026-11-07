@@ -1,0 +1,4 @@
+group,pair,same_episode_jaccard,union_jaccard
+pool13-14,ig-random,0.2455,0.3011
+pool13-14,ig-llm,0.0182,0.0495
+pool13-14,random-llm,0.0182,0.0459
