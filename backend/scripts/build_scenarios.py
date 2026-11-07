@@ -2,9 +2,12 @@
 
     uv run python scripts/download_amazon_c4.py          # 먼저 C4를 받는다
     uv run python scripts/build_scenarios.py headphones --limit 10
+    uv run python scripts/build_scenarios.py headphones --extend --limit 34   # 기존 시나리오는 그대로 두고 덧붙임
 
 정답 상품이 카탈로그(SQLite)에 있고 긍정(평점 ≥ --min-rating)·충분히 긴(≥ --min-review-chars) 리뷰의
 C4 질의 중 limit개를 seed로 뽑아, LLM으로 페르소나·첫 마디를 만든다.
+--extend면 이미 있는 시나리오(같은 C4 질의)는 후보에서 빼고 새로 뽑아 파일 뒤에 덧붙인다.
+기존 시나리오의 페르소나를 다시 쓰지 않으므로, 그 시나리오로 돌린 이전 run과 계속 비교할 수 있다.
 결과: evaluation/scenarios/<id>.jsonl (git 포함)
 
 @see docs/briefing.md#8-남은-문제-다음-단계-일-나누기
@@ -23,7 +26,8 @@ from app.catalog.repository import load_category, load_products  # noqa: E402
 from app.config import settings  # noqa: E402
 from app.db import connect  # noqa: E402
 from app.evaluation.scenarios import (  # noqa: E402
-    C4_TEST, MIN_RATING, MIN_REVIEW_CHARS, c4_candidates, generate_scenario, sample_rows, save_scenarios,
+    C4_TEST, MIN_RATING, MIN_REVIEW_CHARS, c4_candidates, generate_scenario, load_scenarios, sample_rows,
+    save_scenarios,
 )
 from app.llm import get_llm_client  # noqa: E402
 
@@ -35,6 +39,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--min-rating", type=float, default=MIN_RATING)
     parser.add_argument("--min-review-chars", type=int, default=MIN_REVIEW_CHARS)
+    parser.add_argument("--extend", action="store_true", help="기존 시나리오를 두고, 남은 후보에서 뽑아 덧붙인다")
     args = parser.parse_args()
 
     if not C4_TEST.exists():
@@ -47,13 +52,18 @@ def main() -> None:
 
     in_catalog = c4_candidates(set(products), min_rating=0, min_review_chars=0)
     rows = c4_candidates(set(products), min_rating=args.min_rating, min_review_chars=args.min_review_chars)
-    picked = sample_rows(rows, args.limit, args.seed)
+    existing = load_scenarios(args.category) if args.extend else []
+    used = {s.id for s in existing}
+    remaining = [r for r in rows if f"c4-{r['qid']}" not in used]
+    picked = sample_rows(remaining, args.limit, args.seed)
     print(f"C4 질의 중 정답이 카탈로그에 있는 것 {len(in_catalog)}개 → 평점 ≥ {args.min_rating}, "
-          f"리뷰 ≥ {args.min_review_chars}자 {len(rows)}개 → {len(picked)}개 사용")
+          f"리뷰 ≥ {args.min_review_chars}자 {len(rows)}개"
+          + (f" → 기존 {len(existing)}개 제외 {len(remaining)}개" if args.extend else "")
+          + f" → {len(picked)}개 사용")
     client = get_llm_client()
     with ThreadPoolExecutor(max_workers=8) as pool:
         scenarios = list(pool.map(lambda r: generate_scenario(client, spec, r, products[r["item_id"]]), picked))
-    path = save_scenarios(args.category, scenarios)
+    path = save_scenarios(args.category, existing + scenarios)
     for s in scenarios:
         print(f"  {s.id}: {s.brief}  /  첫 마디: {s.opening}")
     print(f"-> {path}")

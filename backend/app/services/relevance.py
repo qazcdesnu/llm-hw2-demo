@@ -13,7 +13,10 @@ import hashlib
 import json
 import logging
 import sqlite3
+import threading
+from collections import OrderedDict
 from collections.abc import Callable
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -35,10 +38,53 @@ SKIP_DETAILS = {"Best Sellers Rank", "Date First Available", "Is Discontinued By
 Embedder = Callable[[str], list[float]]
 
 
-def embedder_for(client: LLMClient) -> Embedder:
-    """설정의 임베딩 모델로 글 하나를 임베딩하는 함수 (상품 임베딩과 같은 모델·차원)."""
-    model, dims = settings.openai_embedding_model, settings.openai_embedding_dimensions
-    return lambda text: client.embed([text], model=model, dimensions=dims)[0]
+class CachedEmbedder:
+    """질의 임베딩. 같은 글(모델·차원 포함)은 한 번만 계산하고, 미리 계산(prefetch)해 둘 수 있다.
+
+    추천 전 확인 질문을 하는 턴에 그때의 질의 글을 백그라운드로 미리 임베딩해 두고, 다음 턴에 추천할 때
+    질의 글이 글자 하나까지 같으면 그 결과를 쓴다. 같은 입력의 결과를 다시 쓰는 것이라 순위는 바뀌지 않고,
+    글이 다르면 새로 계산한다. 미리 보낸 요청이 아직 끝나지 않았으면 그 결과를 기다린다. 실패한 결과는
+    남기지 않는다(호출한 쪽은 지금처럼 BM25만 쓴다).
+
+    @docid chat.cached-embedder
+    @see docs/ig-engine.md#4-추천과-한계-표시
+    """
+
+    MAX_ENTRIES = 256
+    _cache: "OrderedDict[tuple[str, int, str], Future]" = OrderedDict()
+    _lock = threading.Lock()
+    _pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="embed-prefetch")
+
+    def __init__(self, client: LLMClient, model: str, dimensions: int):
+        self.client, self.model, self.dimensions = client, model, dimensions
+
+    def _future(self, text: str) -> Future:
+        key = (self.model, self.dimensions, text)
+        with self._lock:
+            future = self._cache.get(key)
+            if future is None or (future.done() and future.exception() is not None):
+                future = self._pool.submit(self._embed, text)
+                self._cache[key] = future
+            self._cache.move_to_end(key)
+            while len(self._cache) > self.MAX_ENTRIES:
+                self._cache.popitem(last=False)
+        return future
+
+    def _embed(self, text: str) -> list[float]:
+        return self.client.embed([text], model=self.model, dimensions=self.dimensions)[0]
+
+    def prefetch(self, text: str) -> None:
+        """결과를 기다리지 않고 미리 계산을 시작한다."""
+        if text.strip():
+            self._future(text)
+
+    def __call__(self, text: str) -> list[float]:
+        return self._future(text).result()
+
+
+def embedder_for(client: LLMClient) -> CachedEmbedder:
+    """설정의 임베딩 모델로 글 하나를 임베딩하는 함수 (상품 임베딩과 같은 모델·차원, 결과 캐시)."""
+    return CachedEmbedder(client, settings.openai_embedding_model, settings.openai_embedding_dimensions)
 
 
 def product_text(title: str, features: str | None, details: str | None) -> str:

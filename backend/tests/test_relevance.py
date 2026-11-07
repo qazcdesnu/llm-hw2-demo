@@ -112,3 +112,70 @@ def test_product_text_skips_ranking_details():
     text = product_text("Earbuds", json.dumps(["Long battery"]),
                         json.dumps({"Item Weight": "5 g", "Best Sellers Rank": "#1"}))
     assert text == "Earbuds\nLong battery\nItem Weight: 5 g"
+
+
+# ---------------------------------------------------------------- 질의 임베딩 캐시·미리 계산
+
+class CountingClient:
+    """embed 호출 수를 세는 가짜 클라이언트. fail=True면 실패한다."""
+
+    def __init__(self, fail=False):
+        self.calls, self.fail = [], fail
+
+    def embed(self, texts, *, model, dimensions):
+        self.calls.append(texts[0])
+        if self.fail:
+            raise RuntimeError("down")
+        return [[float(len(texts[0])), 1.0]]
+
+
+def fresh_embedder(client, model="m-test"):
+    from app.services.relevance import CachedEmbedder
+
+    CachedEmbedder._cache.clear()
+    return CachedEmbedder(client, model, 2)
+
+
+def test_same_text_is_embedded_once_and_prefetch_is_reused():
+    client = CountingClient()
+    embed = fresh_embedder(client)
+    embed.prefetch("wireless gym")
+    assert embed("wireless gym") == [12.0, 1.0]  # 미리 계산한 결과 (같은 입력 → 같은 결과)
+    assert embed("wireless gym") == [12.0, 1.0]
+    assert client.calls == ["wireless gym"]
+    embed("wireless gym, under $30")  # 글이 조금이라도 다르면 새로 계산
+    assert client.calls == ["wireless gym", "wireless gym, under $30"]
+
+
+def test_failed_embedding_is_not_cached():
+    import pytest
+
+    client = CountingClient(fail=True)
+    embed = fresh_embedder(client, "m-fail")
+    with pytest.raises(RuntimeError):
+        embed("q")
+    client.fail = False
+    assert embed("q") == [1.0, 1.0]  # 실패는 남기지 않고 다시 계산한다
+    assert client.calls == ["q", "q"]
+
+
+def test_confirmation_turn_prefetches_the_query_used_for_recommendation():
+    """확인 질문 턴에 미리 계산한 글과, 바뀐 게 없을 때 추천 턴에서 쓰는 글이 같다."""
+    from app.services.chat import _ask_confirmation, _Understanding
+
+    prefetched, embedded = [], []
+
+    class Recorder:
+        def prefetch(self, text):
+            prefetched.append(text)
+
+        def __call__(self, text):
+            embedded.append(text)
+            return [1.0, 0.0]
+
+    index = TextIndex.from_texts(TEXTS, {pid: [1.0, 0.0] for pid in TEXTS})
+    catalog = build_catalog(SPEC, products(), text=index, embed=Recorder())
+    state = state_with(("connection", "wireless"), keywords=["running"])
+    _ask_confirmation(catalog, state, catalog.preference(state), _Understanding())
+    tie_order(catalog, state)  # 바뀐 게 없으면 다음 턴의 추천이 이 정렬을 쓴다
+    assert prefetched and prefetched == embedded

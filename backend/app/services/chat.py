@@ -390,6 +390,10 @@ def _ask_confirmation(catalog: Catalog, state: ChatState, pref: PreferenceState,
     spec, lang = catalog.spec, state.language
     state.confirming = True
     state.confirms += 1
+    # 다음 턴에 그대로 추천하면 쓸 질의 임베딩을 미리 계산해 둔다 (글이 같을 때만 쓰므로 결과는 같다)
+    prefetch = getattr(catalog.embed, "prefetch", None)
+    if prefetch is not None and catalog.text is not None and catalog.text.vectors is not None:
+        prefetch(state.memory.search_text())
     reply = (say.acknowledgement(understood.changes, lang) + say.guess_note(understood.guesses, lang)
              + say.confirmation(_summary(spec, state, lang), lang, last=state.confirms >= MAX_CONFIRMS))
     debug = build_debug(catalog, catalog.engine.step(pref), state, pref, understood.request_type)
