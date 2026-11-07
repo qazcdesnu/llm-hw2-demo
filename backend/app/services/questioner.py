@@ -53,6 +53,7 @@ class QuestionDraft(BaseModel):
 def build_instructions(spec: CategorySpec) -> str:
     """@docid chat.question-persona
     @see docs/llm-parser.md#5-질문-작성기-친구-페르소나
+    @see docs/pepper-prompt-changes.md#1-2-질문-작성기-전에-쓰던-물건-장면
     """
     return "\n".join([
         f"너는 {spec.name}에 빠삭한 친한 친구다. 친구가 {spec.name}을(를) 고르는 걸 메신저로 도와준다.",
@@ -79,6 +80,8 @@ def build_instructions(spec: CategorySpec) -> str:
         "## 돌려 묻는 방법 (approach에 한 줄로 짧게 정리하고 text를 쓴다)",
         "1. 그 속성의 값이 무엇이냐에 따라 달라지는 친구의 생활 장면을 떠올린다:",
         "   어디서·언제·누구와·무엇을 하면서 쓰는지, 몸이나 습관, 예전에 겪은 불편, 아끼는 것.",
+        "   예전에 써 본 같은 종류의 물건(무엇이 좋았고 무엇이 불편했는지)은 한 번의 답으로 여러 가지를 알려 주는",
+        "   좋은 장면이다. 아직 그 얘기를 안 들었다면 먼저 떠올린다.",
         "2. 그중 지금까지의 대화와 가장 자연스럽게 이어지는 장면 하나를 고른다.",
         "   친구가 이미 말한 상황이 있으면 그 상황을 이어서 파고든다.",
         "3. 장소·환경만 묻고 끝내지 않는다. 같은 곳에서 써도 원하는 게 다를 수 있다",
@@ -120,6 +123,8 @@ def build_instructions(spec: CategorySpec) -> str:
         "- 커피 머신 · 알아낼 것: 우유 스팀 기능 · 답할 언어: 영어 →",
         "  text: \"Oh nice, a new machine! At a café, are you more of an americano or a latte person?\"",
         "- 커피 머신 · 다시 묻기 → text: \"우유 데워서 거품 내 주는 것도 있으면 좋겠어, 아니면 커피만 내리면 돼?\"",
+        "- 커피 머신 · 알아낼 것: 원두 분쇄 기능 → approach: 장면: 전에 쓰던 기계; 원두 갈기 귀찮았음 → 필요, 캡슐 씀 → 불필요",
+        "  text: \"오 바꾸는 거구나! 전에 쓰던 건 뭐가 제일 아쉬웠어?\"",
     ])
 
 

@@ -253,3 +253,157 @@ run 2(조건 없이 뽑은 이전 시나리오 10개)도 같은 경향이었다:
 - 가상 사용자가 정답 상품의 리뷰를 보고 말하므로, 대화와 정답 상품 글의 텍스트 관련도가 실제보다 높게 나올 수 있다(예: "waterproof (IPX5)"처럼 상품 설명의 표현을 그대로 씀).
 - 서버의 `--reload`가 코드 변경으로 재시작되면 실행 중이던 백그라운드 평가가 끊긴다(상태가 `running`으로 남음). 긴 평가는 명령줄로 돌린다.
 - 테스트: [test_evaluation.py](../backend/tests/test_evaluation.py) (가짜 LLM으로 에피소드·API·지표 확인)
+
+
+
+## 7. Literature-Grounded LLM Judge Evaluation Rubric
+
+### 7.1. Scope and Rationale
+
+We evaluate conversational recommendation systems using an LLM Judge that receives three inputs:
+
+1. **Hidden Persona:** The simulated shopper's preferences and requirements.
+2. **Conversation Transcript:** The dialogue between the simulated shopper and the recommendation chatbot.
+3. **Recommended Products:** Product titles, prices, and available catalog attributes.
+
+The LLM Judge independently evaluates three dimensions on a 1–5 integer scale:
+
+- **Naturalness:** The linguistic and conversational quality of the chatbot.
+- **Fit (Recommendation Appropriateness):** How well the recommended products satisfy the shopper's preferences and constraints.
+- **Efficiency:** Whether the chatbot reaches useful recommendations without unnecessary or repetitive questions.
+
+The separation between conversational quality and recommendation effectiveness is motivated by Chen et al. [1]. Explicit evaluation criteria are motivated by G-Eval [2], while Jannach [3] provides broader motivation for evaluating both recommendation outcomes and user interaction quality.
+
+**Important:** The following 1–5 scoring rubrics are designed specifically for this project. They are inspired by the referenced literature but are not directly reproduced or validated scoring scales from these papers.
+
+### 7.2. Naturalness: Chatbot Dialogue Quality (1–5)
+
+**Definition:** Naturalness measures whether the chatbot communicates fluently and maintains a coherent, contextually appropriate conversation.
+
+The evaluation considers:
+
+- **Linguistic Fluency:** Whether the chatbot's sentences are clear, grammatical, and natural.
+- **Contextual Coherence:** Whether responses remain consistent with the conversation history.
+- **Conversational Flow:** Whether questions and responses transition smoothly.
+- **Human-Likeness:** Whether the chatbot sounds conversational rather than like a rigid questionnaire.
+
+| Score | Level | Evaluation Criterion |
+|---|---|---|
+| 5 | Excellent | Consistently fluent, context-aware, and smooth dialogue without noticeably robotic turns. |
+| 4 | Good | Generally natural dialogue with only minor awkward or formulaic expressions. |
+| 3 | Acceptable | Understandable but noticeably scripted, abrupt, or survey-like at times. |
+| 2 | Poor | Frequent awkward wording or weak conversational continuity. |
+| 1 | Very Poor | Persistently unnatural, confusing, or incoherent chatbot language. |
+
+**Scoring Principles:**
+
+- Evaluate the chatbot's language, not the simulated shopper's writing style.
+- Do not reward verbosity or excessive friendliness.
+- Short but contextually appropriate responses may receive high scores.
+- Recommendation accuracy should not affect Naturalness scores.
+
+### 7.3. Fit / Recommendation Appropriateness (1–5)
+
+**Definition:** Fit measures how well the recommended products satisfy the shopper's preferences, explicit constraints, and intended use cases.
+
+The evaluation considers:
+
+- **Preference Alignment:** Whether products match the shopper's expressed preferences.
+- **Constraint Satisfaction:** Whether explicit constraints such as budget, connectivity, and form factor are satisfied.
+- **Use-Case Relevance:** Whether the products are appropriate for the shopper's intended activities.
+- **Recommendation Quality:** Whether the highest-ranked product is suitable and other recommendations provide reasonable alternatives.
+
+| Score | Level | Evaluation Criterion |
+|---|---|---|
+| 5 | Excellent | The top recommendation satisfies all verifiable key constraints, strongly matches the use case, and other recommendations are sensible alternatives. |
+| 4 | Good | Key constraints are satisfied, with only minor preference gaps or uncertainty. |
+| 3 | Acceptable | The recommendation is partly suitable, but one important mismatch or substantial uncertainty remains. |
+| 2 | Poor | Several important mismatches or weak relevance to the shopper's needs. |
+| 1 | Very Poor | Recommendations are largely irrelevant, or no product is recommended. |
+
+**Scoring Principles:**
+
+- Prioritize explicit hard constraints over softer preferences.
+- Give greater importance to the first recommendation while considering all recommended products.
+- If the shopper corrects an earlier preference, prioritize the latest explicit statement.
+- Missing product attributes should be treated as unknown rather than automatically absent or present.
+- Do not invent product specifications.
+- Do not require the chatbot to recommend the exact historically purchased product. Its rank percentile is evaluated separately.
+
+**Conceptual Distinction:**
+
+In Chen et al. [1], linguistic Appropriateness concerns the suitability of language expression. In this project, Recommendation Appropriateness refers to product suitability and is conceptually closer to recommendation-item effectiveness.
+
+These constructs should not be treated as equivalent.
+
+### 7.4. Efficiency and Scoring Procedure
+
+Efficiency retains the existing evaluation dimension: whether the chatbot asks only necessary questions and avoids unnecessary repetition while obtaining sufficient information for useful recommendations.
+
+| Score | Evaluation Criterion |
+|---|---|
+| 5 | No unnecessary or repetitive questions; efficient progression toward recommendations. |
+| 4 | Mostly efficient, with only minor redundancy. |
+| 3 | Some avoidable questions or delays. |
+| 2 | Significant repetition or low-value questions that slow progress. |
+| 1 | Persistent repetition, wasted turns, or inability to progress. |
+
+The LLM Judge evaluates Naturalness, Fit, and Efficiency independently.
+
+The existing `JudgeScores` output schema is preserved:
+
+```python
+class JudgeScores(BaseModel):
+    fit: int
+    naturalness: int
+    efficiency: int
+    comment: str
+```
+
+The `comment` field provides a brief evidence-based explanation of the assigned scores.
+
+The target item's rank percentile and attribute-matching metrics are computed separately from the LLM Judge.
+
+The implementation is located in:
+
+`backend/app/evaluation/judge.py`
+
+### 7.5. Interpretation and Limitations
+
+Several limitations should be considered when interpreting evaluation results.
+
+**1. LLM-as-a-Judge Bias**
+
+LLM-based evaluation can exhibit systematic biases, including preferences related to response style, length, or presentation [4].
+
+**2. Simulated User Bias**
+
+The simulated shopper and LLM Judge may share model-specific preferences. The simulated persona is also constructed using information from the historically purchased product.
+
+**3. Incomplete Product Metadata**
+
+Some catalog attributes are missing or uncertain. The LLM Judge must avoid treating missing attributes as confirmed negative or positive evidence.
+
+**4. Limited Evaluation Scenarios**
+
+Evaluations conducted on only a small number of Amazon-C4 scenarios provide preliminary evidence and should not be used to claim statistically reliable superiority.
+
+**5. Rubric Changes and Comparability**
+
+Because the LLM Judge prompt has been revised, scores obtained using the previous rubric are not directly comparable with scores obtained using the updated rubric.
+
+IG, Random, and LLM baseline systems should therefore be evaluated using the same scenarios and the same updated scoring criteria.
+
+**6. Human Evaluation**
+
+When feasible, human ratings should be collected for a subset of conversations to assess the consistency and validity of LLM Judge scores.
+
+### 7.6. References
+
+[1] Chen, N., Dai, Q., Dong, X., Wu, X.-M., & Dong, Z. (2025). *Evaluating Conversational Recommender Systems with Large Language Models: A User-Centric Evaluation Framework.* arXiv:2501.09493. https://arxiv.org/abs/2501.09493
+
+[2] Liu, Y., Iter, D., Xu, Y., Wang, S., Xu, R., & Zhu, C. (2023). *G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment.* Proceedings of EMNLP 2023, 2511–2522. https://aclanthology.org/2023.emnlp-main.153/
+
+[3] Jannach, D. (2023). *Evaluating Conversational Recommender Systems: A Landscape of Research.* Artificial Intelligence Review. https://doi.org/10.1007/s10462-022-10229-x
+
+[4] Zheng, L., et al. (2023). *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena.* arXiv:2306.05685. https://arxiv.org/abs/2306.05685
