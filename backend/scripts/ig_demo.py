@@ -9,6 +9,7 @@
     # 질문 정책 비교용
     uv run python scripts/ig_demo.py headphones --target B0BHR5VQC9 --policy random --seed 1
 
+@see docs/diversity.md#5-다음-실험-설계만-실행하지-않음
 @see docs/ig-engine.md#5-실행해-보기
 """
 

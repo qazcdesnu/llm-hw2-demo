@@ -35,12 +35,13 @@
 - 가상 사용자가 정답 상품의 속성을 알고 답하는 이유: 질문에 일관되게 답해야 시스템 간 비교가 공정하다(IG 평가의 표준 방식). 리뷰만 주면 속성 질문에 "잘 모르겠어"가 많아져 결과 분산이 커진다.
 - 가격은 "실제 가격이 들어가는 예산"으로 쓴다(예: $35 → "about $30-40, no more than $50").
 - **영어권 사용자 (2026-10-31):** C4 리뷰·상품 정보·실제 구매자가 모두 영어라, 가상 사용자를 영어로 말하는 Amazon 구매자로 바꿨다. 시나리오 생성·가상 사용자·심판·`llm` 비교군의 프롬프트를 모두 영어로 쓰고, 같은 seed로 시나리오 10개(같은 C4 질의)를 다시 만들었다. 챗봇은 사용자 발화의 언어로 답한다([LLM 파서 8절](llm-parser.md#8-요청-분류와-safety)). 한국어 시나리오는 run 1~5에서 썼다.
-- 결과: `backend/evaluation/scenarios/<id>.jsonl` (git 포함). 지금은 10개(seed 42, 위 조건). 운동용 무선 이어폰이 가장 많고 재택근무·운전용 헤드셋, 오버이어, 골전도도 있다.
+- 결과: `backend/evaluation/scenarios/<id>.jsonl` (git 포함). 위 조건을 만족하는 44개 전부다. 앞 10개(seed 42)는 run 3~13에서 쓴 것으로, 운동용 무선 이어폰이 가장 많고 재택근무·운전용 헤드셋, 오버이어, 골전도도 있다. 뒤 34개는 2026-11-04에 `--extend`로 덧붙였다(기존 10개의 페르소나는 다시 쓰지 않음). 출퇴근·여행·업무용, ANC 이어폰, 오버이어, 아이용, 수면용 헤드밴드까지 범위가 넓다.
 
 ```bash
 cd backend
 uv run python scripts/download_amazon_c4.py
 uv run python scripts/build_scenarios.py headphones --limit 10
+uv run python scripts/build_scenarios.py headphones --extend --limit 34   # 기존 시나리오는 그대로 두고 남은 후보를 덧붙임
 ```
 
 ## 2. 비교하는 시스템
@@ -73,6 +74,7 @@ uv run python scripts/build_scenarios.py headphones --limit 10
 - 가상 사용자·심판·`llm` 비교군은 `OPENAI_MODEL`(기본 `gpt-5-mini` + `low`)을 쓴다.
 - **가상 사용자 규칙:** 물은 것만 1~2문장으로 답한다. 챗봇이 자기에 대해 틀린 짐작("so you want noise cancelling")을 말하면 답하면서 짧게 바로잡는다(2026-11-03, 실제 사용자처럼). 페르소나에 없는 것을 물으면 그 사람의 상황에서 가장 그럴듯하게 답하고, 정말 알 수 없을 때만 "잘 모르겠어"라고 한다(run 3~5에서 "잘 모르겠어"로 질문을 낭비했다). 페르소나에 없는 강한 요구는 지어내지 않는다.
 - **추천 전 확인:** 확인 질문(최대 3번)은 질문 수와 따로 `confirms`로 센다. 대화 최대 길이는 시스템 응답 11번이다.
+- **추천 집중도·속성 일치 확장:** 저장된 run의 추천 목록으로 시스템 간·사용자 간 중복, 같은 시나리오 반복의 일관성, 인기도 편향, 속성별 일치와 우연 기준선 보정(lift)을 계산해 CSV로 남긴다([diversity.md](diversity.md)).
 - **텍스트 정렬 효과:** `ig`·`random`은 동률 정렬에서 텍스트 관련도를 뺀 정답 순위 백분율도 함께 남긴다(`extra.rank_pct_no_text`, 요약의 `rank_pct_mean_no_text`·`rank_pct_median_no_text`). 같은 대화에서 정렬만 다른 비교다([IG 엔진 4절](ig-engine.md#4-추천과-한계-표시)).
 
 ## 4. 실행
@@ -86,6 +88,7 @@ uv run python scripts/build_scenarios.py headphones --limit 10
 cd backend
 uv run python scripts/run_eval.py headphones --limit 10                 # ig, random, llm
 uv run python scripts/run_eval.py headphones --limit 3 --systems ig llm
+uv run python scripts/run_eval.py headphones --start 10 --limit 34      # 시나리오 파일의 11번째부터 34개 (run 14)
 ```
 결과는 SQLite(`eval_runs`, `eval_episodes`, 매뉴얼은 `eval_manual`)에 남고 평가 모드에서도 보인다. 앱 DB(`backend/data/app.db`)는 저장소에 올려 두어 팀원도 평가 모드에서 run 기록을 본다. 의미 있는 run은 run 3부터이고, 지금 구조와 바로 비교할 수 있는 것은 run 8부터다([README 평가 실행 기록](../README.md#평가-실행-기록-run별-코드-변경)). 10 × 3 한 번에 약 12분(대화 하나 ig·random 약 65초, llm 약 33초, 4개 동시).
 
