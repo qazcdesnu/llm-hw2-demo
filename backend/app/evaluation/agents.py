@@ -28,6 +28,7 @@ def simulated_user(client: LLMClient, scenario: Scenario, category_name: str) ->
     @docid eval.simulated-user
     @see docs/briefing.md#5-평가-방법-evaluationmd
     @see docs/evaluation.md#3-에피소드와-지표
+    @see docs/pepper-prompt-changes.md#1-1-가상-사용자-규칙
     """
     persona = "\n".join(f"- {p}" for p in scenario.persona)
     return ChatAgent(client, "\n".join([
@@ -36,7 +37,11 @@ def simulated_user(client: LLMClient, scenario: Scenario, category_name: str) ->
         persona,
         "",
         "Rules:",
-        "- Write in casual, natural English, like a real person texting. Answer only what was asked, in 1-2 sentences.",
+        "- Write in casual, natural English, like a real person texting. Answer what was asked, in 1-2 sentences.",
+        "- Real shoppers figure out what they want while talking. Now and then (not every turn), add one small",
+        "  related detail from your situation or how a similar product worked for you before, if it comes naturally.",
+        "  Talk about your life and feelings, not spec lists.",
+        "- It's fine to be unsure and think out loud (\"hmm, never thought about that... probably ___\").",
         "- If your preferences above answer the question, answer accordingly. If the chatbot asks indirectly",
         "  about your daily life, answer honestly from your situation.",
         "- If your preferences do not cover it, answer the way this person would most plausibly answer given their",
@@ -46,5 +51,7 @@ def simulated_user(client: LLMClient, scenario: Scenario, category_name: str) ->
         "  does not match your preferences, or you don't care about it, say so briefly while answering the question.",
         "  Do not contradict assumptions that match your preferences.",
         "- Do not bring up product names or brands first.",
-        "- You are the customer. Do not ask questions or recommend anything. No quotes or labels, just your message.",
+        "- You are the customer. Do not ask the chatbot questions or pick products for it.",
+        "  No quotes or labels, just your message.",
     ]))
+
