@@ -1,5 +1,7 @@
 backend/data/raw/
 *.db
+# 평가 기록·카탈로그·상품 임베딩을 팀이 함께 보도록 앱 DB는 올린다 (README 평가 실행 기록)
+!backend/data/app.db
 __pycache__/
 .venv/
 node_modules/

@@ -14,6 +14,7 @@ IG 기반 대화형 상품 추천 챗봇 (HW2). Frontend `frontend/` (Vite), Bac
 | [ig-engine.md](docs/ig-engine.md) | IG 엔진: 가능도 모델, 대화 상태, 질문 선택, 종료 조건·한계 표시, 동률 정렬(텍스트 관련도), 예비 결과 |
 | [llm-parser.md](docs/llm-parser.md) | LLM 파서(요청 분류·속성 추출), 대화 메모리, 질문 작성기(친구 페르소나), 멀티턴 추천 조정, Safety·응답 언어, 파서 평가와 모델 선택 |
 | [evaluation.md](docs/evaluation.md) | 평가: C4 시나리오, 가상 사용자·LLM 심판, 비교군(Random, LLM), 평가 모드, 결과 |
+| [diversity.md](docs/diversity.md) | 추천 집중도(echo chamber·동질화·인기도 편향)와 속성 일치(우연 기준선 보정) 분석: 지표 정의, 코드 설명, 저장된 run 분석과 CSV |
 | [roadmap.md](docs/roadmap.md) | 전체 단계(Phase)와 확정된 결정사항 |
 | [ongoing.md](docs/ongoing.md) | 진행 중인 작업 |
 | [done.md](docs/done.md) | 완료 기록 |

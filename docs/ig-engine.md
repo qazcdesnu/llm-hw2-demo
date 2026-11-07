@@ -117,7 +117,7 @@
 
 - **상품 글:** 상품명 + 특징(features) + 세부 정보(details, 판매 순위·출시일 등 제외), 최대 6,000자([`product_text`](../backend/app/services/relevance.py "sym:py:app.services.relevance#product_text")).
 - **BM25 질의:** 속성 추출기가 매 턴 뽑는 영어 키워드(메모리 `keywords`). 상품 글이 영어라, 한국어 대화도 키워드는 영어로 뽑는다.
-- **임베딩:** 상품 임베딩은 미리 만들어 SQLite `product_embeddings`에 저장한다([build_embeddings.py](../backend/scripts/build_embeddings.py), `text-embedding-3-small` 512차원, 4,628개). 실행 중에는 질의 글(근거 발화 + 맥락 + 키워드) 하나만 임베딩한다. 색인은 카탈로그·임베딩이 바뀔 때까지 캐시한다([`load_text_index`](../backend/app/services/relevance.py "sym:py:app.services.relevance#load_text_index")). 임베딩이 없거나 호출이 실패하면 BM25만 쓴다.
+- **임베딩:** 상품 임베딩은 미리 만들어 SQLite `product_embeddings`에 저장한다([build_embeddings.py](../backend/scripts/build_embeddings.py), `text-embedding-3-small` 512차원, 4,628개). 실행 중에는 질의 글(근거 발화 + 맥락 + 키워드) 하나만 임베딩한다. 색인은 카탈로그·임베딩이 바뀔 때까지 캐시한다([`load_text_index`](../backend/app/services/relevance.py "sym:py:app.services.relevance#load_text_index")). 임베딩이 없거나 호출이 실패하면 BM25만 쓴다. 질의 임베딩은 같은 글이면 한 번만 계산하고([`CachedEmbedder`](../backend/app/services/relevance.py "docid:chat.cached-embedder")), 추천 전 확인 질문을 하는 턴에 그때의 질의 글을 백그라운드로 미리 계산해 둔다. 다음 턴에 질의 글이 글자 하나까지 같을 때만 그 결과를 쓰므로(같은 입력) 순위는 바뀌지 않는다. 글이 다르면 새로 계산하고, 실패한 결과는 남기지 않는다.
 - **주 용도(use_case)를 속성에서 뺀 이유 (2026-11-03):** 상품 메타데이터의 용도와 실제 구매자의 사용 목적이 자주 다르고(업무용으로 산 게이밍 헤드셋, 운동에도 쓰는 일상용 헤드폰), 값(운동·게임·아이용·일상)도 너무 다양하다. 평가에서 정답이 1위 동률 묶음 밖으로 밀린 7건 중 5건이 주 용도 불일치였다([evaluation.md 5절](evaluation.md#5-결과)). 처음(2026-10-31)에는 묻지 않고 정렬에만 쓰려 했으나 완전히 뺐다. 쓰임새는 대화의 맥락·키워드로 텍스트 관련도에만 반영된다.
 - 사용자에게는 "N개가 똑같이 잘 맞아서, 얘기해 준 내용에 가까운 순으로 골랐어"로 알린다. Developer Panel의 `Tie order`에 기준이 보인다.
 
