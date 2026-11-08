@@ -410,7 +410,8 @@ def _understand(
     | 입력 | 대기 질문 처리 |
     |---|---|
     | 보기 버튼 | 그 질문의 답 |
-    | LLM: 위험·다른 상품 | 상태 그대로, 같은 질문 다시 |
+    | LLM: 위험 | 상태 그대로, 거절 문구만 (질문 다시 안 보여 줌) |
+    | LLM: 다른 상품 | 상태 그대로, 같은 질문 다시 |
     | LLM: 잡담 | 질문 단계면 답 안 함으로 닫고 대화를 이어 감 |
     | LLM: 쇼핑 | 대기 질문의 속성이 나왔으면 답, 아니면 답 안 함으로 닫음 |
     | LLM 없음·실패 | 보기 이름 매칭, 실패하면 같은 질문 다시 |
@@ -450,7 +451,11 @@ def _understand(
 
     request_type = parsed.request_type
     state.language = parsed.language
-    if request_type in ("unsafe", "other_product") or (
+    if request_type == "unsafe":  # 거절 한 문장만. 질문·보기는 다시 보여 주지 않는다 (대기 질문은 그대로 남음)
+        pref = catalog.preference(state)
+        debug = build_debug(catalog, decide(catalog, state, pref)[0], state, pref, request_type)
+        return TurnResult(say.non_shopping_reply(spec, request_type, state.language), state, debug)
+    if request_type == "other_product" or (
             request_type == "off_topic" and (writer is None or state.finished)):
         return _same_question(catalog, state, say.non_shopping_reply(spec, request_type, state.language),
                               request_type)
