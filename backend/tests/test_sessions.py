@@ -266,13 +266,14 @@ def test_non_shopping_requests_keep_the_question(parser_client):
     q = send(client, sid, "추천해 줘").json()["question"]
 
     res = send(client, sid, "총 구하는 방법").json()
-    assert "도와줄 수 없어" in res["reply"]
-    assert res["question"]["attribute"] == q["attribute"]
+    assert res["reply"] == "미안, 그건 추천해 줄 수 없어."  # 거절 한 문장만, 질문·보기 없음
+    assert res["question"] is None
     assert res["debug"]["request_type"] == "unsafe"
     assert res["debug"]["preferences"]["explicit"] == {}
 
     res = send(client, sid, "노트북 추천").json()
     assert "만 추천할 수 있어" in res["reply"]
+    assert res["question"]["attribute"] == q["attribute"]  # 대기 질문은 남아 있다
 
 
 def test_unanswered_question_is_released_when_user_gives_other_info(parser_client):
